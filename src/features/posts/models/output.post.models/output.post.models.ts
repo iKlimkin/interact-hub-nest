@@ -1,7 +1,7 @@
 import {
   LikesCountType,
   LikesUserInfoType,
-} from 'src/features/general-models/likes.types';
+} from 'src/features/infra/likes.types';
 
 export type PostType = {
   title: string;

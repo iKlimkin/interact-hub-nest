@@ -3,7 +3,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BlogsController } from './features/blogs/api/controllers/blogs.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ConfigModule } from '@nestjs/config';
 import { Blog, BlogSchema } from './features/blogs/blog.schema';
 import { Post, PostSchema } from './features/posts/posts.schema';
 import { BlogsService } from './features/blogs/domain/blogs.service';
@@ -26,13 +25,16 @@ import { FeedbacksRepository } from './features/comments/infrastructure/feedback
 import { UsersRepository } from './features/admin/infrastructure/users.repository';
 import { FeedbacksService } from './features/comments/domain/feedbacks.service';
 import { AdminUserService } from './features/admin/domain/user.admins.service';
-import { AdminUserController } from './features/admin/api/controllers/admin.users.controller';
+import { AdminUserController } from './features/admin/api/controllers/admin-users.controller';
 import { FeedbacksController } from './features/comments/api/controllers/feedbacks.controller';
-ConfigModule.forRoot();
+import { BcryptAdapter } from './features/infra/adapters/bcrypt-adapter';
+import { EmailAdapter } from './features/infra/adapters/email-adapter';
+import settings from '../src/features/infra/settings/app.settings';
+import { JwtService } from './features/infra/application/jwt-service';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(process.env.MONGO_URL || `mongodb://127.0.0.1:27017/nest-studying-project`),
+    MongooseModule.forRoot(settings.MONGO_URL),
     MongooseModule.forFeature([
       {
         name: Blog.name,
@@ -58,15 +60,20 @@ ConfigModule.forRoot();
     AdminUserController,
 
     BlogsController,
-    
+
     PostsController,
 
     FeedbacksController,
-    
+
     TestDatabaseController,
   ],
   providers: [
     AppService,
+    
+    JwtService,
+
+    BcryptAdapter,
+    EmailAdapter,
 
     BlogsService,
     BlogsQueryRepo,

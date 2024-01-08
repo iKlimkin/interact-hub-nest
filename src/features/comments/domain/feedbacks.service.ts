@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   OutputId,
   likeUserInfo,
-} from 'src/features/general-models/likes.types';
+} from 'src/features/infra/likes.types';
 import { InputCommentModel } from '../api/models/input.comment.models';
 import { Comment } from '../comment.schema';
 import { FeedbacksRepository } from '../infrastructure/feedbacks.repository';

@@ -1,36 +1,34 @@
 import {
+  Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
+  InternalServerErrorException,
   NotFoundException,
   Param,
-  Res,
-  Query,
-  Put,
-  Body,
   Post,
-  InternalServerErrorException,
-  Delete,
+  Put,
+  Query,
+  Res,
+  UseGuards,
 } from '@nestjs/common';
-import { SortingQueryModel } from 'src/features/general-models/SortingQueryModel';
-import { PaginationViewModel } from 'src/features/general-models/paginationViewModel';
-import { PostsService } from '../../domain/posts.service';
-import { PostsQueryRepository } from '../../infrastructure/posts.query.repo';
-import { PostViewModel } from '../../models/post.view.models/PostViewModel';
 import { Response } from 'express';
-import { getStatusCounting } from 'src/features/general-models/utils/statusCounter';
 import { UsersQueryRepository } from 'src/features/admin/infrastructure/users.query.repo';
-import {
-  InputLikeStatus,
-  likesStatus,
-} from 'src/features/general-models/likes.types';
-import { CreatePostModel } from '../../models/input.posts.models/CreatePostModel';
-import { UpdatePostModel } from '../../models/input.posts.models/UpdatePostModel';
 import { CommentsViewModel } from 'src/features/comments/api/models/comments.view.models/comments.view.model';
 import { InputContentType } from 'src/features/comments/api/models/input.comment.models';
-import { FeedbacksQueryRepository } from 'src/features/comments/infrastructure/feedbacks.query.repository';
 import { FeedbacksService } from 'src/features/comments/domain/feedbacks.service';
+import { FeedbacksQueryRepository } from 'src/features/comments/infrastructure/feedbacks.query.repository';
+import { SortingQueryModel } from 'src/features/infra/SortingQueryModel';
+import { AuthBasicGuard } from 'src/features/infra/guards/auth.guard';
+import { InputLikeStatus, likesStatus } from 'src/features/infra/likes.types';
+import { PaginationViewModel } from 'src/features/infra/paginationViewModel';
+import { getStatusCounting } from 'src/features/infra/utils/statusCounter';
+import { PostsService } from '../../domain/posts.service';
+import { PostsQueryRepository } from '../../infrastructure/posts.query.repo';
+import { InputPostModel } from '../../models/input.posts.models/create.post.model';
+import { PostViewModel } from '../../models/post.view.models/PostViewModel';
 
 @Controller('posts')
 export class PostsController {
@@ -199,9 +197,10 @@ export class PostsController {
   }
 
   @Post()
+  @UseGuards(AuthBasicGuard)
   @HttpCode(HttpStatus.CREATED)
   async createPost(
-    @Body() body: CreatePostModel,
+    @Body() body: InputPostModel,
     @Res() res: Response<PostViewModel>,
   ) {
     const { title, shortDescription, content, blogId } = body;
@@ -231,8 +230,9 @@ export class PostsController {
   }
 
   @Put(':id')
+  @UseGuards(AuthBasicGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async updatePost(@Param('id') postId: string, @Body() body: UpdatePostModel) {
+  async updatePost(@Param('id') postId: string, @Body() body: InputPostModel) {
     const { title, shortDescription, content, blogId } = body; // add validation blogId pipe
 
     const updatedPost = await this.postsService.updatePost(postId, {
@@ -244,6 +244,7 @@ export class PostsController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthBasicGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePost(@Param('id') postId: string) {
     const deletedPost = await this.postsService.deletePost(postId);

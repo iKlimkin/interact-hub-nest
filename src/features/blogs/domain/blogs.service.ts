@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { BlogsRepository } from '../infrastructure/blogs.repository';
-import { CreateBlogModel } from '../api/models/inputBlogsModels/CreateBlogModel';
-import { OutputId } from 'src/features/general-models/likes.types';
-import { UpdateBlogModel } from '../api/models/inputBlogsModels/UpdateBlogModel';
+import { CreateBlogModelType } from '../api/models/input.blog.models/create.blog.model';
+import { OutputId } from 'src/features/infra/likes.types';
+import { UpdateBlogModel } from '../api/models/input.blog.models/UpdateBlogModel';
 import { Blog, BlogModelType } from '../blog.schema';
 
 @Injectable()
 export class BlogsService {
   constructor(private blogsRepository: BlogsRepository) {}
 
-  async createBlog(createData: CreateBlogModel): Promise<OutputId> {
+  async createBlog(createData: CreateBlogModelType): Promise<OutputId> {
     const blogDto = Blog.makeInstance({
       name: createData.name,
       description: createData.description,

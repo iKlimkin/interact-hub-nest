@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { SortingQueryModel } from 'src/features/general-models/SortingQueryModel';
-import { PaginationViewModel } from 'src/features/general-models/paginationViewModel';
-import { getPagination } from 'src/features/general-models/utils/pagination';
-import { getSearchTerm } from 'src/features/general-models/utils/searchTerm';
+import { SortingQueryModel } from 'src/features/infra/SortingQueryModel';
+import { PaginationViewModel } from 'src/features/infra/paginationViewModel';
+import { getPagination } from 'src/features/infra/utils/pagination';
+import { getSearchTerm } from 'src/features/infra/utils/searchTerm';
 import { getUserViewModel } from '../api/models/userAdmin.view.models/getUserAdmin.vie.model';
 import { UserViewModel } from '../api/models/userAdmin.view.models/userAdmin.view.model';
 import { UserAccount, UserAccountModelType } from '../userAccount.schema';

@@ -12,10 +12,10 @@ import {
   Query,
   Res,
 } from '@nestjs/common';
-import { SortingQueryModel } from 'src/features/general-models/SortingQueryModel';
-import { InputLikeStatus } from 'src/features/general-models/likes.types';
-import { PaginationViewModel } from 'src/features/general-models/paginationViewModel';
-import { getStatusCounting } from 'src/features/general-models/utils/statusCounter';
+import { SortingQueryModel } from 'src/features/infra/SortingQueryModel';
+import { InputLikeStatus } from 'src/features/infra/likes.types';
+import { PaginationViewModel } from 'src/features/infra/paginationViewModel';
+import { getStatusCounting } from 'src/features/infra/utils/statusCounter';
 import { CommentsViewModel } from '../models/comments.view.models/comments.view.model';
 import { InputContentType } from '../models/input.comment.models';
 import { FeedbacksService } from '../../domain/feedbacks.service';
@@ -73,11 +73,10 @@ export class FeedbacksController {
   }
 
   @Put(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
   async updateComment(
     @Param('id') commentId: string,
     @Body() body: InputContentType,
-    @Res() res,
+    @Res() res: Response,
   ) {
     const { content } = body;
     const { userId } = res.locals;
@@ -97,14 +96,15 @@ export class FeedbacksController {
       commentId,
       content,
     );
+
+    res.sendStatus(HttpStatus.NO_CONTENT)
   }
 
   @Put(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
   async updateLikesStatus(
     @Param('id') commentId: string,
     @Body() body: InputLikeStatus,
-    @Res() res,
+    @Res() res: Response,
   ) {
     const { userId } = res.locals;
     const { likeStatus } = body;
@@ -144,6 +144,7 @@ export class FeedbacksController {
     }
 
     const updatedLike = await this.feedbacksService.updateLike(likeData);
+    res.sendStatus(HttpStatus.NO_CONTENT)
   }
 
   @Delete(':id')

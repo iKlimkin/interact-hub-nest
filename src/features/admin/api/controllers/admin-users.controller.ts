@@ -11,15 +11,18 @@ import {
   Post,
   Query,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthUserType } from 'src/features/auth/api/models/auth.output.models/auth.user.types';
 import { UsersQueryRepository } from '../../infrastructure/users.query.repo';
 import { UserViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
 import { AdminUserService } from '../../domain/user.admins.service';
-import { SortingQueryModel } from 'src/features/general-models/SortingQueryModel';
-import { PaginationViewModel } from 'src/features/general-models/paginationViewModel';
+import { SortingQueryModel } from 'src/features/infra/SortingQueryModel';
+import { PaginationViewModel } from 'src/features/infra/paginationViewModel';
+import { AuthBasicGuard } from 'src/features/infra/guards/auth.guard';
 
+@UseGuards(AuthBasicGuard)
 @Controller('users')
 export class AdminUserController {
   constructor(
@@ -70,8 +73,8 @@ export class AdminUserController {
 
     const foundNewestUser = await this.usersQueryRepo.getUserById(user.id);
 
-    if (!foundNewestUser){
-      throw new NotFoundException('User not found after create')
+    if (!foundNewestUser) {
+      throw new NotFoundException('User not found after create');
     }
 
     res.send(foundNewestUser);

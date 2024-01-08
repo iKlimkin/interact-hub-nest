@@ -1,12 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
-import {
-  OutputId,
-  likeUserInfo,
-} from 'src/features/general-models/likes.types';
+import { OutputId, likeUserInfo } from 'src/features/infra/likes.types';
 import { PostsRepository } from '../infrastructure/posts.repository';
-import { CreatePostModel } from '../models/input.posts.models/CreatePostModel';
-import { UpdatePostModel } from '../models/input.posts.models/UpdatePostModel';
+import { CreatePostModel } from '../models/input.posts.models/create.post.model';
+import { UpdatePostModel } from '../models/input.posts.models/update.post.model';
 import { Post } from '../posts.schema';
 import { PostDBType } from '../models/post.view.models/getPostViewModel';
 
@@ -43,7 +40,7 @@ export class PostsService {
   }
 
   async createLike(inputData: likeUserInfo): Promise<boolean> {
-    return this.postsRepository.createLikeStatus(inputData)
+    return this.postsRepository.createLikeStatus(inputData);
   }
 
   async updateLike(inputData: likeUserInfo): Promise<PostDBType | null> {

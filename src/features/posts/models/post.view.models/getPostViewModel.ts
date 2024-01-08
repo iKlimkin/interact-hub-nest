@@ -1,10 +1,7 @@
 import { WithId } from 'mongodb';
-import {
-  LikesUserInfoType,
-  likesStatus,
-} from 'src/features/general-models/likes.types';
-import { getLikeStatus } from 'src/features/general-models/utils/likesStatusFounder';
-import { PostType } from '../output.models/post.models';
+import { LikesUserInfoType, likesStatus } from 'src/features/infra/likes.types';
+import { getLikeStatus } from 'src/features/infra/utils/likesStatusFounder';
+import { PostType } from '../output.post.models/output.post.models';
 import { PostStatusInfo, PostViewModel } from './PostViewModel';
 
 export type PostDBType = WithId<PostType>;

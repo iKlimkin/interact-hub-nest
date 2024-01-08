@@ -2,6 +2,7 @@ export const contentLength = { min: 3, max: 1000 };
 export const descriptionLength = { min: 3, max: 500 };
 export const contentPostLength = { min: 20, max: 300 };
 export const urlLength = { min: 3, max: 100 };
+export const blogIdLength = { min: 20, max: 40 }
 export const frequentLength = { min: 3, max: 100 };
 export const titleLength = { min: 3, max: 30 };
 export const passwordLength = { min: 6, max: 20 };

@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { SortingQueryModel } from 'src/features/general-models/SortingQueryModel';
-import { likesStatus } from 'src/features/general-models/likes.types';
-import { PaginationViewModel } from 'src/features/general-models/paginationViewModel';
-import { getLikeStatus } from 'src/features/general-models/utils/likesStatusFounder';
-import { getPagination } from 'src/features/general-models/utils/pagination';
-import { getSearchTerm } from 'src/features/general-models/utils/searchTerm';
+import { SortingQueryModel } from 'src/features/infra/SortingQueryModel';
+import { likesStatus } from 'src/features/infra/likes.types';
+import { PaginationViewModel } from 'src/features/infra/paginationViewModel';
+import { getLikeStatus } from 'src/features/infra/utils/likesStatusFounder';
+import { getPagination } from 'src/features/infra/utils/pagination';
+import { getSearchTerm } from 'src/features/infra/utils/searchTerm';
 import { CommentsViewModel } from '../api/models/comments.view.models/comments.view.model';
 import { getCommentsViewModel } from '../api/models/comments.view.models/get.comments.view.model';
 import { CommentModelType, Comment } from '../comment.schema';

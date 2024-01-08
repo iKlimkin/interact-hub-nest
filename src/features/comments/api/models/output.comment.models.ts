@@ -1,7 +1,4 @@
-import {
-  LikeUserType,
-  LikesCountType,
-} from 'src/features/general-models/likes.types';
+import { LikeUserType, LikesCountType } from 'src/features/infra/likes.types';
 
 export type CreateCommentType = Omit<
   CommentType,

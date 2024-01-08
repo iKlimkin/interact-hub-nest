@@ -3,7 +3,7 @@ import {
   LikesUserInfoType,
   LikesCountType,
   likesStatus,
-} from '../general-models/likes.types';
+} from '../infra/likes.types';
 import {
   CommentType,
   CreateCommentType,

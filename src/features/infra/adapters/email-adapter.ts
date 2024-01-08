@@ -1,5 +1,7 @@
+import { Injectable } from "@nestjs/common";
 import nodemailer, { SentMessageInfo } from "nodemailer";
 
+@Injectable()
 export class EmailAdapter {
   async sendEmail(inputData: {
     email: string;
@@ -72,5 +74,3 @@ export class EmailAdapter {
     });
   }
 };
-
-export const emailAdapter = new EmailAdapter()

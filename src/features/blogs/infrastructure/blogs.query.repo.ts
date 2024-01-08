@@ -1,10 +1,13 @@
-import { PaginationViewModel } from '../../general-models/paginationViewModel';
-import { getSearchTerm } from '../../general-models/utils/searchTerm';
-import { BaseModel } from '../../general-models/utils/BasePaginationModel';
+import { PaginationViewModel } from '../../infra/paginationViewModel';
+import { getSearchTerm } from '../../infra/utils/searchTerm';
+import { BaseModel } from '../../infra/utils/BasePaginationModel';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { BlogDBType, BlogType } from '../api/models/outputModels/blog.models';
-import { SortingQueryModel } from 'src/features/general-models/SortingQueryModel';
-import { getPagination } from 'src/features/general-models/utils/pagination';
+import {
+  BlogDBType,
+  BlogType,
+} from '../api/models/output.blog.models/blog.models';
+import { SortingQueryModel } from 'src/features/infra/SortingQueryModel';
+import { getPagination } from 'src/features/infra/utils/pagination';
 import { BlogViewModel } from '../api/models/blog.view.models/blog.view.models';
 import { getBlogViewModel } from '../api/models/blog.view.models/getBlogViewModel';
 import { InjectModel } from '@nestjs/mongoose';
@@ -38,7 +41,7 @@ export class BlogsQueryRepo {
 
       return getBlogViewModel(foundedBlog);
     } catch (error) {
-      throw new InternalServerErrorException('Database fails operation')
+      throw new InternalServerErrorException('Database fails operation');
     }
   }
 

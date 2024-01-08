@@ -1,5 +1,5 @@
-import { likesStatus } from 'src/features/general-models/likes.types';
-import { getLikeStatus } from 'src/features/general-models/utils/likesStatusFounder';
+import { likesStatus } from 'src/features/infra/likes.types';
+import { getLikeStatus } from 'src/features/infra/utils/likesStatusFounder';
 import { CommentType } from '../output.comment.models';
 import { CommentsViewModel } from './comments.view.model';
 import { WithId } from 'mongodb';

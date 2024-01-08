@@ -10,22 +10,23 @@ import {
   Post,
   Put,
   Query,
-  Res
+  Res,
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
+import { AuthBasicGuard } from 'src/features/infra/guards/auth.guard';
 import { PostsService } from 'src/features/posts/domain/posts.service';
 import { PostsQueryRepository } from 'src/features/posts/infrastructure/posts.query.repo';
-import { CreatePostModel } from 'src/features/posts/models/input.posts.models/CreatePostModel';
+import { CreatePostModel } from 'src/features/posts/models/input.posts.models/create.post.model';
 import { PostViewModel } from 'src/features/posts/models/post.view.models/PostViewModel';
-import { SortingQueryModel } from '../../../general-models/SortingQueryModel';
-import { PaginationViewModel } from '../../../general-models/paginationViewModel';
+import { SortingQueryModel } from '../../../infra/SortingQueryModel';
+import { PaginationViewModel } from '../../../infra/paginationViewModel';
 import { BlogsService } from '../../domain/blogs.service';
 import { BlogsQueryRepo } from '../../infrastructure/blogs.query.repo';
 import { BlogViewModel } from '../models/blog.view.models/blog.view.models';
-import { CreateBlogModel } from '../models/inputBlogsModels/CreateBlogModel';
-import { URIParamsBlogModel } from '../models/inputBlogsModels/URIParamsBlogModel';
-import { UpdateBlogModel } from '../models/inputBlogsModels/UpdateBlogModel';
-import { BlogType } from '../models/outputModels/blog.models';
+import { URIParamsBlogModel } from '../models/input.blog.models/URIParamsBlogModel';
+import { InputBlogModel } from '../models/input.blog.models/create.blog.model';
+import { BlogType } from '../models/output.blog.models/blog.models';
 
 @Controller('blogs')
 export class BlogsController {
@@ -105,9 +106,10 @@ export class BlogsController {
   }
 
   @Post()
+  @UseGuards(AuthBasicGuard)
   @HttpCode(HttpStatus.CREATED)
   async createBlog(
-    @Body() body: CreateBlogModel,
+    @Body() body: InputBlogModel,
     @Res() res: Response<BlogViewModel>,
   ) {
     const { name, description, websiteUrl } = body;
@@ -123,13 +125,14 @@ export class BlogsController {
     );
 
     if (!newlyCreatedBlog) {
-      throw new NotFoundException('Newlest created blog not found')
+      throw new NotFoundException('Newlest created blog not found');
     }
 
     res.send(newlyCreatedBlog);
   }
 
   @Post(':id/posts')
+  @UseGuards(AuthBasicGuard)
   @HttpCode(HttpStatus.CREATED)
   async createPostByBlogId(
     @Param('id') blogId: string,
@@ -150,15 +153,16 @@ export class BlogsController {
     );
 
     if (!newlyCreatedPost) {
-      throw new NotFoundException('Newlest post not found')
+      throw new NotFoundException('Newlest post not found');
     }
 
     res.send(newlyCreatedPost);
   }
 
   @Put(':id')
+  @UseGuards(AuthBasicGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async updateBlog(@Param('id') blogId: string, @Body() body: UpdateBlogModel) {
+  async updateBlog(@Param('id') blogId: string, @Body() body: InputBlogModel) {
     const { name, description, websiteUrl } = body;
 
     const updatedBlog = await this.blogsService.updateBlog(blogId, {
@@ -166,17 +170,18 @@ export class BlogsController {
       description,
       websiteUrl,
     });
-    
+
     if (!updatedBlog) {
       throw new NotFoundException('blog not found');
     }
   }
 
   @Delete(':id')
+  @UseGuards(AuthBasicGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(@Param('id') blogId: string) {
     const deleteBlog = await this.blogsService.deleteBlog(blogId);
-    
+
     if (!deleteBlog) {
       throw new NotFoundException('blog not found');
     }

@@ -1,9 +1,17 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { UpdateBlogModel } from '../api/models/inputBlogsModels/UpdateBlogModel';
-import { BlogDBType, BlogType } from '../api/models/outputModels/blog.models';
-import { OutputId } from 'src/features/general-models/likes.types';
+import { UpdateBlogModel } from '../api/models/input.blog.models/UpdateBlogModel';
+import {
+  BlogDBType,
+  BlogType,
+} from '../api/models/output.blog.models/blog.models';
+import { OutputId } from 'src/features/infra/likes.types';
 import { InjectModel } from '@nestjs/mongoose';
-import { Blog, BlogDocument, BlogModelDocumentType, BlogModelType } from '../blog.schema';
+import {
+  Blog,
+  BlogDocument,
+  BlogModelDocumentType,
+  BlogModelType,
+} from '../blog.schema';
 import { Model } from 'mongoose';
 
 @Injectable()
@@ -45,15 +53,13 @@ export class BlogsRepository {
     updateData: UpdateBlogModel,
   ): Promise<BlogModelType | null> {
     try {
-      return this.BlogModel
-        .findByIdAndUpdate(blogId, {
-          $set: {
-            name: updateData.name,
-            description: updateData.description,
-            websiteUrl: updateData.websiteUrl,
-          },
-        })
-
+      return this.BlogModel.findByIdAndUpdate(blogId, {
+        $set: {
+          name: updateData.name,
+          description: updateData.description,
+          websiteUrl: updateData.websiteUrl,
+        },
+      });
     } catch (e) {
       throw new InternalServerErrorException(
         'Database fails operate during the upgrade blog',
