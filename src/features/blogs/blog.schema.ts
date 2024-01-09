@@ -30,11 +30,11 @@ export class Blog {
 
   static makeInstance(dto: CreateBlogModelType): BlogType {
     const blog = new Blog();
-    (blog.name = dto.name),
-      (blog.description = dto.description),
-      (blog.websiteUrl = dto.websiteUrl),
-      (blog.createdAt = new Date().toISOString()),
-      (blog.isMembership = false);
+    blog.name = dto.name,
+    blog.description = dto.description,
+    blog.websiteUrl = dto.websiteUrl,
+    blog.createdAt = new Date().toISOString(),
+    blog.isMembership = false;
 
     return blog;
   }
