@@ -16,8 +16,6 @@ import {
 import { Response } from 'express';
 import { PostsService } from 'src/features/posts/domain/posts.service';
 import { PostsQueryRepository } from 'src/features/posts/infrastructure/posts.query.repo';
-import { CreatePostModel } from 'src/features/posts/models/input.posts.models/create.post.model';
-import { PostViewModel } from 'src/features/posts/models/post.view.models/PostViewModel';
 import { AuthBasicGuard } from 'src/infra/guards/auth.guard';
 
 import { SortingQueryModel } from 'src/infra/SortingQueryModel';
@@ -27,6 +25,8 @@ import { BlogsQueryRepo } from '../../infrastructure/blogs.query.repo';
 import { BlogViewModel } from '../models/blog.view.models/blog.view.models';
 import { InputBlogModel } from '../models/input.blog.models/create.blog.model';
 import { BlogType } from '../models/output.blog.models/blog.models';
+import { CreatePostModel } from 'src/features/posts/api/models/input.posts.models/create.post.model';
+import { PostViewModel } from 'src/features/posts/api/models/post.view.models/PostViewModel';
 
 @Controller('blogs')
 export class BlogsController {

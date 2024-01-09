@@ -27,8 +27,8 @@ import { PaginationViewModel } from 'src/infra/paginationViewModel';
 import { getStatusCounting } from 'src/infra/utils/statusCounter';
 import { PostsService } from '../../domain/posts.service';
 import { PostsQueryRepository } from '../../infrastructure/posts.query.repo';
-import { InputPostModel } from '../../models/input.posts.models/create.post.model';
-import { PostViewModel } from '../../models/post.view.models/PostViewModel';
+import { InputPostModel } from '../models/input.posts.models/create.post.model';
+import { PostViewModel } from '../models/post.view.models/PostViewModel'
 
 @Controller('posts')
 export class PostsController {

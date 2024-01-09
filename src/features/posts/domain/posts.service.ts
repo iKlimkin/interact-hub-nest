@@ -2,10 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
 import { OutputId, likeUserInfo } from 'src/infra/likes.types';
 import { PostsRepository } from '../infrastructure/posts.repository';
-import { CreatePostModel } from '../models/input.posts.models/create.post.model';
-import { UpdatePostModel } from '../models/input.posts.models/update.post.model';
 import { Post } from '../posts.schema';
-import { PostDBType } from '../models/post.view.models/getPostViewModel';
+import { CreatePostModel } from '../api/models/input.posts.models/create.post.model';
+import { UpdatePostModel } from '../api/models/input.posts.models/update.post.model';
+import { PostDBType } from '../api/models/post.view.models/getPostViewModel';
 
 @Injectable()
 export class PostsService {

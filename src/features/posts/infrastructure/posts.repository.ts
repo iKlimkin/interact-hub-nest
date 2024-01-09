@@ -1,10 +1,10 @@
 import { Post, PostModelType } from '../posts.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { PostType } from '../models/output.post.models/output.post.models';
 import { OutputId, likeUserInfo } from 'src/infra/likes.types';
-import { UpdatePostModel } from '../models/input.posts.models/update.post.model';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { PostDBType } from '../models/post.view.models/getPostViewModel';
+import { UpdatePostModel } from '../api/models/input.posts.models/update.post.model';
+import { PostType } from '../api/models/output.post.models/output.post.models';
+import { PostDBType } from '../api/models/post.view.models/getPostViewModel';
 
 @Injectable()
 export class PostsRepository {
