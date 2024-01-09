@@ -1,15 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import {
-  LikesUserInfoType,
-  LikesCountType,
-  likesStatus,
-} from '../infra/likes.types';
+
 import {
   CommentType,
   CreateCommentType,
 } from './api/models/output.comment.models';
 import { likesCountInfo } from '../posts/posts.schema';
 import { HydratedDocument, Model } from 'mongoose';
+import { likesStatus, LikesUserInfoType, LikesCountType } from 'src/infra/likes.types';
 
 const LikesUsersInfo = {
   userId: { type: String, default: null },

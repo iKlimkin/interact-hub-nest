@@ -85,173 +85,173 @@ export class AuthController {
   //     res.send({ accessToken });
   //   }
 
-  @Post('new-password')
-  async newPassword(@Body() body: PasswordRecoveryType, @Res() res: Response) {
-    const { newPassword, recoveryCode } = body;
+  // @Post('new-password')
+  // async newPassword(@Body() body: PasswordRecoveryType, @Res() res: Response) {
+  //   const { newPassword, recoveryCode } = body;
 
-    const updatedPassword = await this.authUserService.updatePassword({
-      newPassword,
-      recoveryCode,
-    });
+  //   const updatedPassword = await this.authUserService.updatePassword({
+  //     newPassword,
+  //     recoveryCode,
+  //   });
 
-    // if (!updatedPassword.data) {
-    //   const { status, errorsMessages } = handleAuthResult(updatedPassword);
-    //   res.status(status).send({ errorsMessages });
-    //   return;
-    // }
+  //   // if (!updatedPassword.data) {
+  //   //   const { status, errorsMessages } = handleAuthResult(updatedPassword);
+  //   //   res.status(status).send({ errorsMessages });
+  //   //   return;
+  //   // }
 
-    res.sendStatus(HttpStatus.NO_CONTENT);
-  }
+  //   res.sendStatus(HttpStatus.NO_CONTENT);
+  // }
 
-  @Post('password-recovery')
-  async passwordRecovery(@Body() body: InputEmail, @Res() res: Response) {
-    const { email } = body;
+  // @Post('password-recovery')
+  // async passwordRecovery(@Body() body: InputEmail, @Res() res: Response) {
+  //   const { email } = body;
 
-    const foundUserAccount = await this.authQueryRepository.findByLoginOrEmail({
-      email,
-    });
+  //   const foundUserAccount = await this.authQueryRepository.findByLoginOrEmail({
+  //     email,
+  //   });
 
-    if (!foundUserAccount) {
-      const codeForNonExistentUser =
-        await this.authUserService.createTemporaryUserAccount(email);
+  //   if (!foundUserAccount) {
+  //     const codeForNonExistentUser =
+  //       await this.authUserService.createTemporaryUserAccount(email);
 
-      if (!codeForNonExistentUser.data) {
-        const { status, errorsMessages } = handleAuthResult(
-          codeForNonExistentUser,
-        );
-        res.status(status).send({ errorsMessages });
-        return;
-      }
+  //     if (!codeForNonExistentUser.data) {
+  //       const { status, errorsMessages } = handleAuthResult(
+  //         codeForNonExistentUser,
+  //       );
+  //       res.status(status).send({ errorsMessages });
+  //       return;
+  //     }
 
-      res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
-      return;
-    }
+  //     res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
+  //     return;
+  //   }
 
-    const recoveredPassword =
-      await this.authUserService.passwordRecovery(email);
+  //   const recoveredPassword =
+  //     await this.authUserService.passwordRecovery(email);
 
-    if (!recoveredPassword.data) {
-      const { status, errorsMessages } = handleAuthResult(recoveredPassword);
-      res.status(status).send({ errorsMessages });
-      return;
-    }
+  //   if (!recoveredPassword.data) {
+  //     const { status, errorsMessages } = handleAuthResult(recoveredPassword);
+  //     res.status(status).send({ errorsMessages });
+  //     return;
+  //   }
 
-    res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
-  }
+  //   res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
+  // }
 
   
-  async registration(req: RequestWithBody<AuthUserType>, res: Response) {
-    const { login, email, password } = req.body;
+  // async registration(req: RequestWithBody<AuthUserType>, res: Response) {
+  //   const { login, email, password } = req.body;
 
-    const foundUser = await this.authQueryRepository.findByLoginOrEmail({
-      login,
-      email,
-    });
+  //   const foundUser = await this.authQueryRepository.findByLoginOrEmail({
+  //     login,
+  //     email,
+  //   });
 
-    if (foundUser) {
-      if (foundUser.accountData.email === email) {
-        const errors = makeErrorsMessages('email');
+  //   if (foundUser) {
+  //     if (foundUser.accountData.email === email) {
+  //       const errors = makeErrorsMessages('email');
 
-        res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors);
-        return;
-      }
+  //       res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors);
+  //       return;
+  //     }
 
-      if (foundUser.accountData.login === login) {
-        const errors = makeErrorsMessages('login');
+  //     if (foundUser.accountData.login === login) {
+  //       const errors = makeErrorsMessages('login');
 
-        res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors);
-        return;
-      }
-    }
+  //       res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors);
+  //       return;
+  //     }
+  //   }
 
-    const user = await this.authUserService.createUser({
-      login,
-      email,
-      password,
-    });
+  //   const user = await this.authUserService.createUser({
+  //     login,
+  //     email,
+  //     password,
+  //   });
 
-    if (!user.data) {
-      const { status, errorsMessages } = handleAuthResult(user);
-      res.status(status).send({ errorsMessages });
-      return;
-    }
+  //   if (!user.data) {
+  //     const { status, errorsMessages } = handleAuthResult(user);
+  //     res.status(status).send({ errorsMessages });
+  //     return;
+  //   }
 
-    res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
-  }
+  //   res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
+  // }
 
-  async registrationConfirmation(
-    req: RequestWithBody<{ code: string }>,
-    res: Response,
-  ) {
-    const { code } = req.body;
+  // async registrationConfirmation(
+  //   req: RequestWithBody<{ code: string }>,
+  //   res: Response,
+  // ) {
+  //   const { code } = req.body;
 
-    const confirmedUser = await this.authUserService.confirmEmail(code);
+  //   const confirmedUser = await this.authUserService.confirmEmail(code);
 
-    if (!confirmedUser.data) {
-      const errors = makeErrorsMessages('code');
+  //   if (!confirmedUser.data) {
+  //     const errors = makeErrorsMessages('code');
 
-      res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors);
-      return;
-    }
+  //     res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors);
+  //     return;
+  //   }
 
-    res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
-  }
+  //   res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
+  // }
 
-  async registrationEmailResending(
-    req: RequestWithBody<Pick<AuthUserType, 'email'>>,
-    res: Response,
-  ) {
-    const { email } = req.body;
+  // async registrationEmailResending(
+  //   req: RequestWithBody<Pick<AuthUserType, 'email'>>,
+  //   res: Response,
+  // ) {
+  //   const { email } = req.body;
 
-    const confirmedUser = await this.authQueryRepository.findByLoginOrEmail({
-      email,
-    });
+  //   const confirmedUser = await this.authQueryRepository.findByLoginOrEmail({
+  //     email,
+  //   });
 
-    if (!confirmedUser || confirmedUser.emailConfirmation.isConfirmed) {
-      const errors = makeErrorsMessages('confirmation');
+  //   if (!confirmedUser || confirmedUser.emailConfirmation.isConfirmed) {
+  //     const errors = makeErrorsMessages('confirmation');
 
-      res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors);
-      return;
-    }
+  //     res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors);
+  //     return;
+  //   }
 
-    const updatedUserConfirmation =
-      await this.authUserService.updateConfirmationCode(confirmedUser);
+  //   const updatedUserConfirmation =
+  //     await this.authUserService.updateConfirmationCode(confirmedUser);
 
-    if (!updatedUserConfirmation.data) {
-      const { status, errorsMessages } = handleAuthResult(
-        updatedUserConfirmation,
-      );
-      res.status(status).send({ errorsMessages });
-      return;
-    }
+  //   if (!updatedUserConfirmation.data) {
+  //     const { status, errorsMessages } = handleAuthResult(
+  //       updatedUserConfirmation,
+  //     );
+  //     res.status(status).send({ errorsMessages });
+  //     return;
+  //   }
 
-    res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
-  }
+  //   res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
+  // }
 
-  async me(req: Request, res: Response) {
-    const { userId } = res.locals;
+  // async me(req: Request, res: Response) {
+  //   const { userId } = res.locals;
 
-    const user = await this.usersQueryRepo.getUserById(userId);
+  //   const user = await this.usersQueryRepo.getUserById(userId);
 
-    if (!user) {
-      res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
-      return;
-    }
+  //   if (!user) {
+  //     res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
+  //     return;
+  //   }
 
-    const userViewModel = {
-      email: user.email,
-      login: user.login,
-      userId,
-    };
+  //   const userViewModel = {
+  //     email: user.email,
+  //     login: user.login,
+  //     userId,
+  //   };
 
-    res.send(userViewModel);
-  }
+  //   res.send(userViewModel);
+  // }
 
-  async logout(req: Request, res: Response) {
-    const { deviceId } = res.locals;
+  // async logout(req: Request, res: Response) {
+  //   const { deviceId } = res.locals;
 
-    await this.securityService.deleteActiveSession(deviceId);
+  //   await this.securityService.deleteActiveSession(deviceId);
 
-    res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
-  }
+  //   res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
+  // }
 }

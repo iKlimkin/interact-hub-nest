@@ -20,11 +20,11 @@ import { CommentsViewModel } from 'src/features/comments/api/models/comments.vie
 import { InputContentType } from 'src/features/comments/api/models/input.comment.models';
 import { FeedbacksService } from 'src/features/comments/domain/feedbacks.service';
 import { FeedbacksQueryRepository } from 'src/features/comments/infrastructure/feedbacks.query.repository';
-import { SortingQueryModel } from 'src/features/infra/SortingQueryModel';
-import { AuthBasicGuard } from 'src/features/infra/guards/auth.guard';
-import { InputLikeStatus, likesStatus } from 'src/features/infra/likes.types';
-import { PaginationViewModel } from 'src/features/infra/paginationViewModel';
-import { getStatusCounting } from 'src/features/infra/utils/statusCounter';
+import { SortingQueryModel } from 'src/infra/SortingQueryModel';
+import { AuthBasicGuard } from 'src/infra/guards/auth.guard';
+import { InputLikeStatus, likesStatus } from 'src/infra/likes.types';
+import { PaginationViewModel } from 'src/infra/paginationViewModel';
+import { getStatusCounting } from 'src/infra/utils/statusCounter';
 import { PostsService } from '../../domain/posts.service';
 import { PostsQueryRepository } from '../../infrastructure/posts.query.repo';
 import { InputPostModel } from '../../models/input.posts.models/create.post.model';

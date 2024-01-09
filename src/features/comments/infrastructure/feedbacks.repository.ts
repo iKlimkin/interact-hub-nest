@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import {
   OutputId,
   likeUserInfo,
-} from 'src/features/infra/likes.types';
+} from 'src/infra/likes.types';
 import { CommentType } from '../api/models/output.comment.models';
 import { CommentModelType, CommentDocument, Comment } from '../comment.schema';
 

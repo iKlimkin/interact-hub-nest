@@ -18,9 +18,9 @@ import { AuthUserType } from 'src/features/auth/api/models/auth.output.models/au
 import { UsersQueryRepository } from '../../infrastructure/users.query.repo';
 import { UserViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
 import { AdminUserService } from '../../domain/user.admins.service';
-import { SortingQueryModel } from 'src/features/infra/SortingQueryModel';
-import { PaginationViewModel } from 'src/features/infra/paginationViewModel';
-import { AuthBasicGuard } from 'src/features/infra/guards/auth.guard';
+import { SortingQueryModel } from 'src/infra/SortingQueryModel';
+import { PaginationViewModel } from 'src/infra/paginationViewModel';
+import { AuthBasicGuard } from 'src/infra/guards/auth.guard';
 
 @UseGuards(AuthBasicGuard)
 @Controller('users')

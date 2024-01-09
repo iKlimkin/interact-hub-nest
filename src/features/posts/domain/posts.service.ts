@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
-import { OutputId, likeUserInfo } from 'src/features/infra/likes.types';
+import { OutputId, likeUserInfo } from 'src/infra/likes.types';
 import { PostsRepository } from '../infrastructure/posts.repository';
 import { CreatePostModel } from '../models/input.posts.models/create.post.model';
 import { UpdatePostModel } from '../models/input.posts.models/update.post.model';

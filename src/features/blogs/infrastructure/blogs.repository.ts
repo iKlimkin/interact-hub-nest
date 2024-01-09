@@ -4,7 +4,7 @@ import {
   BlogDBType,
   BlogType,
 } from '../api/models/output.blog.models/blog.models';
-import { OutputId } from 'src/features/infra/likes.types';
+import { OutputId } from 'src/infra/likes.types';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   Blog,

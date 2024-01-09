@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { UsersRepository } from '../infrastructure/users.repository';
 import { UserAccount, UserAccountDocument } from '../userAccount.schema';
 import { AuthUserType } from 'src/features/auth/api/models/auth.output.models/auth.user.types';
-import { BcryptAdapter } from 'src/features/infra/adapters/bcrypt-adapter';
+import { BcryptAdapter } from 'src/infra/adapters/bcrypt-adapter';
 
 @Injectable()
 export class AdminUserService {
@@ -17,14 +17,14 @@ export class AdminUserService {
     const { email, login, password } = createUser;
 
     const { passwordSalt, passwordHash } =
-      await this.bcryptAdapter.createHash(password);
+      await this.bcryptAdapter.createHash(password)
 
     const userAdminDto = UserAccount.makeInstance({
       login,
       email,
       passwordHash,
       passwordSalt,
-      isConfirmed: true,
+      isConfirmed: true
     });
 
     return this.usersRepository.create(userAdminDto);

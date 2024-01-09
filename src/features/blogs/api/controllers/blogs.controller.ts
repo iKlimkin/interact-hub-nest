@@ -14,19 +14,20 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { AuthBasicGuard } from 'src/features/infra/guards/auth.guard';
+import { AuthBasicGuard } from 'src/infra/guards/auth.guard';
 import { PostsService } from 'src/features/posts/domain/posts.service';
 import { PostsQueryRepository } from 'src/features/posts/infrastructure/posts.query.repo';
 import { CreatePostModel } from 'src/features/posts/models/input.posts.models/create.post.model';
 import { PostViewModel } from 'src/features/posts/models/post.view.models/PostViewModel';
-import { SortingQueryModel } from '../../../infra/SortingQueryModel';
-import { PaginationViewModel } from '../../../infra/paginationViewModel';
+
 import { BlogsService } from '../../domain/blogs.service';
 import { BlogsQueryRepo } from '../../infrastructure/blogs.query.repo';
 import { BlogViewModel } from '../models/blog.view.models/blog.view.models';
 import { URIParamsBlogModel } from '../models/input.blog.models/URIParamsBlogModel';
 import { InputBlogModel } from '../models/input.blog.models/create.blog.model';
 import { BlogType } from '../models/output.blog.models/blog.models';
+import { SortingQueryModel } from 'src/infra/SortingQueryModel';
+import { PaginationViewModel } from 'src/infra/paginationViewModel';
 
 @Controller('blogs')
 export class BlogsController {

@@ -4,7 +4,7 @@ import {
   contentLength,
   frequentLength,
   titleLength
-} from 'src/features/infra/validation.constants';
+} from 'src/infra/validation.constants';
 
 export type CreatePostByBlog = Omit<CreatePostModel, 'blogId'>;
 

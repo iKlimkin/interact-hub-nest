@@ -1,4 +1,4 @@
-import { likesStatus } from 'src/features/infra/likes.types';
+import { likesStatus } from 'src/infra/likes.types';
 
 export type PostStatusInfo = {
   addedAt: string;

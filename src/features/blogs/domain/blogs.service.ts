@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BlogsRepository } from '../infrastructure/blogs.repository';
 import { CreateBlogModelType } from '../api/models/input.blog.models/create.blog.model';
-import { OutputId } from 'src/features/infra/likes.types';
+import { OutputId } from 'src/infra/likes.types';
 import { UpdateBlogModel } from '../api/models/input.blog.models/UpdateBlogModel';
 import { Blog, BlogModelType } from '../blog.schema';
 

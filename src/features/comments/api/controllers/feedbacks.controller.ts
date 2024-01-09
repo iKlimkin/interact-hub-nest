@@ -12,10 +12,10 @@ import {
   Query,
   Res,
 } from '@nestjs/common';
-import { SortingQueryModel } from 'src/features/infra/SortingQueryModel';
-import { InputLikeStatus } from 'src/features/infra/likes.types';
-import { PaginationViewModel } from 'src/features/infra/paginationViewModel';
-import { getStatusCounting } from 'src/features/infra/utils/statusCounter';
+import { SortingQueryModel } from 'src/infra/SortingQueryModel';
+import { InputLikeStatus } from 'src/infra/likes.types';
+import { PaginationViewModel } from 'src/infra/paginationViewModel';
+import { getStatusCounting } from 'src/infra/utils/statusCounter';
 import { CommentsViewModel } from '../models/comments.view.models/comments.view.model';
 import { InputContentType } from '../models/input.comment.models';
 import { FeedbacksService } from '../../domain/feedbacks.service';

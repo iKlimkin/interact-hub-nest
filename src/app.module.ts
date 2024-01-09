@@ -27,10 +27,10 @@ import { FeedbacksService } from './features/comments/domain/feedbacks.service';
 import { AdminUserService } from './features/admin/domain/user.admins.service';
 import { AdminUserController } from './features/admin/api/controllers/admin-users.controller';
 import { FeedbacksController } from './features/comments/api/controllers/feedbacks.controller';
-import { BcryptAdapter } from './features/infra/adapters/bcrypt-adapter';
-import { EmailAdapter } from './features/infra/adapters/email-adapter';
-import settings from '../src/features/infra/settings/app.settings';
-import { JwtService } from './features/infra/application/jwt-service';
+import settings from 'src/infra/settings/app.settings';
+import { BcryptAdapter } from './infra/adapters/bcrypt-adapter';
+import { EmailAdapter } from './infra/adapters/email-adapter';
+import { JwtService } from './infra/application/jwt-service';
 
 @Module({
   imports: [
@@ -69,7 +69,7 @@ import { JwtService } from './features/infra/application/jwt-service';
   ],
   providers: [
     AppService,
-    
+
     JwtService,
 
     BcryptAdapter,
