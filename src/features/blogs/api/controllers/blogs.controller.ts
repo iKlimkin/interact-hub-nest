@@ -14,20 +14,19 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { AuthBasicGuard } from 'src/infra/guards/auth.guard';
 import { PostsService } from 'src/features/posts/domain/posts.service';
 import { PostsQueryRepository } from 'src/features/posts/infrastructure/posts.query.repo';
 import { CreatePostModel } from 'src/features/posts/models/input.posts.models/create.post.model';
 import { PostViewModel } from 'src/features/posts/models/post.view.models/PostViewModel';
+import { AuthBasicGuard } from 'src/infra/guards/auth.guard';
 
+import { SortingQueryModel } from 'src/infra/SortingQueryModel';
+import { PaginationViewModel } from 'src/infra/paginationViewModel';
 import { BlogsService } from '../../domain/blogs.service';
 import { BlogsQueryRepo } from '../../infrastructure/blogs.query.repo';
 import { BlogViewModel } from '../models/blog.view.models/blog.view.models';
-import { URIParamsBlogModel } from '../models/input.blog.models/URIParamsBlogModel';
 import { InputBlogModel } from '../models/input.blog.models/create.blog.model';
 import { BlogType } from '../models/output.blog.models/blog.models';
-import { SortingQueryModel } from 'src/infra/SortingQueryModel';
-import { PaginationViewModel } from 'src/infra/paginationViewModel';
 
 @Controller('blogs')
 export class BlogsController {
@@ -42,8 +41,7 @@ export class BlogsController {
   @HttpCode(HttpStatus.OK)
   async getBlogs(
     @Query() query: SortingQueryModel,
-    @Res() res: Response<PaginationViewModel<BlogType>>,
-  ) {
+  ): Promise<PaginationViewModel<BlogType>> {
     const { pageNumber, pageSize, sortBy, sortDirection, searchNameTerm } =
       query;
 
@@ -55,22 +53,19 @@ export class BlogsController {
       searchNameTerm,
     });
 
-    res.send(receivedBlogs);
+    return receivedBlogs;
   }
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  async getBlogById(
-    @Param('id') blogId: string,
-    @Res() res: Response<BlogViewModel>,
-  ) {
+  async getBlogById(@Param('id') blogId: string): Promise<BlogViewModel> {
     const foundBlog = await this.blogsQueryRepo.getBlogById(blogId);
 
     if (!foundBlog) {
       throw new NotFoundException('blog not found');
     }
 
-    res.send(foundBlog);
+    return foundBlog;
   }
 
   @Get(':id/posts')
@@ -82,8 +77,7 @@ export class BlogsController {
   ) {
     const { userId } = res.locals;
     let { pageNumber, pageSize, sortBy, sortDirection } = query;
-    
-    
+
     const blog = await this.blogsQueryRepo.getBlogById(blogId);
 
     if (!blog) {
@@ -107,10 +101,7 @@ export class BlogsController {
   @Post()
   @UseGuards(AuthBasicGuard)
   @HttpCode(HttpStatus.CREATED)
-  async createBlog(
-    @Body() body: InputBlogModel,
-    @Res() res: Response<BlogViewModel>,
-  ) {
+  async createBlog(@Body() body: InputBlogModel): Promise<BlogViewModel> {
     const { name, description, websiteUrl } = body;
 
     const createdBlog = await this.blogsService.createBlog({
@@ -127,7 +118,7 @@ export class BlogsController {
       throw new NotFoundException('Newlest created blog not found');
     }
 
-    res.send(newlyCreatedBlog);
+    return newlyCreatedBlog;
   }
 
   @Post(':id/posts')
@@ -136,8 +127,7 @@ export class BlogsController {
   async createPostByBlogId(
     @Param('id') blogId: string,
     @Body() body: CreatePostModel,
-    @Res() res: Response<PostViewModel>,
-  ) {
+  ): Promise<PostViewModel> {
     const { title, shortDescription, content } = body;
 
     const createdPost = await this.postsService.createPost({
@@ -155,7 +145,7 @@ export class BlogsController {
       throw new NotFoundException('Newlest post not found');
     }
 
-    res.send(newlyCreatedPost);
+    return newlyCreatedPost;
   }
 
   @Put(':id')

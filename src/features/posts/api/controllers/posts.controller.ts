@@ -233,7 +233,7 @@ export class PostsController {
   @UseGuards(AuthBasicGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePost(@Param('id') postId: string, @Body() body: InputPostModel) {
-    const { title, shortDescription, content, blogId } = body; // add validation blogId pipe
+    const { title, shortDescription, content, blogId } = body;
 
     const updatedPost = await this.postsService.updatePost(postId, {
       title,
