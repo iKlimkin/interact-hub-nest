@@ -14,13 +14,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { AuthUserType } from 'src/features/auth/api/models/auth.output.models/auth.user.types';
-import { UsersQueryRepository } from '../../infrastructure/users.query.repo';
-import { UserViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
-import { AdminUserService } from '../../domain/user.admins.service';
 import { SortingQueryModel } from 'src/infra/SortingQueryModel';
-import { PaginationViewModel } from 'src/infra/paginationViewModel';
 import { AuthBasicGuard } from 'src/infra/guards/auth.guard';
+import { PaginationViewModel } from 'src/infra/paginationViewModel';
+import { AdminUserService } from '../../domain/user.admins.service';
+import { UsersQueryRepository } from '../../infrastructure/users.query.repo';
+import { InputUserModel } from '../models/create.userAdmin.model';
+import { UserViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
 
 @UseGuards(AuthBasicGuard)
 @Controller('users')
@@ -60,7 +60,7 @@ export class AdminUserController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createUser(
-    @Body() body: AuthUserType,
+    @Body() body: InputUserModel,
     @Res() res: Response<UserViewModel>,
   ) {
     const { login, email, password } = body;

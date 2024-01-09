@@ -61,11 +61,9 @@ export class BlogsController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   async getBlogById(
-    @Param() params: URIParamsBlogModel,
+    @Param('id') blogId: string,
     @Res() res: Response<BlogViewModel>,
   ) {
-    const { blogId } = params;
-
     const foundBlog = await this.blogsQueryRepo.getBlogById(blogId);
 
     if (!foundBlog) {
@@ -78,14 +76,14 @@ export class BlogsController {
   @Get(':id/posts')
   @HttpCode(HttpStatus.OK)
   async getPostsByBlogId(
-    @Param() params: URIParamsBlogModel,
+    @Param('id') blogId: string,
     @Query() query: SortingQueryModel,
     @Res() res: Response<PaginationViewModel<PostViewModel>>,
   ) {
-    const { blogId } = params;
     const { userId } = res.locals;
     let { pageNumber, pageSize, sortBy, sortDirection } = query;
-
+    
+    
     const blog = await this.blogsQueryRepo.getBlogById(blogId);
 
     if (!blog) {
