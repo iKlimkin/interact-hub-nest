@@ -21,18 +21,13 @@ export class UsersQueryRepository {
   async getAllUsers(
     inputData: SortingQueryModel,
   ): Promise<PaginationViewModel<UserViewModel>> {
-    const filter = getSearchTerm(
-      {
+    const filter = getSearchTerm({
         searchEmailTerm: inputData.searchEmailTerm,
         searchLoginTerm: inputData.searchLoginTerm,
-      },
-      !0,
+      }, !0,
     );
 
-    const { pageNumber, pageSize, skip, sort } = await getPagination(
-      inputData,
-      !0,
-    );
+    const { pageNumber, pageSize, skip, sort } = await getPagination(inputData,!0,);
 
     try {
       const users = await this.UserAccountModel.find(filter)
@@ -52,7 +47,7 @@ export class UsersQueryRepository {
       };
     } catch (error) {
       throw new InternalServerErrorException(
-        'Database fails operate with find users',
+        'Database fails operate with find users by sorting model',
         error,
       );
     }
