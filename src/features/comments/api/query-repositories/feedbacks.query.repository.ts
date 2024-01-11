@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { SortingQueryModel } from 'src/infra/SortingQueryModel';
 import { likesStatus } from 'src/infra/likes.types';
@@ -6,9 +6,12 @@ import { PaginationViewModel } from 'src/infra/paginationViewModel';
 import { getLikeStatus } from 'src/infra/utils/likesStatusFounder';
 import { getPagination } from 'src/infra/utils/pagination';
 import { getSearchTerm } from 'src/infra/utils/searchTerm';
-import { CommentsViewModel } from '../api/models/comments.view.models/comments.view.model';
-import { getCommentsViewModel } from '../api/models/comments.view.models/get.comments.view.model';
-import { CommentModelType, Comment } from '../comment.schema';
+import { CommentsViewModel } from '../models/comments.view.models/comments.view.model';
+import { getCommentsViewModel } from '../models/comments.view.models/get.comments.view.model';
+import {
+  CommentModelType,
+  Comment,
+} from '../../domain/entities/comment.schema';
 
 @Injectable()
 export class FeedbacksQueryRepository {
@@ -50,8 +53,11 @@ export class FeedbacksQueryRepository {
         totalCount: totalCount,
         items: comments.map((comment) => getCommentsViewModel(comment, userId)),
       };
-    } catch (e) {
-      throw new Error(`There're something problems with find posts: ${e}`);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Database fails during find comments by postId operation',
+        error,
+      );
     }
   }
 
@@ -66,8 +72,9 @@ export class FeedbacksQueryRepository {
 
       return getCommentsViewModel(foundedComment, userId);
     } catch (error) {
-      throw new Error(
-        `The comment with id ${commentId} not found or occured something problems: ${error}`,
+      throw new InternalServerErrorException(
+        'Database fails during find comment by id operation',
+        error,
       );
     }
   }
@@ -93,8 +100,9 @@ export class FeedbacksQueryRepository {
 
       return status;
     } catch (error) {
-      throw new Error(
-        `The like comment with id ${userId} not found or occured something problems: ${error}`,
+      throw new InternalServerErrorException(
+        "Database fails during get user's likes operation in feedback",
+        error,
       );
     }
   }
@@ -127,8 +135,9 @@ export class FeedbacksQueryRepository {
         ),
       };
     } catch (error) {
-      throw new Error(
-        `The comment with id ${userId} not found or occured something problems: ${error}`,
+      throw new InternalServerErrorException(
+        'Database fails during find comment by userId operation',
+        error,
       );
     }
   }

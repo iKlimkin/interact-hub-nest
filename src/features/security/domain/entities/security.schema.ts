@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, HydratedDocument, Model } from 'mongoose';
-import { SecurityDeviceType } from './api/models/security.view.models/security.view.types';
-import { InputSessionData } from './api/models/security-input.models/create.session.type';
+import { SecurityDeviceType } from '../../api/models/security.view.models/security.view.types';
+import { InputSessionData } from '../../api/models/security-input.models/create.session.type';
 
 @Schema()
 export class Security extends Document implements SecurityDeviceType {

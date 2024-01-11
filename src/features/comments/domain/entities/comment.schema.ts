@@ -3,10 +3,18 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import {
   CommentType,
   CreateCommentType,
-} from './api/models/output.comment.models';
-import { likesCountInfo } from '../posts/posts.schema';
+} from '../../api/models/output.comment.models';
+import { likesCountInfo } from '../../../posts/domain/entities/posts.schema';
 import { HydratedDocument, Model } from 'mongoose';
-import { likesStatus, LikesUserInfoType, LikesCountType } from 'src/infra/likes.types';
+import {
+  likesStatus,
+  LikesUserInfoType,
+  LikesCountType,
+} from 'src/infra/likes.types';
+
+export type CommentDocument = HydratedDocument<Comment>;
+export type CommentModelType = Model<CommentDocument> & CommentModelStaticType;
+export type CommentWholeModelTypes = CommentModelType & CommentMethodsType;
 
 const LikesUsersInfo = {
   userId: { type: String, default: null },
@@ -43,8 +51,8 @@ export class Comment {
   @Prop({ type: likesCountInfo })
   likesCountInfo: LikesCountType;
 
-  static makeInstance(dto: CreateCommentType): CommentType {
-    const comment = new Comment();
+  static makeInstance(dto: CreateCommentType): CommentDocument {
+    const comment = new this() as CommentDocument;
     comment.content = dto.content;
     comment.postId = dto.postId;
     comment.commentatorInfo = {
@@ -59,16 +67,17 @@ export class Comment {
   }
 }
 
-export type CommentDocument = HydratedDocument<Comment>;
-export type CommentModelType = Model<CommentDocument> & CommentModelStaticType;
-export type CommentModelDocumentType = Model<CommentDocument>;
+export const CommentSchema = SchemaFactory.createForClass(Comment);
 
-export type CommentModelStaticType = {
-  makeInstance(dto: CreateCommentType): CommentType;
-};
-
-export const commentStaticMethods: CommentModelStaticType = {
+export const commentStatics = {
   makeInstance: Comment.makeInstance,
 };
+const commentMethods = {
+  someMethods: Comment.prototype,
+};
 
-export const CommentSchema = SchemaFactory.createForClass(Comment);
+type CommentMethodsType = typeof commentMethods;
+type CommentModelStaticType = typeof commentStatics;
+
+CommentSchema.methods = commentMethods;
+CommentSchema.statics = commentStatics;

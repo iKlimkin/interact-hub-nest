@@ -1,8 +1,11 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { getSecurityViewModel } from '../api/models/security.view.models/security.view.model';
-import { SecurityViewDeviceModel } from '../api/models/security.view.models/security.view.types';
-import { Security, SecurityModelType } from '../security.schema';
+import { getSecurityViewModel } from '../models/security.view.models/security.view.model';
+import { SecurityViewDeviceModel } from '../models/security.view.models/security.view.types';
+import {
+  Security,
+  SecurityModelType,
+} from '../../domain/entities/security.schema';
 
 @Injectable()
 export class SecurityQueryRepo {

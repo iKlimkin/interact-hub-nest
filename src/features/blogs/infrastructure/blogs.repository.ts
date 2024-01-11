@@ -1,29 +1,26 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { OutputId } from 'src/infra/likes.types';
 import { UpdateBlogModel } from '../api/models/input.blog.models/UpdateBlogModel';
 import {
-  BlogDBType,
-  BlogType,
+  BlogDBType
 } from '../api/models/output.blog.models/blog.models';
-import { OutputId } from 'src/infra/likes.types';
-import { InjectModel } from '@nestjs/mongoose';
 import {
   Blog,
   BlogDocument,
-  BlogModelDocumentType,
   BlogModelType,
-} from '../blog.schema';
-import { Model } from 'mongoose';
+} from '../domain/entities/blog.schema';
 
 @Injectable()
 export class BlogsRepository {
   constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType) {}
 
-  async create(blogDto: Readonly<BlogType>): Promise<OutputId> {
+  async save(smartBlogModel: BlogDocument): Promise<OutputId> {
     try {
-      const createdBlog = await this.BlogModel.create(blogDto);
+      const blogDb = await smartBlogModel.save();
 
       return {
-        id: createdBlog._id.toString(),
+        id: blogDb._id.toString(),
       };
     } catch (error) {
       throw new InternalServerErrorException(

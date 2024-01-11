@@ -15,20 +15,20 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { UsersQueryRepository } from 'src/features/admin/infrastructure/users.query.repo';
+import { UsersQueryRepository } from 'src/features/admin/api/query-repositories/users.query.repo';
 import { CommentsViewModel } from 'src/features/comments/api/models/comments.view.models/comments.view.model';
 import { InputContentType } from 'src/features/comments/api/models/input.comment.models';
-import { FeedbacksService } from 'src/features/comments/domain/feedbacks.service';
-import { FeedbacksQueryRepository } from 'src/features/comments/infrastructure/feedbacks.query.repository';
+import { FeedbacksService } from 'src/features/comments/application/feedbacks.service';
+import { FeedbacksQueryRepository } from 'src/features/comments/api/query-repositories/feedbacks.query.repository';
 import { SortingQueryModel } from 'src/infra/SortingQueryModel';
 import { AuthBasicGuard } from 'src/infra/guards/auth.guard';
 import { InputLikeStatus, likesStatus } from 'src/infra/likes.types';
 import { PaginationViewModel } from 'src/infra/paginationViewModel';
 import { getStatusCounting } from 'src/infra/utils/statusCounter';
-import { PostsService } from '../../domain/posts.service';
-import { PostsQueryRepository } from '../../infrastructure/posts.query.repo';
+import { PostsService } from '../../application/posts.service';
+import { PostsQueryRepository } from '../query-repositories/posts.query.repo';
 import { InputPostModel } from '../models/input.posts.models/create.post.model';
-import { PostViewModel } from '../models/post.view.models/PostViewModel'
+import { PostViewModel } from '../models/post.view.models/PostViewModel';
 
 @Controller('posts')
 export class PostsController {
@@ -138,7 +138,7 @@ export class PostsController {
   ) {
     const { userId } = res.locals;
 
-    let { pageNumber, pageSize, sortBy, sortDirection, searchContentTerm } =
+    const { pageNumber, pageSize, sortBy, sortDirection, searchContentTerm } =
       query;
 
     const post = await this.postsQueryRepo.getPostById(postId);
@@ -197,7 +197,7 @@ export class PostsController {
   }
 
   @Post()
-  @UseGuards(AuthBasicGuard)
+  // @UseGuards(AuthBasicGuard)
   @HttpCode(HttpStatus.CREATED)
   async createPost(
     @Body() body: InputPostModel,
@@ -230,7 +230,7 @@ export class PostsController {
   }
 
   @Put(':id')
-  @UseGuards(AuthBasicGuard)
+  // @UseGuards(AuthBasicGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePost(@Param('id') postId: string, @Body() body: InputPostModel) {
     const { title, shortDescription, content, blogId } = body;
@@ -241,10 +241,13 @@ export class PostsController {
       content,
       blogId,
     });
+    if (!updatedPost) {
+      throw new NotFoundException('Post id or blog id not found');
+    }
   }
 
   @Delete(':id')
-  @UseGuards(AuthBasicGuard)
+  // @UseGuards(AuthBasicGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePost(@Param('id') postId: string) {
     const deletedPost = await this.postsService.deletePost(postId);

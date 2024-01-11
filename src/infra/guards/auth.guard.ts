@@ -1,10 +1,15 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from "@nestjs/common";
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 
 @Injectable()
 export class AuthBasicGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const { authorization } = context.switchToHttp().getRequest().headers;
-    
+
     if (!authorization) {
       throw new UnauthorizedException('Unauthorized');
     }

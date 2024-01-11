@@ -1,5 +1,5 @@
 import { Matches } from 'class-validator';
-import { iSValidString } from 'src/features/blogs/api/models/is-valid-string';
+import { iSValidString } from 'src/infra/decorators/is-valid-string';
 import {
   nameLength,
   passwordLength,

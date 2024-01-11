@@ -2,13 +2,18 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { add } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 import {
-  UserAccountType,
   UserConfirmationType,
   UserRecoveryType,
   UserType,
-} from '../auth/api/models/auth.output.models/auth.output.models';
-import { CreateUserDto } from './api/models/create.userAdmin.model';
+} from '../../../auth/api/models/auth.output.models/auth.output.models';
+import { CreateUserDto } from '../../api/models/create.userAdmin.model';
 import { HydratedDocument, Model } from 'mongoose';
+
+export type UserAccountDocument = HydratedDocument<UserAccount>;
+export type UserAccountModelType = Model<UserAccountDocument> &
+  UserAccountModelStaticsType;
+export type UserAccountWholeModelTypes = UserAccountModelType &
+  UserAccountModelMethodsType;
 
 const accountData = {
   login: { type: String, required: true },
@@ -42,8 +47,9 @@ export class UserAccount {
   @Prop({ type: passwordRecovery })
   passwordRecovery: UserRecoveryType;
 
-  static makeInstance(dto: CreateUserDto): UserAccountType {
-    const userAccount = new UserAccount();
+  static makeInstance(dto: CreateUserDto): UserAccountDocument {
+    const userAccount = new this() as UserAccountDocument;
+
     userAccount.accountData = {
       login: dto.login,
       email: dto.email,
@@ -61,17 +67,18 @@ export class UserAccount {
   }
 }
 
-export type UserAccountDocument = HydratedDocument<UserAccount>;
-export type UserAccountModelType = Model<UserAccountDocument> &
-  UserAccountModelStaticType;
-export type UserAccountModelDocumentType = Model<UserAccountDocument>;
+export const UserAccountSchema = SchemaFactory.createForClass(UserAccount);
 
-export type UserAccountModelStaticType = {
-  makeInstance(dto: CreateUserDto): UserAccountType;
-};
-
-export const userAccountStaticMethods: UserAccountModelStaticType = {
+export const UserAccountStatics = {
   makeInstance: UserAccount.makeInstance,
 };
 
-export const UserAccountSchema = SchemaFactory.createForClass(UserAccount);
+export const UserAccountMethods = {
+  someMethods: UserAccount.prototype,
+};
+
+type UserAccountModelStaticsType = typeof UserAccountStatics;
+type UserAccountModelMethodsType = typeof UserAccountMethods;
+
+UserAccountSchema.statics = UserAccountStatics;
+UserAccountSchema.methods = UserAccountMethods;

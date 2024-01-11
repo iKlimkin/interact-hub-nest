@@ -2,14 +2,16 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
 import { OutputId, likeUserInfo } from 'src/infra/likes.types';
 import { PostsRepository } from '../infrastructure/posts.repository';
-import { Post } from '../posts.schema';
+import { Post, PostModelType } from '../domain/entities/posts.schema';
 import { CreatePostModel } from '../api/models/input.posts.models/create.post.model';
 import { UpdatePostModel } from '../api/models/input.posts.models/update.post.model';
 import { PostDBType } from '../api/models/post.view.models/getPostViewModel';
+import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class PostsService {
   constructor(
+    @InjectModel(Post.name) private PostModel: PostModelType,
     private postsRepository: PostsRepository,
     private blogsRepository: BlogsRepository,
   ) {}
@@ -21,7 +23,7 @@ export class PostsService {
 
     if (!foundBlog) throw new NotFoundException('blog not found');
 
-    const postDto = Post.makeInstance({
+    const postSmartModel = this.PostModel.makeInstance({
       title,
       shortDescription,
       content,
@@ -29,7 +31,7 @@ export class PostsService {
       blogName: foundBlog.name,
     });
 
-    return this.postsRepository.create(postDto);
+    return this.postsRepository.save(postSmartModel);
   }
 
   async updatePost(

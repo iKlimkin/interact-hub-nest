@@ -10,8 +10,8 @@ import {
   Res,
   UnauthorizedException,
 } from '@nestjs/common';
-import { SecurityService } from '../../domain/security.service';
-import { SecurityQueryRepo } from '../../infrastructure/security.query.repo';
+import { SecurityService } from '../../application/security.service';
+import { SecurityQueryRepo } from '../query-repositories/security.query.repo';
 import { SecurityInterface } from '../models/security-input.models/security.interface';
 
 @Controller('security/devices')
@@ -63,9 +63,9 @@ export class SecurityController implements SecurityInterface {
     await this.securityService.deleteActiveSession(deviceId);
   }
 
-//   @Get('requestLogs')
-//   @HttpCode(HttpStatus.NO_CONTENT)
-//   async getRequestApiLogs() {
-//     return apiRepository.getClientRequestsCollection();
-//   }
+  //   @Get('requestLogs')
+  //   @HttpCode(HttpStatus.NO_CONTENT)
+  //   async getRequestApiLogs() {
+  //     return apiRepository.getClientRequestsCollection();
+  //   }
 }

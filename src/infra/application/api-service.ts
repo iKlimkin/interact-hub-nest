@@ -2,7 +2,7 @@
 // import { apiRepository } from "../repositories/apiRepository"
 
 // export const apiService = {
-    
+
 //     async addClientRequest(inputData: MatchApiType): Promise<boolean> {
 //         const addedClientRequest = await apiRepository.addClientRequest(inputData)
 //         return addedClientRequest
@@ -12,7 +12,5 @@
 //         const countRequest = await apiRepository.apiClientCounter(inputData)
 //         return countRequest
 //     },
-
-    
 
 // }

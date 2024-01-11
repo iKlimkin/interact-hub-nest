@@ -1,10 +1,13 @@
-import { Post, PostModelType } from '../posts.schema';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { OutputId, likeUserInfo } from 'src/infra/likes.types';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { UpdatePostModel } from '../api/models/input.posts.models/update.post.model';
-import { PostType } from '../api/models/output.post.models/output.post.models';
 import { PostDBType } from '../api/models/post.view.models/getPostViewModel';
+import {
+  Post,
+  PostDocument,
+  PostModelType,
+} from '../domain/entities/posts.schema';
 
 @Injectable()
 export class PostsRepository {
@@ -12,16 +15,16 @@ export class PostsRepository {
     @InjectModel(Post.name) private readonly PostModel: PostModelType,
   ) {}
 
-  async create(postDto: Readonly<PostType>): Promise<OutputId> {
+  async save(postSmartModel: PostDocument): Promise<OutputId> {
     try {
-      const createdPost = await this.PostModel.create(postDto);
+      const retainedPost = await postSmartModel.save();
 
       return {
-        id: createdPost._id.toString(),
+        id: retainedPost._id.toString(),
       };
     } catch (error) {
       throw new InternalServerErrorException(
-        'Database fails during create operate',
+        'Database fails during save operate',
       );
     }
   }
@@ -31,8 +34,22 @@ export class PostsRepository {
     updateData: UpdatePostModel,
   ): Promise<boolean> {
     try {
+      // const post = await this.PostModel.updateOne(
+      //   { _id: postId },
+      //   {
+      //     $set: {
+      //       title: updateData.title,
+      //       shortDescription: updateData.shortDescription,
+      //       content: updateData.content,
+      //       blogId: updateData.blogId,
+      //     },
+      //   },
+      // );
+
       const post = await this.PostModel.updateOne(
-        { _id: postId },
+        {
+          $and: [{ _id: postId }, { blogId: updateData.blogId }],
+        },
         {
           $set: {
             title: updateData.title,
@@ -47,20 +64,6 @@ export class PostsRepository {
     } catch (error) {
       throw new InternalServerErrorException(
         'Database fails during update operate',
-      );
-    }
-  }
-
-  async save(postDto: PostType): Promise<OutputId> {
-    try {
-      const createdPost = await this.PostModel.create(postDto);
-
-      return {
-        id: createdPost._id.toString(),
-      };
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Database fails during save operate',
       );
     }
   }

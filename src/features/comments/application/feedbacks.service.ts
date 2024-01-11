@@ -1,16 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import {
-  OutputId,
-  likeUserInfo,
-} from 'src/infra/likes.types';
+import { OutputId, likeUserInfo } from 'src/infra/likes.types';
 import { InputCommentModel } from '../api/models/input.comment.models';
-import { Comment } from '../comment.schema';
+import {
+  Comment,
+  CommentModelType,
+  CommentWholeModelTypes,
+} from '../domain/entities/comment.schema';
 import { FeedbacksRepository } from '../infrastructure/feedbacks.repository';
 import { UsersRepository } from 'src/features/admin/infrastructure/users.repository';
+import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class FeedbacksService {
   constructor(
+    @InjectModel(Comment.name) private CommentModel: CommentModelType,
     private feedbacksRepository: FeedbacksRepository,
     private usersRepository: UsersRepository,
   ) {}
@@ -22,7 +25,7 @@ export class FeedbacksService {
       throw new NotFoundException('User not found');
     }
 
-    const commentDto = Comment.makeInstance({
+    const commentSmartModel = this.CommentModel.makeInstance({
       commentatorInfo: {
         userId: inputData.userId,
         userLogin: user.accountData.login,
@@ -31,7 +34,7 @@ export class FeedbacksService {
       postId: inputData.postId,
     });
 
-    return this.feedbacksRepository.create(commentDto);
+    return this.feedbacksRepository.save(commentSmartModel);
   }
 
   async createLike(inputData: likeUserInfo): Promise<boolean> {

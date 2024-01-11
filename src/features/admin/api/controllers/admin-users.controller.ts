@@ -17,12 +17,12 @@ import { Response } from 'express';
 import { SortingQueryModel } from 'src/infra/SortingQueryModel';
 import { AuthBasicGuard } from 'src/infra/guards/auth.guard';
 import { PaginationViewModel } from 'src/infra/paginationViewModel';
-import { AdminUserService } from '../../domain/user.admins.service';
-import { UsersQueryRepository } from '../../infrastructure/users.query.repo';
+import { AdminUserService } from '../../application/user.admins.service';
+import { UsersQueryRepository } from '../query-repositories/users.query.repo';
 import { InputUserModel } from '../models/create.userAdmin.model';
 import { UserViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
 
-@UseGuards(AuthBasicGuard)
+// @UseGuards(AuthBasicGuard)
 @Controller('users')
 export class AdminUserController {
   constructor(
@@ -34,8 +34,7 @@ export class AdminUserController {
   @HttpCode(HttpStatus.OK)
   async getUsers(
     @Query() query: SortingQueryModel,
-    @Res() res: Response<PaginationViewModel<UserViewModel>>,
-  ) {
+  ): Promise<PaginationViewModel<UserViewModel>> {
     const {
       pageNumber,
       pageSize,
@@ -54,15 +53,12 @@ export class AdminUserController {
       searchEmailTerm,
     });
 
-    res.send(user);
+    return user;
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async createUser(
-    @Body() body: InputUserModel,
-    @Res() res: Response<UserViewModel>,
-  ) {
+  async createUser(@Body() body: InputUserModel): Promise<UserViewModel> {
     const { login, email, password } = body;
 
     const user = await this.usersService.createUser({ login, email, password });
@@ -77,7 +73,7 @@ export class AdminUserController {
       throw new NotFoundException('User not found after create');
     }
 
-    res.send(foundNewestUser);
+    return foundNewestUser;
   }
 
   @Delete(':id')

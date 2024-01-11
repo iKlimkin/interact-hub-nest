@@ -1,9 +1,8 @@
 export type PasswordRecoveryType = {
-    newPassword: string;
-    recoveryCode: string;
+  newPassword: string;
+  recoveryCode: string;
 };
-  
 
 export type InputEmail = {
-    email: string;
+  email: string;
 };

@@ -1,9 +1,9 @@
-import { iSValidString } from 'src/features/blogs/api/models/is-valid-string';
+import { iSValidString } from 'src/infra/decorators/is-valid-string';
 import {
   blogIdLength,
   contentLength,
   frequentLength,
-  titleLength
+  titleLength,
 } from 'src/infra/validation.constants';
 
 export type CreatePostByBlog = Omit<CreatePostModel, 'blogId'>;

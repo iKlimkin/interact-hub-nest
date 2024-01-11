@@ -1,4 +1,3 @@
-
 export type UpdatePostModel = {
   /**
    * post's name
@@ -18,6 +17,5 @@ export type UpdatePostModel = {
   /**
    * blog's id of updating post
    */
-  blogId: string
-
+  blogId: string;
 };

@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { OutputId, likeUserInfo } from 'src/infra/likes.types';
 import {
-  OutputId,
-  likeUserInfo,
-} from 'src/infra/likes.types';
-import { CommentType } from '../api/models/output.comment.models';
-import { CommentModelType, CommentDocument, Comment } from '../comment.schema';
+  Comment,
+  CommentDocument,
+  CommentModelType,
+} from '../domain/entities/comment.schema';
 
 @Injectable()
 export class FeedbacksRepository {
@@ -13,29 +13,18 @@ export class FeedbacksRepository {
     @InjectModel(Comment.name) private CommentModel: CommentModelType,
   ) {}
 
-  async create(newComment: Readonly<CommentType>): Promise<OutputId> {
+  async save(commentSmartModel: CommentDocument): Promise<OutputId> {
     try {
-      const createdComment = await this.CommentModel.create(newComment);
+      const commentDB = await commentSmartModel.save();
 
-      return {
-        id: createdComment._id.toString(),
-      };
-    } catch (error) {
-      throw new Error(
-        `While creating the comment occured some errors: ${error}`,
-      );
-    }
-  }
-
-  async save(comment: CommentDocument): Promise<OutputId | null> {
-    try {
-      const commentDB = await comment.save();
       return {
         id: commentDB._id.toString(),
       };
     } catch (error) {
-      console.error(`there were some problems during save user, ${error}`);
-      return null;
+      throw new InternalServerErrorException(
+        'Database fails during save comment operation',
+        error,
+      );
     }
   }
 
@@ -49,8 +38,9 @@ export class FeedbacksRepository {
 
       return !!comment;
     } catch (error) {
-      throw new Error(
-        `While updating the comment occured some errors: ${error}`,
+      throw new InternalServerErrorException(
+        'Database fails during update comment operation',
+        error,
       );
     }
   }
@@ -61,8 +51,8 @@ export class FeedbacksRepository {
 
       return !!result;
     } catch (error) {
-      throw new Error(
-        `there were some problems during removal comment, ${error}`,
+      throw new InternalServerErrorException(
+        'Database fails during delete comment operation', error
       );
     }
   }
@@ -88,8 +78,8 @@ export class FeedbacksRepository {
 
       return createdLikeStatus !== null;
     } catch (error) {
-      throw new Error(
-        `there were some problems during create like status, ${error}`,
+      throw new InternalServerErrorException(
+        'Database fails during make likeStatus in comment operation', error
       );
     }
   }
@@ -117,8 +107,8 @@ export class FeedbacksRepository {
 
       return updatedLike !== null;
     } catch (error) {
-      throw new Error(
-        `there were some problems during update like status, ${error}`,
+      throw new InternalServerErrorException(
+        'Database fails during update likeStatus in comment operation', error
       );
     }
   }

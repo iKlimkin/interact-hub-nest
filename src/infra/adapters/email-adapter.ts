@@ -1,5 +1,5 @@
-import { Injectable } from "@nestjs/common";
-import nodemailer, { SentMessageInfo } from "nodemailer";
+import { Injectable } from '@nestjs/common';
+import nodemailer, { SentMessageInfo } from 'nodemailer';
 
 @Injectable()
 export class EmailAdapter {
@@ -18,12 +18,16 @@ export class EmailAdapter {
     </p>`;
 
     try {
-      const info: SentMessageInfo = await this.sendMail(transporter, inputData, message);
+      const info: SentMessageInfo = await this.sendMail(
+        transporter,
+        inputData,
+        message,
+      );
 
       return info.messageId;
     } catch (error) {
       console.error(
-        `Unexpected problems occurred while sending the message: ${error}`
+        `Unexpected problems occurred while sending the message: ${error}`,
       );
       return null;
     }
@@ -35,7 +39,7 @@ export class EmailAdapter {
     confirmationCode: string;
   }): Promise<SentMessageInfo | null> {
     const confirmationLink = `https://somesite.com/confirm-email?code=${inputData.confirmationCode}`;
-    
+
     const transporter = this.createTransport();
 
     const message = `<h1>Thank for your registration</h1>
@@ -44,20 +48,28 @@ export class EmailAdapter {
     </p>`;
 
     try {
-      const info: SentMessageInfo = await this.sendMail(transporter, inputData, message);
+      const info: SentMessageInfo = await this.sendMail(
+        transporter,
+        inputData,
+        message,
+      );
 
       return info.messageId;
     } catch (error) {
       console.error(
-        `Unexpected problems occurred while sending the message: ${error}`
+        `Unexpected problems occurred while sending the message: ${error}`,
       );
       return null;
     }
   }
 
-  private async sendMail(transporter: SentMessageInfo, inputData: { email: string; subject: string}, message: string ): Promise<SentMessageInfo> {
+  private async sendMail(
+    transporter: SentMessageInfo,
+    inputData: { email: string; subject: string },
+    message: string,
+  ): Promise<SentMessageInfo> {
     return await transporter.sendMail({
-      from: "Social Hub👻 <iklimkin50@gmail.com>",
+      from: 'Social Hub👻 <iklimkin50@gmail.com>',
       to: inputData.email,
       subject: inputData.subject,
       html: message,
@@ -73,4 +85,4 @@ export class EmailAdapter {
       },
     });
   }
-};
+}

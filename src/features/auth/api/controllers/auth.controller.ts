@@ -1,7 +1,10 @@
 import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
 import { AuthUserType } from '../models/auth.output.models/auth.user.types';
-import { UsersQueryRepository } from 'src/features/admin/infrastructure/users.query.repo';
-import { InputEmail, PasswordRecoveryType } from '../models/auth-input.models.ts/input-password-rec.type';
+import { UsersQueryRepository } from 'src/features/admin/api/query-repositories/users.query.repo';
+import {
+  InputEmail,
+  PasswordRecoveryType,
+} from '../models/auth-input.models.ts/input-password-rec.type';
 
 @Controller('auth')
 export class AuthController {
@@ -139,7 +142,6 @@ export class AuthController {
   //   res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
   // }
 
-  
   // async registration(req: RequestWithBody<AuthUserType>, res: Response) {
   //   const { login, email, password } = req.body;
 

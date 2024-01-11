@@ -2,7 +2,10 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { OutputId } from 'src/infra/likes.types';
 import { SecurityDeviceType } from '../api/models/security.view.models/security.view.types';
-import { Security, SecurityModelType } from '../security.schema';
+import {
+  Security,
+  SecurityModelType,
+} from '../domain/entities/security.schema';
 
 @Injectable()
 export class SecurityRepository {
@@ -50,9 +53,9 @@ export class SecurityRepository {
       const userSession = await this.SecurityModel.findOneAndDelete({
         deviceId,
       });
-      
+
       // const test = await this.SecurityModel.deleteOne({ _id: deviceId })
-      
+
       return !!userSession;
     } catch (error) {
       throw new InternalServerErrorException(

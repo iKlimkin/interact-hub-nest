@@ -1,4 +1,3 @@
-
 export type BlogViewModel = {
   /**
    * id of the existing blog
@@ -23,11 +22,10 @@ export type BlogViewModel = {
   /**
    * blog is created
    */
-  createdAt: string
+  createdAt: string;
 
   /**
    * is a member of the blog
    */
   isMembership: boolean;
 };
-

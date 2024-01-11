@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import session from 'express-session';
 import { OutputId } from 'src/infra/likes.types';
 import { InputSessionData } from '../api/models/security-input.models/create.session.type';
-import { Security } from '../security.schema';
+import { Security } from '../domain/entities/security.schema';
 import { SecurityRepository } from '../infrastructure/security.repository';
 
 @Injectable()

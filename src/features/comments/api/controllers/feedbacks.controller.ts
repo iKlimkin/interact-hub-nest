@@ -18,8 +18,8 @@ import { PaginationViewModel } from 'src/infra/paginationViewModel';
 import { getStatusCounting } from 'src/infra/utils/statusCounter';
 import { CommentsViewModel } from '../models/comments.view.models/comments.view.model';
 import { InputContentType } from '../models/input.comment.models';
-import { FeedbacksService } from '../../domain/feedbacks.service';
-import { FeedbacksQueryRepository } from '../../infrastructure/feedbacks.query.repository';
+import { FeedbacksService } from '../../application/feedbacks.service';
+import { FeedbacksQueryRepository } from '../query-repositories/feedbacks.query.repository';
 import { Response } from 'express';
 
 @Controller('comments')
@@ -31,10 +31,7 @@ export class FeedbacksController {
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  async getComment(
-    @Param('id') commentId: string,
-    @Res() res
-  ) {
+  async getComment(@Param('id') commentId: string, @Res() res) {
     const { userId } = res.locals;
 
     const comment = await this.feedbacksQueryRepo.getCommentById(
@@ -97,7 +94,7 @@ export class FeedbacksController {
       content,
     );
 
-    res.sendStatus(HttpStatus.NO_CONTENT)
+    res.sendStatus(HttpStatus.NO_CONTENT);
   }
 
   @Put(':id')
@@ -144,7 +141,7 @@ export class FeedbacksController {
     }
 
     const updatedLike = await this.feedbacksService.updateLike(likeData);
-    res.sendStatus(HttpStatus.NO_CONTENT)
+    res.sendStatus(HttpStatus.NO_CONTENT);
   }
 
   @Delete(':id')

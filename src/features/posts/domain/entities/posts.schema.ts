@@ -1,12 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model } from 'mongoose';
-import { LikesUserInfoType, LikesCountType } from 'src/infra/likes.types';
-import { CreatePostModel } from './api/models/input.posts.models/create.post.model';
-import { PostType } from './api/models/output.post.models/output.post.models';
+import { LikesCountType, LikesUserInfoType } from 'src/infra/likes.types';
+import { CreatePostModel } from '../../api/models/input.posts.models/create.post.model';
 
 export type PostDocument = HydratedDocument<Post>;
 export type PostModelType = Model<PostDocument> & PostModelStaticType;
-export type PostModelDocumentType = Model<PostDocument>;
+export type PostModelWholeTypes = PostModelType & PostModelMethodsType;
 
 const likesPostInfo = {
   userId: { type: String },
@@ -48,10 +47,15 @@ export class Post {
   @Prop({ type: likesCountInfo })
   likesCountInfo: LikesCountType;
 
+  someMethods(any: string) {
+    if (any === any) any = '10';
+  }
+
   static makeInstance(
     dto: CreatePostModel & { blogId: string; blogName: string },
-  ): PostType {
-    const post = new Post();
+  ): PostDocument {
+    const post = new this();
+
     post.title = dto.title;
     post.shortDescription = dto.shortDescription;
     post.content = dto.content;
@@ -61,16 +65,22 @@ export class Post {
     post.likesUserInfo = [];
     post.likesCountInfo = { likesCount: 0, dislikesCount: 0 };
 
-    return post;
+    return post as PostDocument;
   }
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);
 
-export type PostModelStaticType = {
-  makeInstance(dto: CreatePostModel): PostType;
-};
-
-export const postStaticMethods: PostModelStaticType = {
+export const postStatics = {
   makeInstance: Post.makeInstance,
 };
+
+export const postMethods = {
+  someMethods: Post.prototype.someMethods,
+};
+
+type PostModelStaticType = typeof postStatics;
+type PostModelMethodsType = typeof postMethods;
+
+PostSchema.statics = postStatics;
+PostSchema.methods = postMethods;

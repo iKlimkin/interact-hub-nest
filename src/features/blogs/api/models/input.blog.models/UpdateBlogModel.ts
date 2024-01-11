@@ -1,4 +1,3 @@
-
 export type UpdateBlogModel = {
   /**
    * blog's name

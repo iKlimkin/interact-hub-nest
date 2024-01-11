@@ -1,4 +1,4 @@
-import { Sort, SortDirection } from 'mongodb';
+import { SortDirection } from 'mongodb';
 import { SortingQueryModel } from '../SortingQueryModel';
 
 export type PaginationType = {
@@ -10,19 +10,42 @@ export type PaginationType = {
 
 export const getPagination = async (
   inputData: SortingQueryModel,
+  option?: boolean,
 ): Promise<PaginationType> => {
-  let sortDirection = inputData.sortDirection === 'asc' ? 1 : -1;
-  let pageNumber = inputData.pageNumber
+  const sortDirection: SortDirection =
+    inputData.sortDirection === 'asc' ? 1 : -1;
+  const pageNumber: number = inputData.pageNumber
     ? Math.min(+inputData.pageNumber, 50)
     : 1;
-  let pageSize = inputData.pageSize ? Math.min(+inputData.pageSize, 50) : 10;
-  let sortBy = inputData.sortBy ? inputData.sortBy : 'createdAt';
+  const pageSize: number = inputData.pageSize
+    ? Math.min(+inputData.pageSize, 50)
+    : 10;
+  const skip: number = (pageNumber - 1) * pageSize;
 
-  const skip = (pageNumber - 1) * pageSize;
+  const getDefaultSort = (sortBy: string): Record<string, SortDirection> => ({
+    [sortBy]: sortDirection,
+  });
 
-  const sort: Record<string, SortDirection> = {
-    [sortBy]: sortDirection as SortDirection,
+  const getUserAccountSort = (
+    sortBy: string,
+  ): Record<string, SortDirection> => {
+    const sortingKeyMap: Record<string, string> = {
+      login: 'accountData.login',
+      email: 'accountData.email',
+    };
+
+    const sortingKey: string = sortingKeyMap[sortBy] || `accountData.createdAt`;
+
+    return {
+      [sortingKey]: sortDirection,
+    };
   };
+
+  const sortBy: string = inputData.sortBy || 'createdAt';
+
+  const sort: Record<string, SortDirection> = option
+    ? getUserAccountSort(sortBy)
+    : getDefaultSort(sortBy);
 
   return {
     sort,

@@ -1,10 +1,10 @@
 // import { apiRepository } from "../repositories/apiRepository"
 
-// export const sessions = {  
+// export const sessions = {
 
 //     connect: async () => {
 //         await apiRepository.ttlApiLogsCleaner()
-      
+
 //     }
-    
+
 // }
