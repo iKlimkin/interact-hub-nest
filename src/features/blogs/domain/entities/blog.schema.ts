@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model } from 'mongoose';
 import { CreateBlogModelType } from '../../api/models/input.blog.models/create.blog.model';
+import { validateOrReject } from 'class-validator';
 
 export type BlogDocument = HydratedDocument<Blog>;
 export type BlogModelType = Model<BlogDocument> & StaticsType;
@@ -24,7 +25,7 @@ export class Blog {
   @Prop({ required: true, type: Boolean, default: false })
   isMembership: boolean;
 
-  static makeInstance(dto: CreateBlogModelType): BlogDocument {
+  static async makeInstance(dto: CreateBlogModelType): Promise<BlogDocument> {
     const blog = new this() as BlogDocument;
     (blog.name = dto.name),
       (blog.description = dto.description),
@@ -32,6 +33,7 @@ export class Blog {
       (blog.createdAt = new Date().toISOString()),
       (blog.isMembership = false);
 
+    await validateOrReject(blog)
     return blog;
   }
 }

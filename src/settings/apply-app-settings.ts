@@ -13,7 +13,7 @@ type CustomError = {
 export const setAppPipes = (app: INestApplication) => {
   app.useGlobalPipes(
     new ValidationPipe({
-      transform: true,
+      transform: true, // трансформация по типам
       stopAtFirstError: true,
       exceptionFactory(errors: ValidationError[]) {
         const customErrors: CustomError[] = [];
@@ -22,9 +22,9 @@ export const setAppPipes = (app: INestApplication) => {
           const constraints = e.constraints;
 
           if (constraints) {
-            const constrainKeys = Object.keys(constraints);
+            const constraintKeys = Object.keys(constraints);
 
-            constrainKeys.forEach((cKey: string) => {
+            constraintKeys.forEach((cKey: string) => {
               const msg = constraints[cKey];
 
               customErrors.push({ key: e.property, message: msg });

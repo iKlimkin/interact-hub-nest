@@ -101,13 +101,8 @@ export class BlogsController {
   // @UseGuards(AuthBasicGuard)
   @HttpCode(HttpStatus.CREATED)
   async createBlog(@Body() body: InputBlogModel): Promise<BlogViewModel> {
-    const { name, description, websiteUrl } = body;
 
-    const createdBlog = await this.blogsService.createBlog({
-      name,
-      description,
-      websiteUrl,
-    });
+    const createdBlog = await this.blogsService.createBlog(body);
 
     const newlyCreatedBlog = await this.blogsQueryRepo.getBlogById(
       createdBlog.id,
