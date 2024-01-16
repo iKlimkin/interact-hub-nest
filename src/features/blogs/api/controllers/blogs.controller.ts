@@ -16,7 +16,7 @@ import {
 import { Response } from 'express';
 import { PostsService } from 'src/features/posts/application/posts.service';
 import { PostsQueryRepository } from 'src/features/posts/api/query-repositories/posts.query.repo';
-import { AuthBasicGuard } from 'src/infra/guards/auth.guard';
+import { AuthBasicGuard } from 'src/infra/guards/basic.guard';
 import { SortingQueryModel } from 'src/infra/SortingQueryModel';
 import { PaginationViewModel } from 'src/infra/paginationViewModel';
 import { BlogsService } from '../../application/blogs.service';
@@ -98,10 +98,9 @@ export class BlogsController {
   }
 
   @Post()
-  // @UseGuards(AuthBasicGuard)
+  @UseGuards(AuthBasicGuard)
   @HttpCode(HttpStatus.CREATED)
   async createBlog(@Body() body: InputBlogModel): Promise<BlogViewModel> {
-
     const createdBlog = await this.blogsService.createBlog(body);
 
     const newlyCreatedBlog = await this.blogsQueryRepo.getBlogById(
@@ -116,7 +115,7 @@ export class BlogsController {
   }
 
   @Post(':id/posts')
-  // @UseGuards(AuthBasicGuard)
+  @UseGuards(AuthBasicGuard)
   @HttpCode(HttpStatus.CREATED)
   async createPostByBlogId(
     @Param('id') blogId: string,
@@ -143,7 +142,7 @@ export class BlogsController {
   }
 
   @Put(':id')
-  // @UseGuards(AuthBasicGuard)
+  @UseGuards(AuthBasicGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateBlog(@Param('id') blogId: string, @Body() body: InputBlogModel) {
     const { name, description, websiteUrl } = body;
@@ -160,7 +159,7 @@ export class BlogsController {
   }
 
   @Delete(':id')
-  // @UseGuards(AuthBasicGuard)
+  @UseGuards(AuthBasicGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(@Param('id') blogId: string) {
     const deleteBlog = await this.blogsService.deleteBlog(blogId);

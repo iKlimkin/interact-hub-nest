@@ -8,7 +8,7 @@ import {
   UserAccount,
   UserAccountModelType,
 } from '../../domain/entities/userAccount.schema';
-import { getUserViewModel } from '../models/userAdmin.view.models/getUserAdmin.vie.model';
+import { getUserViewModel } from '../models/userAdmin.view.models/getUserAdmin.view.model';
 import { UserViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
 
 @Injectable()

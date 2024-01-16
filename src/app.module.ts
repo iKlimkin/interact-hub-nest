@@ -1,16 +1,18 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import settings from 'src/infra/settings/app.settings';
 import { controllers } from './settings/app-controllers';
 import { providers } from './settings/app-providers';
 import { mongooseSchemas } from './settings/mongoose-schemas';
-import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './features/auth/auth.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     MongooseModule.forRoot(settings.MONGO_URL),
     MongooseModule.forFeature(mongooseSchemas),
+    AuthModule
   ],
   controllers,
   providers,

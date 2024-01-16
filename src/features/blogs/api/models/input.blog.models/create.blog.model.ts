@@ -5,7 +5,7 @@ import {
   urlLength,
   urlMatching,
 } from 'src/infra/validation.constants';
-import { iSValidString } from '../../../../../infra/decorators/is-valid-string';
+import { iSValidString } from '../../../../../infra/decorators/transform/is-valid-string';
 
 export type CreateBlogModelType = {
   /**

@@ -2,6 +2,7 @@ import {
   UserAccount,
   UserAccountSchema,
 } from 'src/features/admin/domain/entities/userAccount.schema';
+import { TempUserAccount, TempUserAccountSchema } from 'src/features/auth/domain/entities/temp-account.schema';
 import {
   Blog,
   BlogSchema,
@@ -40,4 +41,10 @@ export const mongooseSchemas = [
     name: Security.name,
     schema: SecuritySchema,
   },
+  {
+    name: TempUserAccount.name,
+    schema: TempUserAccountSchema,
+  },
 ];
+
+

@@ -20,7 +20,7 @@ export class AdminUserService {
 
   async createUser(
     createUser: AuthUserType,
-  ): Promise<UserAccountDocument | null> {
+  ): Promise<UserAccountDocument> {
     const { email, login, password } = createUser;
 
     const { passwordSalt, passwordHash } =

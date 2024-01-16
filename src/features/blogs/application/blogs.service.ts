@@ -2,27 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { OutputId } from 'src/infra/likes.types';
 import { UpdateBlogModel } from '../api/models/input.blog.models/UpdateBlogModel';
-import {
-  CreateBlogModelType,
-  InputBlogModel,
-} from '../api/models/input.blog.models/create.blog.model';
+import { InputBlogModel } from '../api/models/input.blog.models/create.blog.model';
 import { Blog, BlogModelType } from '../domain/entities/blog.schema';
 import { BlogsRepository } from '../infrastructure/blogs.repository';
-import { validateOrReject } from 'class-validator';
-
-const validateOrRejectModel = async (
-  model: InputBlogModel,
-  ctor: { new (): InputBlogModel },
-) => {
-  if (model! instanceof ctor) {
-    throw new Error('Incorrect input blog data');
-  }
-  try {
-    await validateOrReject(model);
-  } catch (error) {
-    throw new Error(error);
-  }
-};
+import { validateOrRejectModel } from './validate-model.helper';
 
 @Injectable()
 export class BlogsService {
@@ -33,7 +16,7 @@ export class BlogsService {
 
   async createBlog(inputModel: InputBlogModel): Promise<OutputId> {
     await validateOrRejectModel(inputModel, InputBlogModel);
-    
+
     const smartBlogModel = await this.BlogModel.makeInstance(inputModel);
 
     return await this.blogsRepository.save(smartBlogModel);

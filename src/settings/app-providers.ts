@@ -16,36 +16,90 @@ import { SecurityQueryRepo } from 'src/features/security/api/query-repositories/
 import { SecurityRepository } from 'src/features/security/infrastructure/security.repository';
 import { BcryptAdapter } from 'src/infra/adapters/bcrypt-adapter';
 import { EmailAdapter } from 'src/infra/adapters/email-adapter';
-import { JwtService } from 'src/infra/application/jwt-service';
 import { TestDatabaseRepo } from 'src/mock-data/test.db';
+import { BlogIdValidationPipe } from 'src/infra/pipes/blogId-validate.pipe';
+import { BlogIdExistConstraint } from 'src/infra/decorators/validate/valid-blogId';
+import { Provider } from '@nestjs/common';
+import { AuthQueryRepository } from 'src/features/auth/api/query-repositories/auth-query-repo';
+import { AuthRepository } from 'src/features/auth/infrastructure/authUsers-repository';
+import { EmailManager } from 'src/infra/application/managers/email-manager';
+import { AuthUserService } from 'src/features/auth/application/auth.service';
+import { AuthService } from 'src/infra/application/auth-service';
+import { AuthModule } from 'src/features/auth/auth.module';
+
+
+
+const blogsProviders: Provider[] = [
+  BlogsService,
+  BlogsQueryRepo,
+  BlogsRepository,
+];
+
+const postsProviders: Provider[] = [
+  PostsService,
+  PostsQueryRepository,
+  PostsRepository,
+];
+
+const feedbacksProviders: Provider[] = [
+  FeedbacksService,
+  FeedbacksQueryRepository,
+  FeedbacksRepository,
+];
+
+const securitiesProviders: Provider[] = [
+  // SecurityService,
+  // SecurityRepository,
+  SecurityQueryRepo,
+];
+
 
 export const providers = [
   AppService,
 
-  JwtService,
+  ...blogsProviders,
 
-  BcryptAdapter,
-  EmailAdapter,
+  ...postsProviders,
 
-  BlogsService,
-  BlogsQueryRepo,
-  BlogsRepository,
+  BlogIdExistConstraint,
 
-  PostsService,
-  PostsQueryRepository,
-  PostsRepository,
+  ...feedbacksProviders,
 
-  AdminUserService,
-  UsersQueryRepository,
-  UsersRepository,
+  ...securitiesProviders,
 
-  FeedbacksService,
-  FeedbacksQueryRepository,
-  FeedbacksRepository,
-
-  SecurityService,
-  SecurityRepository,
-  SecurityQueryRepo,
 
   TestDatabaseRepo,
 ];
+
+// providers: [
+//   AppService,
+
+//   JwtService,
+
+//   BcryptAdapter,
+//   EmailAdapter,
+
+//   BlogsService,
+// BlogsQueryRepo,
+// BlogsRepository,
+
+// PostsService,
+// PostsQueryRepository,
+// PostsRepository,
+
+//   BlogIdExistConstraint,
+
+//   AdminUserService,
+// UsersQueryRepository,
+// UsersRepository,,
+
+// FeedbacksService,
+// FeedbacksQueryRepository,
+// FeedbacksRepository,
+
+// SecurityService,
+// SecurityRepository,
+// SecurityQueryRepo,
+
+//   TestDatabaseRepo,
+// ],

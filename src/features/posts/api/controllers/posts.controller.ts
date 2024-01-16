@@ -13,6 +13,7 @@ import {
   Query,
   Res,
   UseGuards,
+  UsePipes,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { UsersQueryRepository } from 'src/features/admin/api/query-repositories/users.query.repo';
@@ -21,7 +22,7 @@ import { InputContentType } from 'src/features/comments/api/models/input.comment
 import { FeedbacksService } from 'src/features/comments/application/feedbacks.service';
 import { FeedbacksQueryRepository } from 'src/features/comments/api/query-repositories/feedbacks.query.repository';
 import { SortingQueryModel } from 'src/infra/SortingQueryModel';
-import { AuthBasicGuard } from 'src/infra/guards/auth.guard';
+import { AuthBasicGuard } from 'src/infra/guards/basic.guard';
 import { InputLikeStatus, likesStatus } from 'src/infra/likes.types';
 import { PaginationViewModel } from 'src/infra/paginationViewModel';
 import { getStatusCounting } from 'src/infra/utils/statusCounter';
@@ -29,6 +30,8 @@ import { PostsService } from '../../application/posts.service';
 import { PostsQueryRepository } from '../query-repositories/posts.query.repo';
 import { InputPostModel } from '../models/input.posts.models/create.post.model';
 import { PostViewModel } from '../models/post.view.models/PostViewModel';
+import { BlogIdValidationPipe } from 'src/infra/pipes/blogId-validate.pipe';
+import { NumberPipe } from 'src/infra/pipes/number.pipe';
 
 @Controller('posts')
 export class PostsController {
@@ -68,7 +71,7 @@ export class PostsController {
   @HttpCode(HttpStatus.OK)
   async getPostById(
     @Param('id') postId: string,
-    @Res() res: Response<PostViewModel>,
+    @Res({ passthrough: true }) res: Response<PostViewModel>,
   ) {
     const { userId } = res.locals;
 
@@ -78,7 +81,7 @@ export class PostsController {
       throw new NotFoundException('post not found');
     }
 
-    res.send(foundPost);
+    return foundPost;
   }
 
   @Put(':id/like-status')
@@ -197,13 +200,13 @@ export class PostsController {
   }
 
   @Post()
-  // @UseGuards(AuthBasicGuard)
+  @UseGuards(AuthBasicGuard)
   @HttpCode(HttpStatus.CREATED)
   async createPost(
-    @Body() body: InputPostModel,
+    @Body() createPostDto: InputPostModel,
     @Res() res: Response<PostViewModel>,
   ) {
-    const { title, shortDescription, content, blogId } = body;
+    const { title, shortDescription, content, blogId } = createPostDto;
 
     const createdPost = await this.postsService.createPost({
       title,
@@ -230,7 +233,7 @@ export class PostsController {
   }
 
   @Put(':id')
-  // @UseGuards(AuthBasicGuard)
+  @UseGuards(AuthBasicGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePost(@Param('id') postId: string, @Body() body: InputPostModel) {
     const { title, shortDescription, content, blogId } = body;
@@ -247,7 +250,7 @@ export class PostsController {
   }
 
   @Delete(':id')
-  // @UseGuards(AuthBasicGuard)
+  @UseGuards(AuthBasicGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePost(@Param('id') postId: string) {
     const deletedPost = await this.postsService.deletePost(postId);

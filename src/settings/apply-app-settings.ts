@@ -3,37 +3,64 @@ import {
   INestApplication,
   ValidationPipe,
 } from '@nestjs/common';
-import { ValidationError } from 'class-validator';
+import { ValidationError, useContainer } from 'class-validator';
+import { AppModule } from 'src/app.module';
+import { HttpExceptionFilter } from 'src/infra/exception-filters/exception.filter';
 
-type CustomError = {
-  key: string;
-  message: string;
+export const applyAppSettings = (app: INestApplication) => {
+  // Для внедрения зависимостей в validator constraint
+  // {fallbackOnErrors: true} требуется, поскольку Nest генерирует исключение,
+  // когда DI не имеет необходимого класса.
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
+
+  // Применение глобальных Interceptors
+  // app.useGlobalInterceptors()
+
+  // Применение глобальных Guards
+  //  app.useGlobalGuards(new AuthGuard());
+
+  // Включение CORS для разрешения запросов от всех доменов
+  app.enableCors();
+
+  setAppPipes(app);
+  
+  setAppExceptionsFilters(app);
 };
 
-export const setAppPipes = (app: INestApplication) => {
+type CustomError = {
+  message: string;
+  field: string;
+};
+
+const setAppPipes = (app: INestApplication) => {
   app.useGlobalPipes(
     new ValidationPipe({
-      transform: true, // трансформация по типам
+      transform: true,
       stopAtFirstError: true,
       exceptionFactory(errors: ValidationError[]) {
         const customErrors: CustomError[] = [];
-
-        errors.forEach((e: ValidationError) => {
-          const constraints = e.constraints;
-
+        
+        errors.forEach((errors: ValidationError) => {
+          const constraints = errors.constraints;
+     
           if (constraints) {
             const constraintKeys = Object.keys(constraints);
 
             constraintKeys.forEach((cKey: string) => {
-              const msg = constraints[cKey];
+              const message = constraints[cKey];
 
-              customErrors.push({ key: e.property, message: msg });
+              customErrors.push({ message, field: errors.property });
             });
           }
         });
-
+        
+        
         throw new BadRequestException(customErrors);
       },
     }),
   );
+};
+
+const setAppExceptionsFilters = (app: INestApplication) => {
+  app.useGlobalFilters(new HttpExceptionFilter());
 };

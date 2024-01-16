@@ -60,7 +60,7 @@ export class UserAccount {
     userAccount.emailConfirmation = {
       confirmationCode: uuidv4(),
       expirationDate: add(new Date(), { hours: 1, minutes: 15 }).toISOString(),
-      isConfirmed: dto.isConfirmed,
+      isConfirmed: dto.isConfirmed || false,
     };
 
     return userAccount;

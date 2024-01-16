@@ -4,16 +4,21 @@ import {
   ExceptionFilter,
   GoneException,
   HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+
+type errorsMessages = {
+  errorsMessages: string[];
+};
 
 @Catch(GoneException)
 export class ErrorsExceptionFilter implements ExceptionFilter {
   catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    console.log({response});
-    
+    const request = ctx.getRequest<Request>();
+
     if (process.env.environment !== 'product') {
       response
         .status(500)
@@ -31,15 +36,18 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
-
-    if (status === 400) {
-      let errorResponse: { errors: string[] } = {
-        errors: [],
+    
+    if (status === HttpStatus.BAD_REQUEST) {
+      let errorResponse: any = {
+        errorsMessages: [],
       };
-
-      const responseBody: any = exception.getResponse();
-
-      responseBody.message.forEach((m: string) => errorResponse.errors.push(m));
+      const { message }: any = exception.getResponse();
+      
+      if (Array.isArray(message)) {
+        message.forEach((m: string) => errorResponse.errorsMessages.push(m));
+      } else {
+        errorResponse.errorsMessages.push({ message });
+      }
 
       response.status(status).json(errorResponse);
     } else {

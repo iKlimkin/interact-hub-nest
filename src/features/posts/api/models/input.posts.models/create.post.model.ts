@@ -1,4 +1,5 @@
-import { iSValidString } from 'src/infra/decorators/is-valid-string';
+import { iSValidString } from 'src/infra/decorators/transform/is-valid-string';
+import { BlogIdIsExist } from 'src/infra/decorators/validate/valid-blogId';
 import {
   blogIdLength,
   contentLength,
@@ -53,5 +54,6 @@ export class InputPostModel {
    * search blog id
    */
   @iSValidString(blogIdLength)
+  @BlogIdIsExist('blogId doesn\'t exist')
   blogId: string;
 }

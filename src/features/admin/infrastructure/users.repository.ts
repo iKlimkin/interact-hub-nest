@@ -17,20 +17,20 @@ export class UsersRepository {
     private UserAccountModel: UserAccountModelType,
   ) {}
 
-  async create(
-    userAdminDto: Readonly<UserAccountType>,
-  ): Promise<UserAccountDocument> {
-    try {
-      const createdUserAdmin = await this.UserAccountModel.create(userAdminDto);
+  // async create(
+  //   userAdminDto: Readonly<UserAccountType>,
+  // ): Promise<UserAccountDocument> {
+  //   try {
+  //     const createdUserAdmin = await this.UserAccountModel.create(userAdminDto);
 
-      return createdUserAdmin;
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Database fails operate with create user',
-        error,
-      );
-    }
-  }
+  //     return createdUserAdmin;
+  //   } catch (error) {
+  //     throw new InternalServerErrorException(
+  //       'Database fails operate with create user',
+  //       error,
+  //     );
+  //   }
+  // }
 
   async save(
     userAdminModel: UserAccountDocument,

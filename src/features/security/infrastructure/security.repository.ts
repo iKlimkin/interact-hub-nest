@@ -1,9 +1,9 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { OutputId } from 'src/infra/likes.types';
-import { SecurityDeviceType } from '../api/models/security.view.models/security.view.types';
 import {
   Security,
+  SecurityDocument,
   SecurityModelType,
 } from '../domain/entities/security.schema';
 
@@ -13,13 +13,13 @@ export class SecurityRepository {
     @InjectModel(Security.name) private SecurityModel: SecurityModelType,
   ) {}
   async addDeviceSession(
-    session: Readonly<SecurityDeviceType>,
-  ): Promise<OutputId | null> {
+    sessionModel: Readonly<SecurityDocument>,
+  ): Promise<OutputId> {
     try {
-      const createdSession = await this.SecurityModel.create();
+      const createdSession = await sessionModel.save();
 
       return {
-        id: createdSession[0]._id.toString(),
+        id: createdSession._id.toString(),
       };
     } catch (error) {
       throw new InternalServerErrorException(

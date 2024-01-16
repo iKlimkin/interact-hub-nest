@@ -1,5 +1,5 @@
 import { Matches } from 'class-validator';
-import { iSValidString } from 'src/infra/decorators/is-valid-string';
+import { iSValidString } from 'src/infra/decorators/transform/is-valid-string';
 import {
   nameLength,
   passwordLength,
@@ -13,7 +13,7 @@ export type CreateUserDto = {
   email: string;
   passwordHash: string;
   passwordSalt: string;
-  isConfirmed: boolean;
+  isConfirmed?: boolean;
 };
 
 export class InputUserModel {

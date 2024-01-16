@@ -2,7 +2,7 @@ import { Details } from 'express-useragent';
 import { JwtPayload } from 'jsonwebtoken';
 
 export type InputSessionData = {
-  userInfo: JwtPayload;
+  userPayload: JwtPayload;
   ip: string;
   browser: string;
   deviceType: string;

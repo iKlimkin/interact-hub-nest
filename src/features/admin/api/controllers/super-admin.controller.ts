@@ -10,21 +10,20 @@ import {
   Param,
   Post,
   Query,
-  Res,
   UseGuards,
 } from '@nestjs/common';
-import { Response } from 'express';
 import { SortingQueryModel } from 'src/infra/SortingQueryModel';
-import { AuthBasicGuard } from 'src/infra/guards/auth.guard';
+import { AuthBasicGuard } from 'src/infra/guards/basic.guard';
 import { PaginationViewModel } from 'src/infra/paginationViewModel';
 import { AdminUserService } from '../../application/user.admins.service';
-import { UsersQueryRepository } from '../query-repositories/users.query.repo';
 import { InputUserModel } from '../models/create.userAdmin.model';
 import { UserViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
+import { UsersQueryRepository } from '../query-repositories/users.query.repo';
+import { BasicSAAuthGuard } from 'src/features/auth/infrastructure/guards/basic-auth.guard';
 
-// @UseGuards(AuthBasicGuard)
+@UseGuards(BasicSAAuthGuard)
 @Controller('users')
-export class AdminUserController {
+export class SuperAdminsController {
   constructor(
     private usersQueryRepo: UsersQueryRepository,
     private usersService: AdminUserService,
@@ -78,7 +77,7 @@ export class AdminUserController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteuser(@Param('id') userId: string) {
+  async deleteuser(@Param('id') userId: string): Promise<void> {
     const deletedUser = await this.usersService.deleteUser(userId);
 
     if (!deletedUser) {

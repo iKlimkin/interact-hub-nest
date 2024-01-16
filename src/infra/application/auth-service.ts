@@ -1,0 +1,94 @@
+import { v4 as uuidv4 } from 'uuid';
+import {
+  JwtTokens,
+  VerifyTokensType,
+  TokensMeta,
+  Payload,
+} from 'src/features/auth/api/models/jwt.models';
+import { Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { jwtConstants } from 'src/features/auth/infrastructure/guards/constants';
+
+@Injectable()
+export class AuthService {
+  constructor(private jwtService: JwtService) {}
+  // login(userId: string): JwtTokens {
+  //   const deviceId = uuidv4();
+  //   const payload = { userId, deviceId };
+
+  //   const accessToken = this.jwtService.sign(payload, {
+  //     secret: jwtConstants.jwt_access_secret,
+  //     expiresIn: '10m',
+  //   });
+
+  //   const refreshToken = this.jwtService.sign(payload, {
+  //     secret: jwtConstants.refresh_secret,
+  //     expiresIn: '20m',
+  //   });
+
+  //   return {
+  //     refreshToken,
+  //     accessToken,
+  //   };
+  // }
+
+  async getTokens(userId: string) {
+    const deviceId = uuidv4();
+    const payload = { userId, deviceId };
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        secret: jwtConstants.jwt_access_secret,
+        expiresIn: '15m',
+      }),
+      this.jwtService.signAsync(payload, {
+        secret: jwtConstants.refresh_secret,
+        expiresIn: '1d',
+      }),
+    ]);
+
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  async getUserInfoByToken(
+    inputToken: VerifyTokensType,
+  ): Promise<TokensMeta | null> {
+    try {
+      const decodedData = await this.jwtService.verifyAsync(inputToken.token);
+      return decodedData as TokensMeta;
+    } catch (err) {
+      console.error(`Troubleshoots with ${inputToken.tokenType}: `, err);
+      return null;
+    }
+  }
+
+  getUserPayloadByToken(token: string): Payload | null {
+    try {
+      return this.jwtService.decode(token) as Payload;
+    } catch (error) {
+      console.error(`Troubleshoots with getting user's payload`, error);
+      return null;
+    }
+  }
+
+  updateUserTokens(userId: string, deviceId: string): JwtTokens {
+    const accessToken = this.jwtService.sign(
+      { userId, deviceId },
+      {
+        secret: jwtConstants.jwt_access_secret,
+        expiresIn: '10m',
+      },
+    );
+    const refreshToken = this.jwtService.sign(
+      { userId, deviceId },
+      { secret: jwtConstants.refresh_secret, expiresIn: '20m' },
+    );
+
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
+}

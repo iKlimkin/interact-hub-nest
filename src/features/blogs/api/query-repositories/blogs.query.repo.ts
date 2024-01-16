@@ -38,7 +38,8 @@ export class BlogsQueryRepo {
 
       return getBlogViewModel(foundedBlog);
     } catch (error) {
-      throw new InternalServerErrorException('Database fails operation');
+      console.error(error)
+      return null
     }
   }
 

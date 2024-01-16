@@ -1,33 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import session from 'express-session';
 import { OutputId } from 'src/infra/likes.types';
 import { InputSessionData } from '../api/models/security-input.models/create.session.type';
-import { Security } from '../domain/entities/security.schema';
+import {
+  Security,
+  SecurityModelType,
+} from '../domain/entities/security.schema';
 import { SecurityRepository } from '../infrastructure/security.repository';
+import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class SecurityService {
-  constructor(private securityRepository: SecurityRepository) {}
+  constructor(
+    @InjectModel(Security.name) private SecurityModel: SecurityModelType,
+    private securityRepository: SecurityRepository,
+  ) {}
 
-  async createUserSession(
-    inputData: InputSessionData,
-  ): Promise<OutputId | null> {
-    const sessionDto = Security.makeInstance(inputData);
+  async createUserSession(inputData: InputSessionData): Promise<OutputId> {
+    const sessionModel = this.SecurityModel.makeInstance(inputData);
 
-    // const session = new SessionDBType(
-    //   inputData.ip,
-    //   `Device type: ${inputData.deviceType}, Application: ${inputData.browser}`,
-    //   inputData.userId,
-    //   deviceId,
-    //   inputData.refreshToken,
-    //   new Date(iat! * 1000).toISOString(),
-    //   new Date(exp! * 1000).toISOString()
-    // );
-
-    const createdSession =
-      await this.securityRepository.addDeviceSession(sessionDto);
-
-    return createdSession;
+    return await this.securityRepository.addDeviceSession(sessionModel);
   }
 
   async updateIssuedToken(

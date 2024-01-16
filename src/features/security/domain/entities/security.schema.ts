@@ -26,15 +26,15 @@ export class Security extends Document implements SecurityDeviceType {
   @Prop({ required: true })
   expirationDate: string;
 
-  static makeInstance(dto: InputSessionData): SecurityDeviceType {
-    const security = new Security();
+  static makeInstance(dto: InputSessionData): SecurityDocument {
+    const security = new this() as SecurityDocument;
     security.ip = dto.ip;
     security.title = `Device type: ${dto.deviceType}, Application: ${dto.browser}`;
     security.userId = dto.userId;
-    security.deviceId = dto.userInfo.deviceId;
+    security.deviceId = dto.userPayload.deviceId;
     security.refreshToken = dto.refreshToken;
-    security.issuedAt = new Date(dto.userInfo.iat! * 1000).toISOString();
-    security.expirationDate = new Date(dto.userInfo.exp! * 1000).toISOString();
+    security.issuedAt = new Date(dto.userPayload.iat! * 1000).toISOString();
+    security.expirationDate = new Date(dto.userPayload.exp! * 1000).toISOString();
 
     return security;
   }
@@ -47,10 +47,11 @@ export type SecurityModelType = Model<SecurityDocument> &
   SecurityModelStaticType;
 export type SecurityModelDocumentType = Model<SecurityDocument>;
 
-export type SecurityModelStaticType = {
-  makeInstance(dto: InputSessionData): SecurityDeviceType;
-};
 
-export const SecurityStaticMethods: SecurityModelStaticType = {
+export const SecurityStaticMethods = {
   makeInstance: Security.makeInstance,
 };
+
+SecuritySchema.statics = SecurityStaticMethods
+
+type SecurityModelStaticType = typeof SecurityStaticMethods

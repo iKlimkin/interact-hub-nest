@@ -1,98 +1,124 @@
-import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
-import { AuthUserType } from '../models/auth.output.models/auth.user.types';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  NotFoundException,
+  Post,
+  Req,
+  Res,
+  UnauthorizedException,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
+import {
+  AuthUserType,
+  InputCredentialsModel,
+  LoginCredentials,
+} from '../models/auth.output.models/auth.user.types';
 import { UsersQueryRepository } from 'src/features/admin/api/query-repositories/users.query.repo';
+import { Response } from 'express';
 import {
   InputEmail,
   PasswordRecoveryType,
 } from '../models/auth-input.models.ts/input-password-rec.type';
+import { AuthQueryRepository } from '../query-repositories/auth-query-repo';
+import { SecurityService } from 'src/features/security/application/security.service';
+import { getDeviceInfo } from 'src/infra/utils/deviceHandler';
+import { AuthUserService } from '../../application/auth.service';
+import { LocalAuthGuard } from '../../infrastructure/guards/local-auth.guard';
+import { UserAgent } from 'express-useragent';
+import { JwtAuthGuard } from '../../infrastructure/guards/jwt-auth.guard';
+import { AuthService } from 'src/infra/application/auth-service';
+import { CurrentUserInfo } from '../../infrastructure/decorators/current-user-id.decorator';
+import { RefreshTokenGuard } from '../../infrastructure/guards/refreshToken.guard';
+import { GetClientInfo } from '../../infrastructure/decorators/client-ip.decorator';
+
+type ClientInfo = {
+  ip: string;
+  userAgentInfo: any;
+};
+
+export type UserInfoType = {
+  userId: string;
+  deviceId: string;
+};
 
 @Controller('auth')
 export class AuthController {
   constructor(
-    // private authQueryRepository: AuthQueryRepository,
+    private authQueryRepository: AuthQueryRepository,
     private usersQueryRepo: UsersQueryRepository,
-    // private authUserService: AuthUserService,
-    // private securityService: SecurityService
+    private authUserService: AuthUserService,
+    private securityService: SecurityService,
+    private authService: AuthService,
   ) {}
 
-  //   @Post('login')
-  //   async login(
-  //     @Body() body: LoginCredentials,
-  //     @Req() req: Request,
-  //   @Res() res: Response,
-  //   ) {
-  //     const { loginOrEmail, password } = body;
+  @UseGuards(LocalAuthGuard)
+  @Post('login')
+  async login(
+    @CurrentUserInfo() userInfo: UserInfoType,
+    @GetClientInfo() clientInfo: ClientInfo,
+    @Res({ passthrough: true }) res: Response,
+    @Body() body: InputCredentialsModel,
+  ) {
+   
+    
+    const { accessToken, refreshToken } =
+      await this.authService.getTokens(userInfo.userId);
 
-  //     const forwardedIpsStr =
-  //       req.headers("x-forwarded-for") || req.socket.remoteAddress || "";
-  //     const ip = forwardedIpsStr.split(",")[0];
+    const userPayload = this.authService.getUserPayloadByToken(refreshToken);
+    if (!userPayload) throw new Error();
 
-  //     let userAgentInfo = req.useragent;
+    const { browser, deviceType } = getDeviceInfo(clientInfo.userAgentInfo);
 
-  //     const authResult = await this.authUserService.checkCredentials({
-  //       loginOrEmail,
-  //       password,
-  //     });
+    const createSessionData = {
+      userPayload,
+      browser,
+      deviceType,
+      ip: clientInfo.ip,
+      userAgentInfo: clientInfo.userAgentInfo,
+      userId: userInfo.userId,
+      refreshToken,
+    };
 
-  //     if (!authResult.data) {
-  //       const { status, errorsMessages } = handleAuthResult(authResult);
-  //       res.status(status).send({ errorsMessages });
-  //       return;
-  //     }
+    await this.securityService.createUserSession(createSessionData);
 
-  //     const { id: userId } = authResult.data;
+    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
 
-  //     const { accessToken, refreshToken } = jwtService.createJWT(userId);
+    return { accessToken }
+  }
 
-  //     const userInfo = jwtService.getUserPayloadByToken(refreshToken);
+  @UseGuards(RefreshTokenGuard)
+  @Post('refresh-token')
+    async refreshToken(
+    @CurrentUserInfo() userInfo: UserInfoType,
+    @Res({ passthrough: true }) res: Response,
+      ) {
+      const { userId, deviceId } = userInfo
 
-  //     const { browser, deviceType } = getDeviceInfo(userAgentInfo);
+      const { accessToken, refreshToken } = this.authService.updateUserTokens(
+        userId,
+        deviceId
+      );
 
-  //     const createSessionData = {
-  //       userInfo: userInfo!,
-  //       browser,
-  //       deviceType,
-  //       ip,
-  //       userAgentInfo,
-  //       userId,
-  //       refreshToken,
-  //     };
+      const userInfoAfterRefresh = this.authService.getUserPayloadByToken(refreshToken);
 
-  //     await this.securityService.createUserSession(createSessionData);
+      const issuedAt = new Date(userInfoAfterRefresh!.iat * 1000).toISOString();
 
-  //     res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true });
+      await this.securityService.updateIssuedToken(deviceId, issuedAt);
 
-  //     res.send({ accessToken });
-  //   }
-
-  //   async refreshToken(req: Request, res: Response) {
-  //     const { userId, deviceId } = res.locals;
-
-  //     const { accessToken, refreshToken } = jwtService.updateUserTokens(
-  //       userId,
-  //       deviceId
-  //     );
-
-  //     const userInfoAfterRefresh = jwtService.getUserPayloadByToken(refreshToken);
-
-  //     if (!userInfoAfterRefresh) {
-  //       res.sendStatus(HTTP_STATUSES.CONFLICT_409);
-  //       return;
-  //     }
-
-  //     const issuedAt = new Date(userInfoAfterRefresh.iat * 1000).toISOString();
-
-  //     await this.securityService.updateIssuedToken(deviceId, issuedAt);
-
-  //     res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true });
-  //     res.send({ accessToken });
-  //   }
+      res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true });
+      res.send({ accessToken });
+    }
 
   // @Post('new-password')
   // async newPassword(@Body() body: PasswordRecoveryType, @Res() res: Response) {
   //   const { newPassword, recoveryCode } = body;
 
-  //   const updatedPassword = await this.authUserService.updatePassword({
+  //   const updatedPassword = await this.AuthUserService.updatePassword({
   //     newPassword,
   //     recoveryCode,
   //   });
@@ -116,7 +142,7 @@ export class AuthController {
 
   //   if (!foundUserAccount) {
   //     const codeForNonExistentUser =
-  //       await this.authUserService.createTemporaryUserAccount(email);
+  //       await this.AuthUserService.createTemporaryUserAccount(email);
 
   //     if (!codeForNonExistentUser.data) {
   //       const { status, errorsMessages } = handleAuthResult(
@@ -131,7 +157,7 @@ export class AuthController {
   //   }
 
   //   const recoveredPassword =
-  //     await this.authUserService.passwordRecovery(email);
+  //     await this.AuthUserService.passwordRecovery(email);
 
   //   if (!recoveredPassword.data) {
   //     const { status, errorsMessages } = handleAuthResult(recoveredPassword);
@@ -166,7 +192,7 @@ export class AuthController {
   //     }
   //   }
 
-  //   const user = await this.authUserService.createUser({
+  //   const user = await this.AuthUserService.createUser({
   //     login,
   //     email,
   //     password,
@@ -187,7 +213,7 @@ export class AuthController {
   // ) {
   //   const { code } = req.body;
 
-  //   const confirmedUser = await this.authUserService.confirmEmail(code);
+  //   const confirmedUser = await this.AuthUserService.confirmEmail(code);
 
   //   if (!confirmedUser.data) {
   //     const errors = makeErrorsMessages('code');
@@ -217,7 +243,7 @@ export class AuthController {
   //   }
 
   //   const updatedUserConfirmation =
-  //     await this.authUserService.updateConfirmationCode(confirmedUser);
+  //     await this.AuthUserService.updateConfirmationCode(confirmedUser);
 
   //   if (!updatedUserConfirmation.data) {
   //     const { status, errorsMessages } = handleAuthResult(
@@ -230,24 +256,23 @@ export class AuthController {
   //   res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
   // }
 
-  // async me(req: Request, res: Response) {
-  //   const { userId } = res.locals;
+  @UseGuards(RefreshTokenGuard)
+  @Get('me')
+  async getProfile(@CurrentUserInfo() userInfo: UserInfoType) {
+    const user = await this.usersQueryRepo.getUserById(userInfo.userId);
 
-  //   const user = await this.usersQueryRepo.getUserById(userId);
+    if (!user) {
+      throw new NotFoundException();
+    }
 
-  //   if (!user) {
-  //     res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
-  //     return;
-  //   }
+    const userViewModel = {
+      email: user.email,
+      login: user.login,
+      id: userInfo.userId,
+    };
 
-  //   const userViewModel = {
-  //     email: user.email,
-  //     login: user.login,
-  //     userId,
-  //   };
-
-  //   res.send(userViewModel);
-  // }
+    return userViewModel
+  }
 
   // async logout(req: Request, res: Response) {
   //   const { deviceId } = res.locals;
