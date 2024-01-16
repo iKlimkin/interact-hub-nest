@@ -13,7 +13,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { SortingQueryModel } from 'src/infra/SortingQueryModel';
-import { AuthBasicGuard } from 'src/infra/guards/basic.guard';
 import { PaginationViewModel } from 'src/infra/paginationViewModel';
 import { AdminUserService } from '../../application/user.admins.service';
 import { InputUserModel } from '../models/create.userAdmin.model';

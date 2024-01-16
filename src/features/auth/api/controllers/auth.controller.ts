@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   HttpStatus,
   NotFoundException,
   Post,
@@ -10,31 +11,35 @@ import {
   Res,
   UnauthorizedException,
   UseGuards,
+  UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import {
   AuthUserType,
-  InputCredentialsModel,
   LoginCredentials,
 } from '../models/auth.output.models/auth.user.types';
 import { UsersQueryRepository } from 'src/features/admin/api/query-repositories/users.query.repo';
 import { Response } from 'express';
 import {
   InputEmail,
+  InputRecoveryEmailModel,
   PasswordRecoveryType,
 } from '../models/auth-input.models.ts/input-password-rec.type';
 import { AuthQueryRepository } from '../query-repositories/auth-query-repo';
 import { SecurityService } from 'src/features/security/application/security.service';
 import { getDeviceInfo } from 'src/infra/utils/deviceHandler';
-import { AuthUserService } from '../../application/auth.service';
+import { AuthUserService } from '../../application/auth-user.service';
 import { LocalAuthGuard } from '../../infrastructure/guards/local-auth.guard';
 import { UserAgent } from 'express-useragent';
-import { JwtAuthGuard } from '../../infrastructure/guards/jwt-auth.guard';
-import { AuthService } from 'src/infra/application/auth-service';
-import { CurrentUserInfo } from '../../infrastructure/decorators/current-user-id.decorator';
+import { AuthService } from 'src/infra/application/auth.service';
+import { CurrentUserInfo } from '../../infrastructure/decorators/current-user-info.decorator';
 import { RefreshTokenGuard } from '../../infrastructure/guards/refreshToken.guard';
 import { GetClientInfo } from '../../infrastructure/decorators/client-ip.decorator';
+import { InputRecoveryPassModel } from '../models/auth-input.models.ts/input-recovery-model';
+import { InputCredentialsModel } from '../models/auth-input.models.ts/input-credentials-model';
+import { AccessTokenGuard } from '../../infrastructure/guards/accessToken.guard';
+import { RateLimitInterceptor } from 'src/infra/interceptors/rate-limit.interceptor.ts';
 
 type ClientInfo = {
   ip: string;
@@ -57,6 +62,7 @@ export class AuthController {
   ) {}
 
   @UseGuards(LocalAuthGuard)
+  @UseInterceptors(RateLimitInterceptor)
   @Post('login')
   async login(
     @CurrentUserInfo() userInfo: UserInfoType,
@@ -64,10 +70,9 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
     @Body() body: InputCredentialsModel,
   ) {
-   
-    
-    const { accessToken, refreshToken } =
-      await this.authService.getTokens(userInfo.userId);
+    const { accessToken, refreshToken } = await this.authService.getTokens(
+      userInfo.userId,
+    );
 
     const userPayload = this.authService.getUserPayloadByToken(refreshToken);
     if (!userPayload) throw new Error();
@@ -88,85 +93,65 @@ export class AuthController {
 
     res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
 
-    return { accessToken }
+    return { accessToken };
   }
 
   @UseGuards(RefreshTokenGuard)
   @Post('refresh-token')
-    async refreshToken(
+  async refreshToken(
     @CurrentUserInfo() userInfo: UserInfoType,
     @Res({ passthrough: true }) res: Response,
-      ) {
-      const { userId, deviceId } = userInfo
+  ) {
+    const { userId, deviceId } = userInfo;
 
-      const { accessToken, refreshToken } = this.authService.updateUserTokens(
-        userId,
-        deviceId
-      );
+    const { accessToken, refreshToken } = this.authService.updateUserTokens(
+      userId,
+      deviceId,
+    );
 
-      const userInfoAfterRefresh = this.authService.getUserPayloadByToken(refreshToken);
+    const userInfoAfterRefresh =
+      this.authService.getUserPayloadByToken(refreshToken);
 
-      const issuedAt = new Date(userInfoAfterRefresh!.iat * 1000).toISOString();
+    const issuedAt = new Date(userInfoAfterRefresh!.iat * 1000).toISOString();
 
-      await this.securityService.updateIssuedToken(deviceId, issuedAt);
+    await this.securityService.updateIssuedToken(deviceId, issuedAt);
 
-      res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true });
-      res.send({ accessToken });
+    res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
+    res.send({ accessToken });
+  }
+
+  @Post('new-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async newPassword(@Body() body: InputRecoveryPassModel) {
+    const { newPassword, recoveryCode } = body;
+
+    const updatedPassword = await this.authUserService.updatePassword({
+      newPassword,
+      recoveryCode,
+    });
+
+    if (!updatedPassword) {
+      throw new NotFoundException();
+    }
+  }
+
+  @Post('password-recovery')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async passwordRecovery(@Body() body: InputRecoveryEmailModel) {
+    const { email } = body;
+
+    const foundUserAccount = await this.authQueryRepository.findByLoginOrEmail({
+      email,
+    });
+
+    if (!foundUserAccount) {
+      const codeForNonExistentUser =
+        await this.authUserService.createTemporaryUserAccount(email);
     }
 
-  // @Post('new-password')
-  // async newPassword(@Body() body: PasswordRecoveryType, @Res() res: Response) {
-  //   const { newPassword, recoveryCode } = body;
-
-  //   const updatedPassword = await this.AuthUserService.updatePassword({
-  //     newPassword,
-  //     recoveryCode,
-  //   });
-
-  //   // if (!updatedPassword.data) {
-  //   //   const { status, errorsMessages } = handleAuthResult(updatedPassword);
-  //   //   res.status(status).send({ errorsMessages });
-  //   //   return;
-  //   // }
-
-  //   res.sendStatus(HttpStatus.NO_CONTENT);
-  // }
-
-  // @Post('password-recovery')
-  // async passwordRecovery(@Body() body: InputEmail, @Res() res: Response) {
-  //   const { email } = body;
-
-  //   const foundUserAccount = await this.authQueryRepository.findByLoginOrEmail({
-  //     email,
-  //   });
-
-  //   if (!foundUserAccount) {
-  //     const codeForNonExistentUser =
-  //       await this.AuthUserService.createTemporaryUserAccount(email);
-
-  //     if (!codeForNonExistentUser.data) {
-  //       const { status, errorsMessages } = handleAuthResult(
-  //         codeForNonExistentUser,
-  //       );
-  //       res.status(status).send({ errorsMessages });
-  //       return;
-  //     }
-
-  //     res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
-  //     return;
-  //   }
-
-  //   const recoveredPassword =
-  //     await this.AuthUserService.passwordRecovery(email);
-
-  //   if (!recoveredPassword.data) {
-  //     const { status, errorsMessages } = handleAuthResult(recoveredPassword);
-  //     res.status(status).send({ errorsMessages });
-  //     return;
-  //   }
-
-  //   res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
-  // }
+    const recoveredPassword =
+      await this.authUserService.passwordRecovery(email);
+  }
 
   // async registration(req: RequestWithBody<AuthUserType>, res: Response) {
   //   const { login, email, password } = req.body;
@@ -271,7 +256,7 @@ export class AuthController {
       id: userInfo.userId,
     };
 
-    return userViewModel
+    return userViewModel;
   }
 
   // async logout(req: Request, res: Response) {

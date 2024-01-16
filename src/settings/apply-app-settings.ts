@@ -23,7 +23,7 @@ export const applyAppSettings = (app: INestApplication) => {
   app.enableCors();
 
   setAppPipes(app);
-  
+
   setAppExceptionsFilters(app);
 };
 
@@ -39,10 +39,10 @@ const setAppPipes = (app: INestApplication) => {
       stopAtFirstError: true,
       exceptionFactory(errors: ValidationError[]) {
         const customErrors: CustomError[] = [];
-        
+
         errors.forEach((errors: ValidationError) => {
           const constraints = errors.constraints;
-     
+
           if (constraints) {
             const constraintKeys = Object.keys(constraints);
 
@@ -53,8 +53,7 @@ const setAppPipes = (app: INestApplication) => {
             });
           }
         });
-        
-        
+
         throw new BadRequestException(customErrors);
       },
     }),

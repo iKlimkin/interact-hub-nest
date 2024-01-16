@@ -16,7 +16,6 @@ import {
 import { Response } from 'express';
 import { PostsService } from 'src/features/posts/application/posts.service';
 import { PostsQueryRepository } from 'src/features/posts/api/query-repositories/posts.query.repo';
-import { AuthBasicGuard } from 'src/infra/guards/basic.guard';
 import { SortingQueryModel } from 'src/infra/SortingQueryModel';
 import { PaginationViewModel } from 'src/infra/paginationViewModel';
 import { BlogsService } from '../../application/blogs.service';
@@ -26,6 +25,7 @@ import { InputBlogModel } from '../models/input.blog.models/create.blog.model';
 import { BlogType } from '../models/output.blog.models/blog.models';
 import { CreatePostModel } from 'src/features/posts/api/models/input.posts.models/create.post.model';
 import { PostViewModel } from 'src/features/posts/api/models/post.view.models/PostViewModel';
+import { BasicSAAuthGuard } from 'src/features/auth/infrastructure/guards/basic-auth.guard';
 
 @Controller('blogs')
 export class BlogsController {
@@ -98,7 +98,7 @@ export class BlogsController {
   }
 
   @Post()
-  @UseGuards(AuthBasicGuard)
+  @UseGuards(BasicSAAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async createBlog(@Body() body: InputBlogModel): Promise<BlogViewModel> {
     const createdBlog = await this.blogsService.createBlog(body);
@@ -115,7 +115,7 @@ export class BlogsController {
   }
 
   @Post(':id/posts')
-  @UseGuards(AuthBasicGuard)
+  @UseGuards(BasicSAAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async createPostByBlogId(
     @Param('id') blogId: string,
@@ -142,7 +142,7 @@ export class BlogsController {
   }
 
   @Put(':id')
-  @UseGuards(AuthBasicGuard)
+  @UseGuards(BasicSAAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateBlog(@Param('id') blogId: string, @Body() body: InputBlogModel) {
     const { name, description, websiteUrl } = body;
@@ -159,7 +159,7 @@ export class BlogsController {
   }
 
   @Delete(':id')
-  @UseGuards(AuthBasicGuard)
+  @UseGuards(BasicSAAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(@Param('id') blogId: string) {
     const deleteBlog = await this.blogsService.deleteBlog(blogId);

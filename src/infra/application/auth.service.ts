@@ -4,7 +4,7 @@ import {
   VerifyTokensType,
   TokensMeta,
   Payload,
-} from 'src/features/auth/api/models/jwt.models';
+} from 'src/features/auth/api/models/jwt.types';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from 'src/features/auth/infrastructure/guards/constants';

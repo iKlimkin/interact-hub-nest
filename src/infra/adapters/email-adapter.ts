@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import nodemailer, { SentMessageInfo } from 'nodemailer';
 
 @Injectable()
@@ -11,7 +11,7 @@ export class EmailAdapter {
     const recoveryLink = `https://somesite.com/password-recovery?recoveryCode=${inputData.recoveryCode}`;
 
     const transporter = this.createTransport();
-
+    
     const message = `
     <p>To finish password recovery please follow the link below:
       <a href='${recoveryLink}'>recovery password</a>
@@ -26,10 +26,10 @@ export class EmailAdapter {
 
       return info.messageId;
     } catch (error) {
-      console.error(
-        `Unexpected problems occurred while sending the message: ${error}`,
+      throw new HttpException(
+        'Failed to send email for password recovery',
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
-      return null;
     }
   }
 
@@ -56,10 +56,10 @@ export class EmailAdapter {
 
       return info.messageId;
     } catch (error) {
-      console.error(
-        `Unexpected problems occurred while sending the message: ${error}`,
+      throw new HttpException(
+        'Failed to send confirmation message',
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
-      return null;
     }
   }
 

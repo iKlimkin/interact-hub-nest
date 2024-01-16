@@ -1,7 +1,10 @@
 import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { AuthUserService, UserIdType } from '../../../application/auth.service';
+import {
+  AuthUserService,
+  UserIdType,
+} from '../../../application/auth-user.service';
 import { OutputId } from 'src/infra/likes.types';
 
 @Injectable()
@@ -17,7 +20,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
       loginOrEmail,
       password,
     });
-    
+
     if (!userId) {
       throw new UnauthorizedException();
     }

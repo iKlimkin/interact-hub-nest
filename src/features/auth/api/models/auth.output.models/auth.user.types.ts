@@ -6,19 +6,6 @@ export type LoginCredentials = {
   password: string;
 };
 
-export class InputCredentialsModel {
-  /**
-   * loginOrEmail of the user account
-   */
-  @iSValidString(frequentLength)
-  loginOrEmail: string;
-
-  /**
-   * password of the user account.
-   */
-  @iSValidString(passwordLength)
-  password: string;
-}
 
 export type LoginOrEmailType = {
   login?: string | null;

@@ -10,8 +10,8 @@ export type UserType = {
 };
 
 export type UserRecoveryType = {
-  recoveryCode: null | string;
-  expirationDate?: string;
+  recoveryCode: string;
+  expirationDate: string;
 };
 
 export type UserAccountDBType = WithId<UserAccountType>;

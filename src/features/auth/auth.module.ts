@@ -3,7 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { BcryptAdapter } from 'src/infra/adapters/bcrypt-adapter';
 import { EmailAdapter } from 'src/infra/adapters/email-adapter';
-import { AuthService } from 'src/infra/application/auth-service';
+import { AuthService } from 'src/infra/application/auth.service';
 import { EmailManager } from 'src/infra/application/managers/email-manager';
 import { SuperAdminsController } from '../admin/api/controllers/super-admin.controller';
 import { UsersQueryRepository } from '../admin/api/query-repositories/users.query.repo';
@@ -13,7 +13,9 @@ import { SecurityRepository } from '../security/infrastructure/security.reposito
 import { AuthController } from './api/controllers/auth.controller';
 import { jwtConstants } from './infrastructure/guards/constants';
 import {
+  RequestLoggerInterseptor,
   Strategies,
+  requestLoggerProviders,
   userAccountProviders,
   usersProviders,
 } from './infrastructure/settings/auth-providers';
@@ -29,6 +31,10 @@ import { PassportModule } from '@nestjs/passport';
 
   providers: [
     ...Strategies,
+
+    RequestLoggerInterseptor,
+
+  ...requestLoggerProviders,
 
     EmailManager,
     EmailAdapter,

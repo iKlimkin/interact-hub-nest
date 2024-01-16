@@ -6,13 +6,14 @@ import { controllers } from './settings/app-controllers';
 import { providers } from './settings/app-providers';
 import { mongooseSchemas } from './settings/mongoose-schemas';
 import { AuthModule } from './features/auth/auth.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     MongooseModule.forRoot(settings.MONGO_URL),
     MongooseModule.forFeature(mongooseSchemas),
-    AuthModule
+    AuthModule,
   ],
   controllers,
   providers,

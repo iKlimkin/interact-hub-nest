@@ -47,9 +47,7 @@ export class FeedbacksRepository {
 
   async deleteComment(commentId: string): Promise<boolean> {
     try {
-      const result = await this.CommentModel.findByIdAndDelete(commentId);
-
-      return !!result;
+      return this.CommentModel.findByIdAndDelete(commentId).lean();
     } catch (error) {
       throw new InternalServerErrorException(
         'Database fails during delete comment operation', error

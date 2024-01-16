@@ -19,6 +19,7 @@ import {
   Security,
   SecuritySchema,
 } from 'src/features/security/domain/entities/security.schema';
+import { RequestCounter, ApiRequestCounterShema } from 'src/infra/repositories/api-request.schema';
 
 export const mongooseSchemas = [
   {
@@ -44,6 +45,10 @@ export const mongooseSchemas = [
   {
     name: TempUserAccount.name,
     schema: TempUserAccountSchema,
+  },
+  {
+    name: RequestCounter.name,
+    schema: ApiRequestCounterShema,
   },
 ];
 

@@ -22,7 +22,6 @@ import { InputContentType } from 'src/features/comments/api/models/input.comment
 import { FeedbacksService } from 'src/features/comments/application/feedbacks.service';
 import { FeedbacksQueryRepository } from 'src/features/comments/api/query-repositories/feedbacks.query.repository';
 import { SortingQueryModel } from 'src/infra/SortingQueryModel';
-import { AuthBasicGuard } from 'src/infra/guards/basic.guard';
 import { InputLikeStatus, likesStatus } from 'src/infra/likes.types';
 import { PaginationViewModel } from 'src/infra/paginationViewModel';
 import { getStatusCounting } from 'src/infra/utils/statusCounter';
@@ -32,6 +31,7 @@ import { InputPostModel } from '../models/input.posts.models/create.post.model';
 import { PostViewModel } from '../models/post.view.models/PostViewModel';
 import { BlogIdValidationPipe } from 'src/infra/pipes/blogId-validate.pipe';
 import { NumberPipe } from 'src/infra/pipes/number.pipe';
+import { BasicSAAuthGuard } from 'src/features/auth/infrastructure/guards/basic-auth.guard';
 
 @Controller('posts')
 export class PostsController {
@@ -200,7 +200,7 @@ export class PostsController {
   }
 
   @Post()
-  @UseGuards(AuthBasicGuard)
+  @UseGuards(BasicSAAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async createPost(
     @Body() createPostDto: InputPostModel,
@@ -233,7 +233,7 @@ export class PostsController {
   }
 
   @Put(':id')
-  @UseGuards(AuthBasicGuard)
+  @UseGuards(BasicSAAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePost(@Param('id') postId: string, @Body() body: InputPostModel) {
     const { title, shortDescription, content, blogId } = body;
@@ -250,7 +250,7 @@ export class PostsController {
   }
 
   @Delete(':id')
-  @UseGuards(AuthBasicGuard)
+  @UseGuards(BasicSAAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePost(@Param('id') postId: string) {
     const deletedPost = await this.postsService.deletePost(postId);

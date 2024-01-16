@@ -1,12 +1,14 @@
-import { TestingModule, Test } from "@nestjs/testing";
+import { INestApplication } from "@nestjs/common";
+import { Test, TestingModule } from "@nestjs/testing";
 import { AppModule } from "src/app.module";
+import { applyAppSettings } from "src/settings/apply-app-settings";
 import request from 'supertest';
 
 
 
 describe('BlogsController (e2e)', () => {
-    let app;
-    // const request = supertest.agent(app.getHttpServer());
+    let app: INestApplication;
+   
 
     beforeAll(async () => {
       const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -14,6 +16,8 @@ describe('BlogsController (e2e)', () => {
       }).compile();
   
       app = moduleFixture.createNestApplication();
+      applyAppSettings(app);
+
       await app.init();
     });
   
@@ -44,5 +48,4 @@ describe('BlogsController (e2e)', () => {
         .expect('Content-Type', /json/);
     });
   
-    // Другие тесты для создания, обновления и удаления блогов и постов
   });

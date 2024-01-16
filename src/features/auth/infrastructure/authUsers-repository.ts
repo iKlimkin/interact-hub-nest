@@ -1,14 +1,23 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-import { WithId } from "mongodb";
-import { UserAccount, UserAccountModelType, UserAccountDocument } from "src/features/admin/domain/entities/userAccount.schema";
-import { OutputId } from "src/infra/likes.types";
-import { PasswordRecoveryType } from "../api/models/auth-input.models.ts/input-password-rec.type";
-import { UserRecoveryType, UserAccountType } from "../api/models/auth.output.models/auth.output.models";
-import { LoginOrEmailType } from "../api/models/auth.output.models/auth.user.types";
-import { TempUserAccount, TempUserAccountModelType } from "../domain/entities/temp-account.schema";
-import { TemporaryAccountDBType } from "../api/models/temp-account.models.ts/temp-account-models";
-
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { WithId } from 'mongodb';
+import {
+  UserAccount,
+  UserAccountModelType,
+  UserAccountDocument,
+} from 'src/features/admin/domain/entities/userAccount.schema';
+import { OutputId } from 'src/infra/likes.types';
+import { PasswordRecoveryType } from '../api/models/auth-input.models.ts/input-password-rec.type';
+import {
+  UserRecoveryType,
+  UserAccountType,
+} from '../api/models/auth.output.models/auth.output.models';
+import { LoginOrEmailType } from '../api/models/auth.output.models/auth.user.types';
+import {
+  TempUserAccount,
+  TempUserAccountModelType,
+} from '../domain/entities/temp-account.schema';
+import { TemporaryAccountDBType } from '../api/models/temp-account.models.ts/temp-account-models';
 
 type PasswordsType = {
   passwordHash: string;
@@ -20,9 +29,10 @@ export class AuthRepository {
   constructor(
     @InjectModel(UserAccount.name)
     private UserAccountModel: UserAccountModelType,
-    @InjectModel(TempUserAccount.name) private TempUserAccountModel: TempUserAccountModelType
+    @InjectModel(TempUserAccount.name)
+    private TempUserAccountModel: TempUserAccountModelType,
   ) {}
-  
+
   async save(user: UserAccountDocument): Promise<UserAccountDocument> {
     try {
       return await user.save();
@@ -36,8 +46,8 @@ export class AuthRepository {
 
   async createTemporaryUserAccount(
     inputData: UserRecoveryType,
-    email: string
-  ): Promise<OutputId | null> {
+    email: string,
+  ): Promise<OutputId> {
     try {
       const { recoveryCode, expirationDate } = inputData;
 
@@ -53,18 +63,21 @@ export class AuthRepository {
         id: insertedTempUser._id.toString(),
       };
     } catch (error) {
-      console.error(`While creating the user occured some errors: ${error}`);
-      return null;
+      throw new InternalServerErrorException(
+        `While creating the user occured some errors: ${error}`
+      );
     }
   }
 
   async findTemporaryUserAccountByCode(
-    recoveryCode: string
+    recoveryCode: string,
   ): Promise<TemporaryAccountDBType | null> {
     try {
-      const foundTempUserAccountModel = await this.TempUserAccountModel.findOne({
-        recoveryCode,
-      });
+      const foundTempUserAccountModel = await this.TempUserAccountModel.findOne(
+        {
+          recoveryCode,
+        },
+      );
 
       if (!foundTempUserAccountModel) return null;
 
@@ -88,27 +101,26 @@ export class AuthRepository {
     }
   }
 
-  async deleteTemporaryUserAccount(
-    recoveryCode: string
-  ): Promise<boolean | null> {
+  async deleteTemporaryUserAccount(recoveryCode: string): Promise<TemporaryAccountDBType | null> {
     try {
-      const deletedTempUserAccountModel =
-        await this.TempUserAccountModel.findOneAndDelete({ recoveryCode });
-
-      return !!deletedTempUserAccountModel;
+      return this.TempUserAccountModel.findOneAndDelete({
+        recoveryCode,
+      }).lean();
     } catch (error) {
-      console.error(`While delete the user occured some errors: ${error}`);
-      return null;
+      throw new InternalServerErrorException(
+        'Database fails operate with deleting user',
+        error,
+      );
     }
   }
 
   async findUserByConfirmationCode(
-    emailConfirmationCode: string
+    emailConfirmationCode: string,
   ): Promise<UserAccountDocument | null> {
     try {
       const filter = {
-        "emailConfirmation.confirmationCode": emailConfirmationCode,
-        "emailConfirmation.expirationDate": { $gt: new Date().toISOString() },
+        'emailConfirmation.confirmationCode': emailConfirmationCode,
+        'emailConfirmation.expirationDate': { $gt: new Date().toISOString() },
       };
 
       const foundSmartUser = await this.UserAccountModel.findOne(filter);
@@ -118,20 +130,20 @@ export class AuthRepository {
       return foundSmartUser;
     } catch (e) {
       console.error(
-        `there were some problems during find user by confirmation code, ${e}`
+        `there were some problems during find user by confirmation code, ${e}`,
       );
       return null;
     }
   }
 
   async findByLoginOrEmail(
-    inputData: LoginOrEmailType
+    inputData: LoginOrEmailType,
   ): Promise<WithId<UserAccountType> | null> {
     try {
       const foundUser = await this.UserAccountModel.findOne({
         $or: [
-          { "accountData.email": inputData.email || inputData.loginOrEmail },
-          { "accountData.login": inputData.login || inputData.loginOrEmail },
+          { 'accountData.email': inputData.email || inputData.loginOrEmail },
+          { 'accountData.login': inputData.login || inputData.loginOrEmail },
         ],
       });
 
@@ -145,7 +157,7 @@ export class AuthRepository {
       };
     } catch (e) {
       console.error(
-        `there were some problems during find user by login or email, ${e}`
+        `there were some problems during find user by login or email, ${e}`,
       );
       return null;
     }
@@ -154,7 +166,7 @@ export class AuthRepository {
   async findByEmail(email: string): Promise<UserAccountType | null> {
     try {
       const foundUser = await this.UserAccountModel.findOne({
-        "accountData.email": email,
+        'accountData.email': email,
       });
 
       if (!foundUser) return null;
@@ -169,13 +181,13 @@ export class AuthRepository {
   async updateConfirmation(id: string): Promise<boolean> {
     try {
       const confirmedUser = await this.UserAccountModel.findByIdAndUpdate(id, {
-        $set: { "emailConfirmation.isConfirmed": true },
+        $set: { 'emailConfirmation.isConfirmed': true },
       });
 
       return !!confirmedUser;
     } catch (error) {
       console.error(
-        `there were some problems during update user's confirmation by id: ${error}`
+        `there were some problems during update user's confirmation by id: ${error}`,
       );
       return false;
     }
@@ -183,18 +195,18 @@ export class AuthRepository {
 
   async updateConfirmationCode(
     email: string,
-    confirmationCode: string
+    confirmationCode: string,
   ): Promise<boolean> {
     try {
       const confirmedUser = await this.UserAccountModel.updateOne(
-        { "accountData.email": email },
-        { $set: { "emailConfirmation.confirmationCode": confirmationCode } }
+        { 'accountData.email': email },
+        { $set: { 'emailConfirmation.confirmationCode': confirmationCode } },
       );
 
       return confirmedUser.modifiedCount === 1;
     } catch (error) {
       console.error(
-        `there were some problems during update user's confirmation by new confirmation code: ${error}`
+        `there were some problems during update user's confirmation by new confirmation code: ${error}`,
       );
       return false;
     }
@@ -202,35 +214,37 @@ export class AuthRepository {
 
   async updateRecoveryCode(
     email: string,
-    recoveryData: UserRecoveryType
-  ): Promise<boolean | null> {
+    recoveryData: UserRecoveryType,
+  ): Promise<boolean> {
     try {
-      const filter = { "accountData.email": email };
+      const filter = { 'accountData.email': email };
       const update = {
         $set: {
-          "passwordRecovery.recoveryCode": recoveryData.recoveryCode,
-          "passwordRecovery.expirationDate": recoveryData.expirationDate,
+          'passwordRecovery.recoveryCode': recoveryData.recoveryCode,
+          'passwordRecovery.expirationDate': recoveryData.expirationDate,
         },
       };
 
-      const recoveredPass = await this.UserAccountModel.updateOne(filter, update);
+      const recoveredPass = await this.UserAccountModel.updateOne(
+        filter,
+        update,
+      );
 
       return recoveredPass.modifiedCount === 1;
     } catch (error) {
-      console.error(
-        `there were some problems during update user's recovery code: ${error}`
+      throw new InternalServerErrorException(
+        'Database fails operate during update recovery code operation',
       );
-      return null;
     }
   }
 
   async findUserByRecoveryCode(
-    recoveryCode: string
+    recoveryCode: string,
   ): Promise<(UserAccountType & OutputId) | null> {
     try {
       const filter = {
-        "passwordRecovery.recoveryCode": recoveryCode,
-        "passwordRecovery.expirationDate": { $gt: new Date().toISOString() },
+        'passwordRecovery.recoveryCode': recoveryCode,
+        'passwordRecovery.expirationDate': { $gt: new Date().toISOString() },
       };
 
       const foundUser = await this.UserAccountModel.findOne(filter);
@@ -243,55 +257,55 @@ export class AuthRepository {
       };
     } catch (e) {
       console.error(
-        `there were some problems during find user by confirmation code, ${e}`
+        `there were some problems during find user by confirmation code, ${e}`,
       );
       return null;
     }
   }
 
   async updateUserPassword(
-    inputData: Pick<PasswordRecoveryType, "recoveryCode"> & PasswordsType
+    inputData: Pick<PasswordRecoveryType, 'recoveryCode'> & PasswordsType,
   ): Promise<boolean> {
     try {
       const filter = {
-        "passwordRecovery.recoveryCode": inputData.recoveryCode,
+        'passwordRecovery.recoveryCode': inputData.recoveryCode,
       };
       const update = {
         $set: {
-          "accountData.passwordSalt": inputData.passwordSalt,
-          "accountData.passwordHash": inputData.passwordHash,
-          "passwordRecovery.recoveryCode": null,
+          'accountData.passwordSalt': inputData.passwordSalt,
+          'accountData.passwordHash': inputData.passwordHash,
+          'passwordRecovery.recoveryCode': null,
         },
       };
 
       const updatedPasswordData = await this.UserAccountModel.updateOne(
         filter,
-        update
+        update,
       );
 
       return updatedPasswordData.modifiedCount === 1;
     } catch (error) {
-      console.error(
-        `there were some problems during update user's confirmation by new confirmation code: ${error}`
+      throw new InternalServerErrorException(
+        'Database fails operate with update user password',
+        error,
       );
-      return false;
     }
   }
 
   async updateUserCredentials(
     email: string,
-    confirmationCode: string
+    confirmationCode: string,
   ): Promise<boolean> {
     try {
       const confirmedUser = await this.UserAccountModel.updateOne(
-        { "accountData.email": email },
-        { $set: { "emailConfirmation.confirmationCode": confirmationCode } }
+        { 'accountData.email': email },
+        { $set: { 'emailConfirmation.confirmationCode': confirmationCode } },
       );
 
       return confirmedUser.modifiedCount === 1;
     } catch (error) {
       console.error(
-        `there were some problems during update user's confirmation by new confirmation code: ${error}`
+        `there were some problems during update user's confirmation by new confirmation code: ${error}`,
       );
       return false;
     }
