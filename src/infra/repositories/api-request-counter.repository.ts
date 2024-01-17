@@ -1,9 +1,9 @@
 
-import { Injectable } from "@nestjs/common"
-import { MatchApiLimitType, MatchApiType } from "../interceptors/models/rate-limiter.models"
+import { Injectable, InternalServerErrorException } from "@nestjs/common"
 import { InjectModel } from "@nestjs/mongoose"
+import { HydratedDocument } from "mongoose"
+import { MatchApiLimitType, MatchApiType } from "../interceptors/models/rate-limiter.models"
 import { ApiRequestModelType, RequestCounter } from "./api-request.schema"
-import { WithId } from "mongodb"
 
 @Injectable()
 export class ApiRequestCounterRepository {
@@ -18,14 +18,13 @@ export class ApiRequestCounterRepository {
         }
     }
 
-    async getClientRequestsCollection (): Promise<WithId<MatchApiType>[] | null> {
+    async getClientRequestsCollection(): Promise<MatchApiType[]> {
         try {
-            const addedClientInfo = await this.RequestCounterApiModel.find()
-            
-            return addedClientInfo
+            return await this.RequestCounterApiModel.find().lean()
         } catch (error) {
-            console.error(`Occured some problems during count client's api requests ${error}`)
-            return null
+            throw new InternalServerErrorException(
+                'Database fails request loggers operate', error
+              );
         }
     }
 

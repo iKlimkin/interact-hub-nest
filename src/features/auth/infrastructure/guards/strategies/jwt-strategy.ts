@@ -1,10 +1,10 @@
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { jwtConstants } from '../constants';
-import { JwtService } from '@nestjs/jwt';
+import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
-import { AuthUserService } from '../../../application/auth-user.service';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { SecurityQueryRepo } from 'src/features/security/api/query-repositories/security.query.repo';
+import { AuthService } from 'src/infra/application/auth.service';
+import { jwtConstants } from '../constants';
 
 type JwtPayload = {
   sub: string;
@@ -13,7 +13,7 @@ type JwtPayload = {
 
 @Injectable()
 export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor() {
+  constructor(private authService: AuthService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -22,7 +22,7 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: JwtPayload) {
-    return payload.sub;
+    return payload;
   }
 }
 
@@ -31,7 +31,7 @@ export class RefreshTokenStrategy extends PassportStrategy(
   Strategy,
   'jwt-refresh',
 ) {
-  constructor() {
+  constructor(private securityQueryRepo: SecurityQueryRepo) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
       ignoreExpiration: false,
@@ -41,16 +41,20 @@ export class RefreshTokenStrategy extends PassportStrategy(
   }
 
   async validate(req: Request, payload: any) {
-    const refreshToken = req.headers.cookie?.split('=')[1];
-    if (!refreshToken) {
-      throw new UnauthorizedException('Refresh token not found');
+    const { iat, deviceId } = payload;
+
+    const tokenIssuedAt = new Date(iat * 1000).toISOString();
+
+    const userSession = await this.securityQueryRepo.getUserSession(deviceId);
+
+    if (!userSession || tokenIssuedAt !== userSession.lastActiveDate) {
+      throw new UnauthorizedException('Invalid refresh token');
     }
 
-    return { ...payload, refreshToken };
+    return { ...payload };
   }
 }
 
-const cookieExtractor = (request: Request): string | null => {
-  const refreshToken = request.headers.cookie?.split('=')[1];
-  return refreshToken!;
+const cookieExtractor = (request: Request): string => {
+  return request.headers.cookie?.split('=')[1] as string;
 };

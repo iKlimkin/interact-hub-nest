@@ -1,4 +1,4 @@
-import { iSValidString } from 'src/infra/decorators/transform/is-valid-string';
+import { iSValidField } from 'src/infra/decorators/transform/is-valid-string';
 import { BlogIdIsExist } from 'src/infra/decorators/validate/valid-blogId';
 import {
   blogIdLength,
@@ -35,25 +35,25 @@ export class InputPostModel {
   /**
    *  post's title
    */
-  @iSValidString(titleLength)
+  @iSValidField(titleLength)
   title: string;
 
   /**
    * shortDescription of the post
    */
-  @iSValidString(frequentLength)
+  @iSValidField(frequentLength)
   shortDescription: string;
 
   /**
    * content of existing post
    */
-  @iSValidString(contentLength)
+  @iSValidField(contentLength)
   content: string;
 
   /**
    * search blog id
    */
-  @iSValidString(blogIdLength)
-  @BlogIdIsExist('blogId doesn\'t exist')
+  @iSValidField(blogIdLength)
+  @BlogIdIsExist("blogId doesn't exist")
   blogId: string;
 }

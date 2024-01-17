@@ -36,10 +36,13 @@ import { AuthService } from 'src/infra/application/auth.service';
 import { CurrentUserInfo } from '../../infrastructure/decorators/current-user-info.decorator';
 import { RefreshTokenGuard } from '../../infrastructure/guards/refreshToken.guard';
 import { GetClientInfo } from '../../infrastructure/decorators/client-ip.decorator';
-import { InputRecoveryPassModel } from '../models/auth-input.models.ts/input-recovery-model';
-import { InputCredentialsModel } from '../models/auth-input.models.ts/input-credentials-model';
+import { InputRecoveryPassModel } from '../models/auth-input.models.ts/input-recovery.model';
+import { InputCredentialsModel } from '../models/auth-input.models.ts/input-credentials.model';
 import { AccessTokenGuard } from '../../infrastructure/guards/accessToken.guard';
 import { RateLimitInterceptor } from 'src/infra/interceptors/rate-limit.interceptor.ts';
+import { ErrorType, makeErrorsMessages } from 'src/infra/utils/errorHandler';
+import { InputRegistrationModel } from '../models/auth-input.models.ts/input-registration.model';
+import { InputRegistrationCodeModel } from '../models/auth-input.models.ts/input-registration-code.model';
 
 type ClientInfo = {
   ip: string;
@@ -62,7 +65,6 @@ export class AuthController {
   ) {}
 
   @UseGuards(LocalAuthGuard)
-  @UseInterceptors(RateLimitInterceptor)
   @Post('login')
   async login(
     @CurrentUserInfo() userInfo: UserInfoType,
@@ -104,10 +106,8 @@ export class AuthController {
   ) {
     const { userId, deviceId } = userInfo;
 
-    const { accessToken, refreshToken } = this.authService.updateUserTokens(
-      userId,
-      deviceId,
-    );
+    const { accessToken, refreshToken } =
+      await this.authService.updateUserTokens(userId, deviceId);
 
     const userInfoAfterRefresh =
       this.authService.getUserPayloadByToken(refreshToken);
@@ -120,6 +120,7 @@ export class AuthController {
     res.send({ accessToken });
   }
 
+  @UseInterceptors(RateLimitInterceptor)
   @Post('new-password')
   @HttpCode(HttpStatus.NO_CONTENT)
   async newPassword(@Body() body: InputRecoveryPassModel) {
@@ -135,6 +136,7 @@ export class AuthController {
     }
   }
 
+  @UseInterceptors(RateLimitInterceptor)
   @Post('password-recovery')
   @HttpCode(HttpStatus.NO_CONTENT)
   async passwordRecovery(@Body() body: InputRecoveryEmailModel) {
@@ -153,95 +155,80 @@ export class AuthController {
       await this.authUserService.passwordRecovery(email);
   }
 
-  // async registration(req: RequestWithBody<AuthUserType>, res: Response) {
-  //   const { login, email, password } = req.body;
+  @Post('registration')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async registration(
+    @Body() body: InputRegistrationModel,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { login, email, password } = body;
 
-  //   const foundUser = await this.authQueryRepository.findByLoginOrEmail({
-  //     login,
-  //     email,
-  //   });
+    const foundUser = await this.authQueryRepository.findByLoginOrEmail({
+      login,
+      email,
+    });
 
-  //   if (foundUser) {
-  //     if (foundUser.accountData.email === email) {
-  //       const errors = makeErrorsMessages('email');
+    if (foundUser) {
+      let errors: ErrorType;
 
-  //       res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors);
-  //       return;
-  //     }
+      if (foundUser.accountData.email === email) {
+        errors = makeErrorsMessages('email');
+      }
 
-  //     if (foundUser.accountData.login === login) {
-  //       const errors = makeErrorsMessages('login');
+      if (foundUser.accountData.login === login) {
+        errors = makeErrorsMessages('login');
+      }
 
-  //       res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors);
-  //       return;
-  //     }
-  //   }
+      res.status(HttpStatus.BAD_REQUEST).send(errors!);
+      return;
+    }
 
-  //   const user = await this.AuthUserService.createUser({
-  //     login,
-  //     email,
-  //     password,
-  //   });
+    const newUser = await this.authUserService.createUser({
+      login,
+      email,
+      password,
+    });
+  }
 
-  //   if (!user.data) {
-  //     const { status, errorsMessages } = handleAuthResult(user);
-  //     res.status(status).send({ errorsMessages });
-  //     return;
-  //   }
+  @UseInterceptors(RateLimitInterceptor)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post('registration-confirmation')
+  async registrationConfirmation(
+    @Body() body: InputRegistrationCodeModel,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const confirmedUser = await this.authUserService.confirmEmail(body.code);
 
-  //   res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
-  // }
+    if (!confirmedUser) {
+      const errors = makeErrorsMessages('code');
+      res.status(HttpStatus.BAD_REQUEST).send(errors);
+      return;
+    }
+  }
 
-  // async registrationConfirmation(
-  //   req: RequestWithBody<{ code: string }>,
-  //   res: Response,
-  // ) {
-  //   const { code } = req.body;
+  @UseInterceptors(RateLimitInterceptor)
+  @Post('registration-email-resending')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async registrationEmailResending(
+    @Body() inputModel: InputRecoveryEmailModel,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { email } = inputModel;
+    const confirmedUser = await this.authQueryRepository.findByLoginOrEmail({
+      email,
+    });
 
-  //   const confirmedUser = await this.AuthUserService.confirmEmail(code);
+    if (!confirmedUser || confirmedUser.emailConfirmation.isConfirmed) {
+      const errors = makeErrorsMessages('confirmation');
+      res.status(HttpStatus.BAD_REQUEST).send(errors);
+      return;
+    }
 
-  //   if (!confirmedUser.data) {
-  //     const errors = makeErrorsMessages('code');
+    const updatedUserConfirmation =
+      await this.authUserService.updateConfirmationCode(confirmedUser);
+  }
 
-  //     res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors);
-  //     return;
-  //   }
-
-  //   res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
-  // }
-
-  // async registrationEmailResending(
-  //   req: RequestWithBody<Pick<AuthUserType, 'email'>>,
-  //   res: Response,
-  // ) {
-  //   const { email } = req.body;
-
-  //   const confirmedUser = await this.authQueryRepository.findByLoginOrEmail({
-  //     email,
-  //   });
-
-  //   if (!confirmedUser || confirmedUser.emailConfirmation.isConfirmed) {
-  //     const errors = makeErrorsMessages('confirmation');
-
-  //     res.status(HTTP_STATUSES.BAD_REQUEST_400).send(errors);
-  //     return;
-  //   }
-
-  //   const updatedUserConfirmation =
-  //     await this.AuthUserService.updateConfirmationCode(confirmedUser);
-
-  //   if (!updatedUserConfirmation.data) {
-  //     const { status, errorsMessages } = handleAuthResult(
-  //       updatedUserConfirmation,
-  //     );
-  //     res.status(status).send({ errorsMessages });
-  //     return;
-  //   }
-
-  //   res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
-  // }
-
-  @UseGuards(RefreshTokenGuard)
+  @UseGuards(AccessTokenGuard)
   @Get('me')
   async getProfile(@CurrentUserInfo() userInfo: UserInfoType) {
     const user = await this.usersQueryRepo.getUserById(userInfo.userId);
@@ -259,11 +246,10 @@ export class AuthController {
     return userViewModel;
   }
 
-  // async logout(req: Request, res: Response) {
-  //   const { deviceId } = res.locals;
-
-  //   await this.securityService.deleteActiveSession(deviceId);
-
-  //   res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
-  // }
+  @UseGuards(RefreshTokenGuard)
+  @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async logout(@CurrentUserInfo() userInfo: UserInfoType) {
+    await this.securityService.deleteActiveSession(userInfo.deviceId);
+  }
 }

@@ -1,5 +1,5 @@
 import { Matches } from 'class-validator';
-import { iSValidString } from 'src/infra/decorators/transform/is-valid-string';
+import { iSValidField } from 'src/infra/decorators/transform/is-valid-string';
 import {
   nameLength,
   passwordLength,
@@ -21,19 +21,19 @@ export class InputUserModel {
    * user's email
    */
   @Matches(loginMatch)
-  @iSValidString(nameLength)
+  @iSValidField(nameLength)
   login: string;
 
   /**
    * user's registration password
    */
-  @iSValidString(passwordLength)
+  @iSValidField(passwordLength)
   password: string;
 
   /**
    * user's registration email
    */
   @Matches(emailMatches)
-  @iSValidString(frequentLength)
+  @iSValidField(frequentLength)
   email: string;
 }

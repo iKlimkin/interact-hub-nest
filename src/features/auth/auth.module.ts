@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
+import { PassportModule } from '@nestjs/passport';
 import { BcryptAdapter } from 'src/infra/adapters/bcrypt-adapter';
 import { EmailAdapter } from 'src/infra/adapters/email-adapter';
 import { AuthService } from 'src/infra/application/auth.service';
@@ -8,33 +9,35 @@ import { EmailManager } from 'src/infra/application/managers/email-manager';
 import { SuperAdminsController } from '../admin/api/controllers/super-admin.controller';
 import { UsersQueryRepository } from '../admin/api/query-repositories/users.query.repo';
 import { UsersRepository } from '../admin/infrastructure/users.repository';
+import { SecurityQueryRepo } from '../security/api/query-repositories/security.query.repo';
 import { SecurityService } from '../security/application/security.service';
-import { SecurityRepository } from '../security/infrastructure/security.repository';
 import { AuthController } from './api/controllers/auth.controller';
-import { jwtConstants } from './infrastructure/guards/constants';
 import {
   RequestLoggerInterseptor,
   Strategies,
   requestLoggerProviders,
+  securitiesProviders,
   userAccountProviders,
   usersProviders,
 } from './infrastructure/settings/auth-providers';
 import { mongooseModels } from './infrastructure/settings/mongoose-models';
-import { PassportModule } from '@nestjs/passport';
-
+import { ConfigModule } from '@nestjs/config';
+import { getAuthConfiguration } from './config/configuration';
+ 
 @Module({
   imports: [
     JwtModule.register({}),
     PassportModule,
     MongooseModule.forFeature(mongooseModels),
+    ConfigModule.forFeature(getAuthConfiguration)
   ],
 
   providers: [
     ...Strategies,
 
     RequestLoggerInterseptor,
-
-  ...requestLoggerProviders,
+    
+    ...requestLoggerProviders,
 
     EmailManager,
     EmailAdapter,
@@ -42,8 +45,7 @@ import { PassportModule } from '@nestjs/passport';
 
     AuthService,
 
-    SecurityService,
-    SecurityRepository,
+    ...securitiesProviders,
 
     ...userAccountProviders,
     ...usersProviders,
@@ -55,6 +57,7 @@ import { PassportModule } from '@nestjs/passport';
     UsersRepository,
     UsersQueryRepository,
     SecurityService,
+    SecurityQueryRepo,
   ],
 })
 export class AuthModule {}

@@ -15,6 +15,9 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ApiRequestCounterService } from 'src/infra/application/api-request-counter.service';
 import { RateLimitInterceptor } from 'src/infra/interceptors/rate-limit.interceptor.ts';
 import { ApiRequestCounterRepository } from 'src/infra/repositories/api-request-counter.repository';
+import { SecurityRepository } from 'src/features/security/infrastructure/security.repository';
+import { SecurityQueryRepo } from 'src/features/security/api/query-repositories/security.query.repo';
+import { SecurityService } from 'src/features/security/application/security.service';
 
 export const userAccountProviders: Provider[] = [
   AuthUserService,
@@ -44,3 +47,9 @@ export const RequestLoggerInterseptor = {
   provide: APP_INTERCEPTOR,
   useClass: RateLimitInterceptor,
 }
+
+export const securitiesProviders: Provider[] = [
+  SecurityService,
+  SecurityRepository,
+  SecurityQueryRepo,
+];

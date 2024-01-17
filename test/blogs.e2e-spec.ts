@@ -1,7 +1,7 @@
 import { INestApplication } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
-import { AppModule } from "src/app.module";
-import { applyAppSettings } from "src/settings/apply-app-settings";
+import { AppModule } from "../src/app.module";
+import { applyAppSettings } from "../src/settings/apply-app-settings";
 import request from 'supertest';
 
 

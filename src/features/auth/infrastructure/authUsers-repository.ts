@@ -205,10 +205,9 @@ export class AuthRepository {
 
       return confirmedUser.modifiedCount === 1;
     } catch (error) {
-      console.error(
-        `there were some problems during update user's confirmation by new confirmation code: ${error}`,
+      throw new InternalServerErrorException(
+        'Database fails operate during update confirmation code operation',
       );
-      return false;
     }
   }
 

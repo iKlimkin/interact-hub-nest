@@ -37,7 +37,7 @@ export class EmailAdapter {
     email: string;
     subject: string;
     confirmationCode: string;
-  }): Promise<SentMessageInfo | null> {
+  }): Promise<SentMessageInfo> {
     const confirmationLink = `https://somesite.com/confirm-email?code=${inputData.confirmationCode}`;
 
     const transporter = this.createTransport();

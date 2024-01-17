@@ -22,7 +22,7 @@ export class RateLimitInterceptor implements NestInterceptor {
   ): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
-    
+
     const { ip } = request;
     const url = request.originalUrl;
     const timestamp = new Date();
@@ -41,15 +41,20 @@ export class RateLimitInterceptor implements NestInterceptor {
       url,
       limitTime,
     });
-    console.log({requestCount});
-    
-    if (requestCount <= 5) {
-      return next
-        .handle()
-        .pipe(tap(() => console.log('Request processed successfully')));
-    } else {
-      response.status(HttpStatus.TOO_MANY_REQUESTS).send('Rate limit exceeded');
-      return new Observable();
-    }
+    const requestLogger =
+      await this.apiRequestCounterService.getClientRequstLogger();
+
+    if (requestCount <= 5) return next.handle();
+
+    let result = {
+      requestInfo: [
+        {
+          ip: requestLogger[0].ip,
+          url: requestLogger[0].url,
+        },
+      ],
+    };
+    response.status(HttpStatus.TOO_MANY_REQUESTS).send(result);
+    return new Observable();
   }
 }

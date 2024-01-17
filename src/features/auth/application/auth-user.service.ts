@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { add } from 'date-fns';
 import {
@@ -12,6 +12,7 @@ import { OutputId } from 'src/infra/likes.types';
 import { v4 as uuidv4 } from 'uuid';
 import { PasswordRecoveryType } from '../api/models/auth-input.models.ts/input-password-rec.type';
 import {
+  UserAccountViewModel,
   UserRecoveryType
 } from '../api/models/auth.output.models/auth.output.models';
 import {
@@ -47,12 +48,6 @@ export class AuthUserService {
     });
 
     if (foundUserByEmail) return null;
-
-    const foundUserByLogin = await this.authUsersRepository.findByLoginOrEmail({
-      login,
-    });
-
-    if (foundUserByLogin) return null;
 
     const smartUserModel = this.UserAccountModel.makeInstance({
       login,
@@ -170,69 +165,51 @@ export class AuthUserService {
     return false;
   }
 
-  // async confirmEmail(code: string): Promise<Result<boolean>> {
-  //   const user = await this.authUsersRepository.findUserByConfirmationCode(
-  //     code
-  //   );
+  async confirmEmail(code: string): Promise<UserAccountDocument> {
+    const user = await this.authUsersRepository.findUserByConfirmationCode(
+      code
+    );
 
-  //   if (!user) {
-  //     return Result.notFound<boolean>("User not found by confirmationCode or code is expired");
-  //   }
+    if (!user) {
+      throw new NotFoundException('User not found')
+    }
 
-  //   const { isConfirmed, confirmationCode } = user.emailConfirmation;
+    const { isConfirmed, confirmationCode } = user.emailConfirmation;
 
-  //   if (isConfirmed) {
-  //     return Result.alreadyConfirmed<boolean>("Email is already confirmed");
-  //   }
+    if (isConfirmed || confirmationCode !== code) {
+      throw new BadRequestException()
+    }
 
-  //   if (confirmationCode !== code) {
-  //     return Result.invalidCode<boolean>("Code dont't match or expired");
-  //   }
+   
+    // user.confirm(); user.confirm is not a function
+    user.emailConfirmation.isConfirmed = true
+    const result = await this.authUsersRepository.save(user);
 
-  //   // user.confirm(); user.confirm is not a function
-  //   user.emailConfirmation.isConfirmed = true
-  //   const result = await this.authUsersRepository.save(user);
+    return result
+  }
 
-  //   // const updatedConfirmation =
-  //   //   await this.authUsersRepository.updateConfirmation(user.id);
+  async updateConfirmationCode(
+    user: UserAccountViewModel
+  ): Promise<boolean> {
+    const newConfirmationCode = uuidv4();
+    const { email } = user.accountData
+    try {
+      const updatedCode = await this.authUsersRepository.updateConfirmationCode(
+        email,
+        newConfirmationCode
+      );
 
-  //   // if (!updatedConfirmation) {
-  //   //   return Result.dbLayDown<boolean>("During update occured some promlems");
-  //   // }
+      const confirmLetter =
+        await this.emailManager.sendEmailConfirmationMessage(
+          email,
+          newConfirmationCode
+        );
+    } catch (error) {
+      throw new InternalServerErrorException('during update confirmation occured some problems', error)
+    }
 
-  //   return Result.success<boolean>(true);
-  // }
-
-  // async updateConfirmationCode(
-  //   user: UserAccountViewModel
-  // ): Promise<Result<string>> {
-  //   const newConfirmationCode = uuidv4();
-  //   try {
-  //     const updatedCode = await this.authUsersRepository.updateConfirmationCode(
-  //       user.accountData.email,
-  //       newConfirmationCode
-  //     );
-
-  //     if (!updatedCode) {
-  //       return Result.dbLayDown("Database is not responding");
-  //     }
-
-  //     const confirmLetter =
-  //       await this.emailManager.sendEmailConfirmationMessage(
-  //         user.accountData.email,
-  //         newConfirmationCode
-  //       );
-
-  //     if (!confirmLetter) {
-  //       return Result.dbLayDown("Mail delivery services are not responding");
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //     return Result.dbLayDown("Unexpected error occurred");
-  //   }
-
-  //   return Result.success(newConfirmationCode);
-  // }
+    return !!newConfirmationCode
+  }
 
   private sendRecoveryMsg(email: string, recoveryPassInfo: UserRecoveryType) {
     return this.emailManager.sendEmailRecoveryMessage(

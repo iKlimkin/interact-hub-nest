@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { HydratedDocument } from 'mongoose';
 import {
-  MatchApiType,
   MatchApiLimitType,
+  MatchApiType,
 } from '../interceptors/models/rate-limiter.models';
 import { ApiRequestCounterRepository } from '../repositories/api-request-counter.repository';
 
@@ -16,5 +17,9 @@ export class ApiRequestCounterService {
 
   async apiClientCounter(inputData: MatchApiLimitType): Promise<number> {
     return this.apiRequestCounterRepository.apiClientCounter(inputData);
+  }
+
+  async getClientRequstLogger(): Promise<MatchApiType[]> {
+    return this.apiRequestCounterRepository.getClientRequestsCollection();
   }
 }

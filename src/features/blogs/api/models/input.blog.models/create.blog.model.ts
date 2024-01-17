@@ -5,7 +5,7 @@ import {
   urlLength,
   urlMatching,
 } from 'src/infra/validation.constants';
-import { iSValidString } from '../../../../../infra/decorators/transform/is-valid-string';
+import { iSValidField } from '../../../../../infra/decorators/transform/is-valid-string';
 
 export type CreateBlogModelType = {
   /**
@@ -28,13 +28,13 @@ export class InputBlogModel {
   /**
    * name of the blog
    */
-  @iSValidString(nameLength)
+  @iSValidField(nameLength)
   name: string;
 
   /**
    * description of the blog.
    */
-  @iSValidString(descriptionLength)
+  @iSValidField(descriptionLength)
   description: string;
 
   /**
