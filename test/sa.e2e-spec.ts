@@ -5,7 +5,7 @@ import { UserServiceMockObject } from './base/mock/user.service.mock';
 import { UsersTestManager } from './base/UsersTestManager';
 import { expectLength } from './base/utils/expect-length.test-utils';
 import { skipSettings } from './tests-settings';
-import { applyAppSettings } from '../src/settings/apply-app-settings';
+import { applyAppSettings } from '../src/settings/apply-app.settings';
 import { AdminUserService } from 'src/features/admin/application/user.admins.service';
 import { AppModule } from '../src/app.module';
 
