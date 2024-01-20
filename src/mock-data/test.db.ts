@@ -4,22 +4,11 @@ import {
   BlogModelType,
 } from '../features/blogs/domain/entities/blog.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import {
-  Post,
-  PostModelType,
-} from 'src/features/posts/domain/entities/posts.schema';
-import {
-  UserAccount,
-  UserAccountModelType,
-} from 'src/features/admin/domain/entities/userAccount.schema';
-import {
-  CommentModelType,
-  Comment,
-} from 'src/features/comments/domain/entities/comment.schema';
-import {
-  Security,
-  SecurityModelType,
-} from 'src/features/security/domain/entities/security.schema';
+import { Post, PostModelType } from '../features/posts/domain/entities/posts.schema';
+import { UserAccount, UserAccountModelType } from '../features/admin/domain/entities/userAccount.schema';
+import { CommentModelType, Comment } from '../features/comments/domain/entities/comment.schema';
+import { Security, SecurityModelType } from '../features/security/domain/entities/security.schema';
+
 
 @Injectable()
 export class TestDatabaseRepo {

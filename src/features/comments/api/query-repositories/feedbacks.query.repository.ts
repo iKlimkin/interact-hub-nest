@@ -1,11 +1,11 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { SortingQueryModel } from 'src/infra/SortingQueryModel';
-import { likesStatus } from 'src/infra/likes.types';
-import { PaginationViewModel } from 'src/infra/paginationViewModel';
-import { getLikeStatus } from 'src/infra/utils/likesStatusFounder';
-import { getPagination } from 'src/infra/utils/pagination';
-import { getSearchTerm } from 'src/infra/utils/searchTerm';
+import { SortingQueryModel } from '../../../../infra/SortingQueryModel';
+import { likesStatus } from '../../../../infra/likes.types';
+import { PaginationViewModel } from '../../../../infra/paginationViewModel';
+import { getLikeStatus } from '../../../../infra/utils/get-like-status';
+import { getPagination } from '../../../../infra/utils/pagination';
+import { getSearchTerm } from '../../../../infra/utils/searchTerm';
 import { CommentsViewModel } from '../models/comments.view.models/comments.view.model';
 import { getCommentsViewModel } from '../models/comments.view.models/get.comments.view.model';
 import {

@@ -1,11 +1,11 @@
-// import { ExecutionContext, createParamDecorator } from '@nestjs/common';
+import { ExecutionContext, createParamDecorator } from '@nestjs/common';
 
-// export const CurrentUserId = createParamDecorator(
-//   (data: unknown, ctx: ExecutionContext): string => {
-//     const request = ctx.switchToHttp().getRequest();
+export const CurrentUserId = createParamDecorator(
+  (data: unknown, context: ExecutionContext) => {
+    const request = context.switchToHttp().getRequest();
 
-//     return request.user.userId;
-//   },
-// );
+    const { userId } = request;
 
-// // made guard which hang user
+    return userId;
+  },
+);

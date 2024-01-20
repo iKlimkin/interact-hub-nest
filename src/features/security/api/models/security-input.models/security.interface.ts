@@ -1,6 +1,16 @@
+import { MatchApiType } from "../../../../../infra/interceptors/models/rate-limiter.models";
+import { UserInfoType } from "../../../../auth/api/controllers/auth.controller";
+import { SecurityViewDeviceModel } from "../security.view.models/security.view.types";
+
+
 export interface SecurityInterface {
-  getUserActiveSessions(res: any): Promise<void>;
-  terminateOtherUserSessions(res: any): Promise<boolean>;
-  terminateSpecificSession(deviceId: string, res: any): Promise<void>;
-  // getRequestApiLogs(): Promise<void>;
+  getUserActiveSessions(
+    userInfo: UserInfoType,
+  ): Promise<SecurityViewDeviceModel[]>;
+  terminateOtherUserSessions(userInfo: UserInfoType): Promise<void>;
+  terminateSpecificSession(
+    deviceId: string,
+    userInfo: UserInfoType,
+  ): Promise<void>;
+  getRequestApiLogs(): Promise<MatchApiType[]>;
 }

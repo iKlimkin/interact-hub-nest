@@ -33,7 +33,7 @@ export class Blog {
       (blog.createdAt = new Date().toISOString()),
       (blog.isMembership = false);
 
-    await validateOrReject(blog)
+    await validateOrReject(blog);
     return blog;
   }
 }

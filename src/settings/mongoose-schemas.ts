@@ -1,25 +1,11 @@
-import {
-  UserAccount,
-  UserAccountSchema,
-} from 'src/features/admin/domain/entities/userAccount.schema';
-import { TempUserAccount, TempUserAccountSchema } from 'src/features/auth/domain/entities/temp-account.schema';
-import {
-  Blog,
-  BlogSchema,
-} from 'src/features/blogs/domain/entities/blog.schema';
-import {
-  CommentSchema,
-  Comment,
-} from 'src/features/comments/domain/entities/comment.schema';
-import {
-  PostSchema,
-  Post,
-} from 'src/features/posts/domain/entities/posts.schema';
-import {
-  Security,
-  SecuritySchema,
-} from 'src/features/security/domain/entities/security.schema';
-import { RequestCounter, ApiRequestCounterShema } from 'src/infra/repositories/api-request.schema';
+import { UserAccount, UserAccountSchema } from "../features/admin/domain/entities/userAccount.schema";
+import { TempUserAccount, TempUserAccountSchema } from "../features/auth/domain/entities/temp-account.schema";
+import { Blog, BlogSchema } from "../features/blogs/domain/entities/blog.schema";
+import { CommentSchema, Comment } from "../features/comments/domain/entities/comment.schema";
+import { PostSchema, Post } from "../features/posts/domain/entities/posts.schema";
+import { Security, SecuritySchema } from "../features/security/domain/entities/security.schema";
+import { RequestCounter, ApiRequestCounterShema } from "../infra/repositories/api-request.schema";
+
 
 export const mongooseSchemas = [
   {
@@ -51,5 +37,3 @@ export const mongooseSchemas = [
     schema: ApiRequestCounterShema,
   },
 ];
-
-

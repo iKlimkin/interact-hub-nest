@@ -9,8 +9,8 @@ export class AppController {
   constructor(
     private readonly configService: ConfigService<ConfigType>,
     private readonly configAuthService: ConfigService<AuthConfigurationType>,
-    private readonly appService: AppService
-    ) {}
+    private readonly appService: AppService,
+  ) {}
 
   @Get()
   getHello(): any {
@@ -19,8 +19,8 @@ export class AppController {
       env: this.configService.get('NODE_ENV', { infer: true }),
       CASE1: this.configService.get('CASE1'),
       CASE2: this.configService.get('CASE2'),
-      auth: this.configAuthService.get('auth', { infer: true })
+      auth: this.configAuthService.get('auth', { infer: true }),
       // auth: this.configService.get('auth', { infer: true })?.type
-    }
+    };
   }
 }

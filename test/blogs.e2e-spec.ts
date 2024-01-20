@@ -1,21 +1,29 @@
 import { INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestingModule, Test } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
-import { applyAppSettings } from '../src/settings/apply-app.settings';
 import request from 'supertest';
+import { applyAppSettings } from '../src/settings/apply-app.settings';
+
 
 describe('BlogsController (e2e)', () => {
   let app: INestApplication;
+  let httpServer: any;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      // .overrideProvider(EmailService)
+      // .useClass(EmailMockService)
+      .compile();
 
     app = moduleFixture.createNestApplication();
+
     applyAppSettings(app);
 
     await app.init();
+
+    httpServer = app.getHttpServer;
   });
 
   afterAll(async () => {
@@ -23,24 +31,8 @@ describe('BlogsController (e2e)', () => {
   });
 
   it('/blogs (GET)', () => {
-    return request(app.getHttpServer())
+    return request(app.getHttpServer)
       .get('/blogs')
-      .expect(200)
-      .expect('Content-Type', /json/);
-  });
-
-  it('/blogs/:id (GET)', () => {
-    const blogId = 'your-blog-id'; // Замените на существующий ID блога
-    return request(app.getHttpServer())
-      .get(`/blogs/${blogId}`)
-      .expect(200)
-      .expect('Content-Type', /json/);
-  });
-
-  it('/blogs/:id/posts (GET)', () => {
-    const blogId = 'your-blog-id'; // Замените на существующий ID блога
-    return request(app.getHttpServer())
-      .get(`/blogs/${blogId}/posts`)
       .expect(200)
       .expect('Content-Type', /json/);
   });

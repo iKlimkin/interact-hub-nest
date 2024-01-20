@@ -1,23 +1,23 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { WithId } from 'mongodb';
-import {
-  UserAccount,
-  UserAccountModelType,
-  UserAccountDocument,
-} from 'src/features/admin/domain/entities/userAccount.schema';
-import { OutputId } from 'src/infra/likes.types';
 import { PasswordRecoveryType } from '../api/models/auth-input.models.ts/input-password-rec.type';
 import {
   UserRecoveryType,
   UserAccountType,
 } from '../api/models/auth.output.models/auth.output.models';
 import { LoginOrEmailType } from '../api/models/auth.output.models/auth.user.types';
+import { TemporaryAccountDBType } from '../api/models/temp-account.models.ts/temp-account-models';
 import {
   TempUserAccount,
   TempUserAccountModelType,
 } from '../domain/entities/temp-account.schema';
-import { TemporaryAccountDBType } from '../api/models/temp-account.models.ts/temp-account-models';
+import { OutputId } from '../../../infra/likes.types';
+import {
+  UserAccount,
+  UserAccountModelType,
+  UserAccountDocument,
+} from '../../admin/domain/entities/userAccount.schema';
 
 type PasswordsType = {
   passwordHash: string;
@@ -64,7 +64,7 @@ export class AuthRepository {
       };
     } catch (error) {
       throw new InternalServerErrorException(
-        `While creating the user occured some errors: ${error}`
+        `While creating the user occured some errors: ${error}`,
       );
     }
   }
@@ -101,7 +101,9 @@ export class AuthRepository {
     }
   }
 
-  async deleteTemporaryUserAccount(recoveryCode: string): Promise<TemporaryAccountDBType | null> {
+  async deleteTemporaryUserAccount(
+    recoveryCode: string,
+  ): Promise<TemporaryAccountDBType | null> {
     try {
       return this.TempUserAccountModel.findOneAndDelete({
         recoveryCode,

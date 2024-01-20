@@ -5,7 +5,6 @@ import {
   AuthUserService,
   UserIdType,
 } from '../../../application/auth-user.service';
-import { OutputId } from 'src/infra/likes.types';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {

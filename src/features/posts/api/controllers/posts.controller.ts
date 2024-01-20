@@ -13,25 +13,32 @@ import {
   Query,
   Res,
   UseGuards,
-  UsePipes,
 } from '@nestjs/common';
+import { CommandBus } from '@nestjs/cqrs';
 import { Response } from 'express';
-import { UsersQueryRepository } from 'src/features/admin/api/query-repositories/users.query.repo';
-import { CommentsViewModel } from 'src/features/comments/api/models/comments.view.models/comments.view.model';
-import { InputContentType } from 'src/features/comments/api/models/input.comment.models';
-import { FeedbacksService } from 'src/features/comments/application/feedbacks.service';
-import { FeedbacksQueryRepository } from 'src/features/comments/api/query-repositories/feedbacks.query.repository';
-import { SortingQueryModel } from 'src/infra/SortingQueryModel';
-import { InputLikeStatus, likesStatus } from 'src/infra/likes.types';
-import { PaginationViewModel } from 'src/infra/paginationViewModel';
-import { getStatusCounting } from 'src/infra/utils/statusCounter';
+import { SortingQueryModel } from '../../../../infra/SortingQueryModel';
+import { likesStatus } from '../../../../infra/likes.types';
+import { PaginationViewModel } from '../../../../infra/paginationViewModel';
+import { getStatusCounting } from '../../../../infra/utils/statusCounter';
+import { UsersQueryRepository } from '../../../admin/api/query-repositories/users.query.repo';
+import { UserInfoType } from '../../../auth/api/controllers/auth.controller';
+import { CurrentUserInfo } from '../../../auth/infrastructure/decorators/current-user-info.decorator';
+import { AccessTokenGuard } from '../../../auth/infrastructure/guards/accessToken.guard';
+import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth.guard';
+import { CommentsViewModel } from '../../../comments/api/models/comments.view.models/comments.view.model';
+import { FeedbacksQueryRepository } from '../../../comments/api/query-repositories/feedbacks.query.repository';
+import { FeedbacksService } from '../../../comments/application/feedbacks.service';
 import { PostsService } from '../../application/posts.service';
-import { PostsQueryRepository } from '../query-repositories/posts.query.repo';
+import { CreatePostCommand } from '../../application/use-cases/create-post-use-case';
+import { UpdatePostCommand } from '../../application/use-cases/update-post-use-case';
 import { InputPostModel } from '../models/input.posts.models/create.post.model';
+import { InputLikeStatusModel } from '../models/input.posts.models/input-post..model';
 import { PostViewModel } from '../models/post.view.models/PostViewModel';
-import { BlogIdValidationPipe } from 'src/infra/pipes/blogId-validate.pipe';
-import { NumberPipe } from 'src/infra/pipes/number.pipe';
-import { BasicSAAuthGuard } from 'src/features/auth/infrastructure/guards/basic-auth.guard';
+import { PostsQueryRepository } from '../query-repositories/posts.query.repo';
+import { SetUserIdGuard } from '../../../../infra/guards/set-user-id.guard';
+import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
+import { DeletePostCommand } from '../../application/use-cases/delete-post-use-case';
+import { InputContentModel } from '../../../comments/api/models/input.comment.models';
 
 @Controller('posts')
 export class PostsController {
@@ -41,19 +48,20 @@ export class PostsController {
     private postsService: PostsService,
     private feedbacksService: FeedbacksService,
     private usersQueryRepo: UsersQueryRepository,
+    private commandBus: CommandBus,
   ) {}
 
   @Get()
+  @UseGuards(SetUserIdGuard)
   @HttpCode(HttpStatus.OK)
   async getPosts(
     @Query() query: SortingQueryModel,
-    @Res() res: Response<PaginationViewModel<PostViewModel>>,
-  ) {
+    @CurrentUserId() userId: string,
+  ): Promise<PaginationViewModel<PostViewModel>> {
     const { pageNumber, pageSize, sortBy, sortDirection, searchLoginTerm } =
       query;
-    const { userId } = res.locals;
 
-    const posts = await this.postsQueryRepo.getAllPosts(
+    return this.postsQueryRepo.getAllPosts(
       {
         pageNumber,
         pageSize,
@@ -63,18 +71,14 @@ export class PostsController {
       },
       userId,
     );
-
-    res.send(posts);
   }
 
   @Get(':id')
-  @HttpCode(HttpStatus.OK)
+  @UseGuards(SetUserIdGuard)
   async getPostById(
     @Param('id') postId: string,
-    @Res({ passthrough: true }) res: Response<PostViewModel>,
-  ) {
-    const { userId } = res.locals;
-
+    @CurrentUserId() userId: string,
+  ): Promise<PostViewModel> {
     const foundPost = await this.postsQueryRepo.getPostById(postId, userId);
 
     if (!foundPost) {
@@ -84,15 +88,16 @@ export class PostsController {
     return foundPost;
   }
 
-  @Put(':id/like-status')
+  @Put(':postId/like-status')
+  @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateLikesStatus(
     @Param('id') postId: string,
-    @Body() body: InputLikeStatus,
-    @Res() res,
+    @Body() status: InputLikeStatusModel,
+    @CurrentUserInfo() userInfo: UserInfoType,
   ) {
-    const { userId } = res.locals;
-    const { likeStatus } = body;
+    const { userId } = userInfo;
+    const { likeStatus } = status;
 
     const foundPost = await this.postsQueryRepo.getPostById(postId, userId);
 
@@ -102,45 +107,37 @@ export class PostsController {
 
     if (foundPost.extendedLikesInfo.myStatus === likeStatus) return;
 
-    const userInfo = await this.usersQueryRepo.getUserById(userId);
-
     const { likesCount, dislikesCount } = getStatusCounting(
       likeStatus,
       foundPost.extendedLikesInfo.myStatus || likesStatus.None,
     );
 
+    const foundUser = await this.usersQueryRepo.getUserById(userId);
+
     const likeData = {
       postId,
       userId,
-      login: userInfo!.login,
+      login: foundUser!.login,
       status: likeStatus,
       likesCount,
       dislikesCount,
     };
 
-    const userReactions = await this.postsQueryRepo.getUserReactions(
-      userId,
-      postId,
-    );
-
-    if (!userReactions) {
+    // into service and make up in one use-case
+    if (!foundPost.extendedLikesInfo.myStatus) {
       const createdLikeStatus = await this.postsService.createLike(likeData);
       return;
     }
-
-    const updatedLike = await this.postsService.updateLike(likeData);
-    return;
+    await this.postsService.updateLike(likeData);
   }
 
   @Get(':id/comments')
-  @HttpCode(HttpStatus.OK)
+  @UseGuards(SetUserIdGuard)
   async getCommentsByPostId(
     @Param('id') postId: string,
+    @CurrentUserId() userId: string,
     @Query() query: SortingQueryModel,
-    @Res() res: Response<PaginationViewModel<CommentsViewModel>>,
-  ) {
-    const { userId } = res.locals;
-
+  ): Promise<PaginationViewModel<CommentsViewModel>> {
     const { pageNumber, pageSize, sortBy, sortDirection, searchContentTerm } =
       query;
 
@@ -166,17 +163,18 @@ export class PostsController {
       throw new NotFoundException('Comment not found');
     }
 
-    res.send(comments);
+    return comments;
   }
 
-  @Post(':id/comments')
+  @Post(':postId/comments')
+  @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.CREATED)
   async createCommentByPostId(
     @Param('id') postId: string,
-    @Body() body: InputContentType,
-    @Res() res: Response<CommentsViewModel>,
-  ) {
-    const { userId } = res.locals;
+    @Body() body: InputContentModel,
+    @CurrentUserInfo() userInfo: UserInfoType,
+  ): Promise<CommentsViewModel> {
+    const { userId } = userInfo;
     const { content } = body;
 
     const createCommentData = {
@@ -196,7 +194,7 @@ export class PostsController {
       createdComment.id,
     );
 
-    res.send(foundNewComment!);
+    return foundNewComment!
   }
 
   @Post()
@@ -204,48 +202,33 @@ export class PostsController {
   @HttpCode(HttpStatus.CREATED)
   async createPost(
     @Body() createPostDto: InputPostModel,
-    @Res() res: Response<PostViewModel>,
-  ) {
-    const { title, shortDescription, content, blogId } = createPostDto;
-
-    const createdPost = await this.postsService.createPost({
-      title,
-      shortDescription,
-      content,
-      blogId,
-    });
-
-    if (!createdPost) {
-      throw new InternalServerErrorException(
-        'Database fail during create post',
-      );
-    }
-
-    const newlyCreatedPost = await this.postsQueryRepo.getPostById(
-      createdPost.id,
+  ): Promise<PostViewModel> {
+    const post = await this.commandBus.execute(
+      new CreatePostCommand(createPostDto),
     );
+
+    const newlyCreatedPost = await this.postsQueryRepo.getPostById(post.id);
 
     if (!newlyCreatedPost) {
       throw new NotFoundException('Post not found');
     }
 
-    res.send(newlyCreatedPost);
+    return newlyCreatedPost;
   }
 
   @Put(':id')
   @UseGuards(BasicSAAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async updatePost(@Param('id') postId: string, @Body() body: InputPostModel) {
-    const { title, shortDescription, content, blogId } = body;
+  async updatePost(
+    @Param('id') postId: string,
+    @Body() inputPostDto: InputPostModel,
+  ) {
+    const updatedPost = await this.commandBus.execute(
+      new UpdatePostCommand({ inputPostDto, postId }),
+    );
 
-    const updatedPost = await this.postsService.updatePost(postId, {
-      title,
-      shortDescription,
-      content,
-      blogId,
-    });
     if (!updatedPost) {
-      throw new NotFoundException('Post id or blog id not found');
+      throw new NotFoundException('Post or blog not found');
     }
   }
 
@@ -253,7 +236,10 @@ export class PostsController {
   @UseGuards(BasicSAAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePost(@Param('id') postId: string) {
-    const deletedPost = await this.postsService.deletePost(postId);
+    const deletedPost = await this.commandBus.execute(
+      new DeletePostCommand(postId),
+    );
+
     if (!deletedPost) {
       throw new NotFoundException('Post not found');
     }

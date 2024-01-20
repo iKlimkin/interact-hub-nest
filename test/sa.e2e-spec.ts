@@ -1,13 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { aDescribe } from './base/aDescribe';
-import { UserServiceMockObject } from './base/mock/user.service.mock';
+import { TestingModule, Test } from '@nestjs/testing';
 import { UsersTestManager } from './base/UsersTestManager';
+import { aDescribe } from './base/aDescribe';
 import { expectLength } from './base/utils/expect-length.test-utils';
 import { skipSettings } from './tests-settings';
-import { applyAppSettings } from '../src/settings/apply-app.settings';
-import { AdminUserService } from 'src/features/admin/application/user.admins.service';
 import { AppModule } from '../src/app.module';
+import { applyAppSettings } from '../src/settings/apply-app.settings';
 
 const TEST_ADMIN_CREDENTIALS = {
   login: 'test',
@@ -23,8 +21,8 @@ aDescribe(skipSettings.for('appTests'))('AppController (e2e)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
-      .overrideProvider(AdminUserService)
-      .useValue(UserServiceMockObject)
+      // .overrideProvider(AdminUserService)
+      // .useValue(UserServiceMockObject)
       .compile();
 
     app = moduleFixture.createNestApplication();

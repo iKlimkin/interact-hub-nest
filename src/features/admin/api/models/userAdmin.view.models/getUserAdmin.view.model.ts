@@ -1,4 +1,4 @@
-import { UserAccountDBType } from 'src/features/auth/api/models/auth.output.models/auth.output.models';
+import { UserAccountDBType } from '../../../../auth/api/models/auth.output.models/auth.output.models';
 import { UserViewModel } from './userAdmin.view.model';
 
 export const getUserViewModel = (user: UserAccountDBType): UserViewModel => ({

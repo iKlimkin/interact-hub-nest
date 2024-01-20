@@ -1,5 +1,5 @@
-import { iSValidField } from 'src/infra/decorators/transform/is-valid-string';
-import { passwordLength, frequentLength } from 'src/infra/validation.constants';
+import { iSValidField } from "../../../../../infra/decorators/transform/is-valid-string";
+import { passwordLength, frequentLength } from "../../../../../infra/validation.constants";
 
 export class InputRecoveryPassModel {
   /**

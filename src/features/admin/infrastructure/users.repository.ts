@@ -1,14 +1,11 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 import {
   UserAccount,
   UserAccountDocument,
   UserAccountModelType,
 } from '../domain/entities/userAccount.schema';
-import { InjectModel } from '@nestjs/mongoose';
-import {
-  UserAccountType,
-  UserAccountDBType,
-} from 'src/features/auth/api/models/auth.output.models/auth.output.models';
+import { UserAccountDBType } from '../../auth/api/models/auth.output.models/auth.output.models';
 
 @Injectable()
 export class UsersRepository {
@@ -16,22 +13,6 @@ export class UsersRepository {
     @InjectModel(UserAccount.name)
     private UserAccountModel: UserAccountModelType,
   ) {}
-
-  // async create(
-  //   userAdminDto: Readonly<UserAccountType>,
-  // ): Promise<UserAccountDocument> {
-  //   try {
-  //     const createdUserAdmin = await this.UserAccountModel.create(userAdminDto);
-
-  //     return createdUserAdmin;
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(
-  //       'Database fails operate with create user',
-  //       error,
-  //     );
-  //   }
-  // }
-
   async save(
     userAdminModel: UserAccountDocument,
   ): Promise<UserAccountDocument> {

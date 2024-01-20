@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -7,42 +6,32 @@ import {
   HttpStatus,
   NotFoundException,
   Post,
-  Req,
   Res,
-  UnauthorizedException,
   UseGuards,
   UseInterceptors,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
+import { AuthService } from '../../../../infra/application/auth.service';
+import { RateLimitInterceptor } from '../../../../infra/interceptors/rate-limit.interceptor.ts';
+import { getDeviceInfo } from '../../../../infra/utils/deviceHandler';
 import {
-  AuthUserType,
-  LoginCredentials,
-} from '../models/auth.output.models/auth.user.types';
-import { UsersQueryRepository } from 'src/features/admin/api/query-repositories/users.query.repo';
-import { Response } from 'express';
-import {
-  InputEmail,
-  InputRecoveryEmailModel,
-  PasswordRecoveryType,
-} from '../models/auth-input.models.ts/input-password-rec.type';
-import { AuthQueryRepository } from '../query-repositories/auth-query-repo';
-import { SecurityService } from 'src/features/security/application/security.service';
-import { getDeviceInfo } from 'src/infra/utils/deviceHandler';
+  ErrorType,
+  makeErrorsMessages,
+} from '../../../../infra/utils/errorHandler';
+import { UsersQueryRepository } from '../../../admin/api/query-repositories/users.query.repo';
+import { SecurityService } from '../../../security/application/security.service';
 import { AuthUserService } from '../../application/auth-user.service';
-import { LocalAuthGuard } from '../../infrastructure/guards/local-auth.guard';
-import { UserAgent } from 'express-useragent';
-import { AuthService } from 'src/infra/application/auth.service';
-import { CurrentUserInfo } from '../../infrastructure/decorators/current-user-info.decorator';
-import { RefreshTokenGuard } from '../../infrastructure/guards/refreshToken.guard';
 import { GetClientInfo } from '../../infrastructure/decorators/client-ip.decorator';
-import { InputRecoveryPassModel } from '../models/auth-input.models.ts/input-recovery.model';
-import { InputCredentialsModel } from '../models/auth-input.models.ts/input-credentials.model';
+import { CurrentUserInfo } from '../../infrastructure/decorators/current-user-info.decorator';
 import { AccessTokenGuard } from '../../infrastructure/guards/accessToken.guard';
-import { RateLimitInterceptor } from 'src/infra/interceptors/rate-limit.interceptor.ts';
-import { ErrorType, makeErrorsMessages } from 'src/infra/utils/errorHandler';
-import { InputRegistrationModel } from '../models/auth-input.models.ts/input-registration.model';
+import { LocalAuthGuard } from '../../infrastructure/guards/local-auth.guard';
+import { RefreshTokenGuard } from '../../infrastructure/guards/refreshToken.guard';
+import { InputCredentialsModel } from '../models/auth-input.models.ts/input-credentials.model';
+import { InputRecoveryEmailModel } from '../models/auth-input.models.ts/input-password-rec.type';
+import { InputRecoveryPassModel } from '../models/auth-input.models.ts/input-recovery.model';
 import { InputRegistrationCodeModel } from '../models/auth-input.models.ts/input-registration-code.model';
+import { InputRegistrationModel } from '../models/auth-input.models.ts/input-registration.model';
+import { AuthQueryRepository } from '../query-repositories/auth-query-repo';
+import { Response } from 'express';
 
 type ClientInfo = {
   ip: string;

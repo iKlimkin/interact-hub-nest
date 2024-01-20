@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { AuthUserType } from 'src/features/auth/api/models/auth.output.models/auth.user.types';
-import { BcryptAdapter } from 'src/infra/adapters/bcrypt-adapter';
+
 import {
   UserAccount,
-  UserAccountDocument,
   UserAccountModelType,
+  UserAccountDocument,
 } from '../domain/entities/userAccount.schema';
 import { UsersRepository } from '../infrastructure/users.repository';
+import { BcryptAdapter } from '../../../infra/adapters/bcrypt-adapter';
+import { AuthUserType } from '../../auth/api/models/auth.output.models/auth.user.types';
 
 @Injectable()
 export class AdminUserService {
@@ -18,9 +19,7 @@ export class AdminUserService {
     private usersRepository: UsersRepository,
   ) {}
 
-  async createUser(
-    createUser: AuthUserType,
-  ): Promise<UserAccountDocument> {
+  async createUser(createUser: AuthUserType): Promise<UserAccountDocument> {
     const { email, login, password } = createUser;
 
     const { passwordSalt, passwordHash } =

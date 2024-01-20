@@ -3,10 +3,17 @@ import { Transform, TransformFnParams } from 'class-transformer';
 import { IsNotEmpty, IsString, Length, Matches } from 'class-validator';
 
 export const iSValidField = ({ min, max }, regexOption?: RegExp) => {
-  const decorators = [Length(min, max, { message: `range of values [${min}, ${max}] ` }), IsNotEmpty(), Trim(), IsString()];
+  const decorators = [
+    Length(min, max, { message: `range of values [${min}, ${max}] ` }),
+    IsNotEmpty(),
+    Trim(),
+    IsString(),
+  ];
 
   if (regexOption) {
-    decorators.unshift(Matches(regexOption, { message: 'field doesn\'t match' }));
+    decorators.unshift(
+      Matches(regexOption, { message: "field doesn't match" }),
+    );
   }
 
   return applyDecorators(...decorators);

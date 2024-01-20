@@ -1,6 +1,3 @@
-import { iSValidField } from 'src/infra/decorators/transform/is-valid-string';
-import { frequentLength, passwordLength } from 'src/infra/validation.constants';
-
 export type LoginCredentials = {
   loginOrEmail: string;
   password: string;

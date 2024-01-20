@@ -1,10 +1,9 @@
-import { WithId } from "mongodb"
-
+import { WithId } from 'mongodb';
 
 export type UserTomporaryAccount = {
-    email: string,
-    recoveryCode: string,
-    expirationDate: string
-}
+  email: string;
+  recoveryCode: string;
+  expirationDate: string;
+};
 
-export type TemporaryAccountDBType = WithId<UserTomporaryAccount>
+export type TemporaryAccountDBType = WithId<UserTomporaryAccount>;

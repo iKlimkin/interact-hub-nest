@@ -1,47 +1,44 @@
-import { ValidationError } from "express-validator";
+import { ValidationError } from 'express-validator';
 
 export type ErrorsMessages = {
   message: string;
   field: string;
 };
 type ErrorFormatter<T> = (error: ValidationError) => T;
-export type ErrorType = { errorsMessages: ErrorsMessages[] }
-
-
+export type ErrorType = { errorsMessages: ErrorsMessages[] };
 
 export const errorHandler: ErrorFormatter<ErrorsMessages> = (error) => {
-  if (error.type === 'field'){ 
+  if (error.type === 'field') {
     return {
-        message: error.msg,
-        field: error.path
-    } 
+      message: error.msg,
+      field: error.path,
+    };
   }
 
-    return {
-      message: 'Unknown error',
-      field: '',
-    };
-  
+  return {
+    message: 'Unknown error',
+    field: '',
+  };
 };
 
 export const makeErrorsMessages = (msg: string): ErrorType => {
-  let errorsMessages: Array<ErrorsMessages> = [];
+  const errorsMessages: Array<ErrorsMessages> = [];
 
-  if (msg === "login" || msg === "email") {
+  if (msg === 'login' || msg === 'email') {
     errorsMessages.push({
       message: `User with such ${msg} is already exists in the system`,
       field: `${msg}`,
     });
   }
 
-  if (msg === "code") {
+  if (msg === 'code') {
     errorsMessages.push({
       message: `Confirmation ${msg} is incorrect, expired or already been applied`,
       field: `${msg}`,
     });
   }
 
-  if (msg === "confirmation") {
+  if (msg === 'confirmation') {
     errorsMessages.push({
       message: `Email is already confirmed or user doesn't exist`,
       field: `email`,

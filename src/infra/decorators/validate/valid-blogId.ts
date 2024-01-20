@@ -1,7 +1,12 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { ValidationOptions, registerDecorator, ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments } from "class-validator";
-import { BlogsQueryRepo } from "src/features/blogs/api/query-repositories/blogs.query.repo";
-
+import { Injectable } from '@nestjs/common';
+import {
+  ValidationArguments,
+  ValidationOptions,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+  registerDecorator,
+} from 'class-validator';
+import { BlogsQueryRepo } from '../../../features/blogs/api/query-repositories/blogs.query.repo';
 
 @ValidatorConstraint({ name: 'BlogIdIsExist', async: true })
 @Injectable()
@@ -14,8 +19,11 @@ export class BlogIdExistConstraint implements ValidatorConstraintInterface {
   }
 }
 
-export function BlogIdIsExist(property?: string, validationOptions?: ValidationOptions) {
-  return function (object: Object, propertyName: string) {
+export function BlogIdIsExist(
+  property?: string,
+  validationOptions?: ValidationOptions,
+) {
+  return function (object: object, propertyName: string) {
     registerDecorator({
       target: object.constructor,
       propertyName,

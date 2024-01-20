@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { BasicStrategy } from 'passport-http';
-import { basicConstants } from 'src/features/auth/infrastructure/guards/constants';
+import { basicConstants } from '../constants';
 
 @Injectable()
 export class BasicSAStrategy extends PassportStrategy(BasicStrategy) {

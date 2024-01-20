@@ -1,4 +1,7 @@
 {
   "editor.fontSize": 16,
-  "files.autoSave": "afterDelay"
+  "files.autoSave": "afterDelay",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "typescript.preferences.importModuleSpecifier": "relative"
 }

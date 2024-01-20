@@ -1,25 +1,30 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { add } from 'date-fns';
-import {
-  UserAccount,
-  UserAccountDocument,
-  UserAccountModelType,
-} from 'src/features/admin/domain/entities/userAccount.schema';
-import { BcryptAdapter } from 'src/infra/adapters/bcrypt-adapter';
-import { EmailManager } from 'src/infra/application/managers/email-manager';
-import { OutputId } from 'src/infra/likes.types';
 import { v4 as uuidv4 } from 'uuid';
 import { PasswordRecoveryType } from '../api/models/auth-input.models.ts/input-password-rec.type';
 import {
+  UserRecoveryType,
   UserAccountViewModel,
-  UserRecoveryType
 } from '../api/models/auth.output.models/auth.output.models';
 import {
   AuthUserType,
   LoginCredentials,
 } from '../api/models/auth.output.models/auth.user.types';
 import { AuthRepository } from '../infrastructure/authUsers-repository';
+import { BcryptAdapter } from '../../../infra/adapters/bcrypt-adapter';
+import { EmailManager } from '../../../infra/application/managers/email-manager';
+import { OutputId } from '../../../infra/likes.types';
+import {
+  UserAccount,
+  UserAccountModelType,
+  UserAccountDocument,
+} from '../../admin/domain/entities/userAccount.schema';
 
 export type UserIdType = {
   userId: string;
@@ -166,49 +171,48 @@ export class AuthUserService {
   }
 
   async confirmEmail(code: string): Promise<UserAccountDocument> {
-    const user = await this.authUsersRepository.findUserByConfirmationCode(
-      code
-    );
+    const user =
+      await this.authUsersRepository.findUserByConfirmationCode(code);
 
     if (!user) {
-      throw new NotFoundException('User not found')
+      throw new NotFoundException('User not found');
     }
 
     const { isConfirmed, confirmationCode } = user.emailConfirmation;
 
     if (isConfirmed || confirmationCode !== code) {
-      throw new BadRequestException()
+      throw new BadRequestException();
     }
 
-   
     // user.confirm(); user.confirm is not a function
-    user.emailConfirmation.isConfirmed = true
+    user.emailConfirmation.isConfirmed = true;
     const result = await this.authUsersRepository.save(user);
 
-    return result
+    return result;
   }
 
-  async updateConfirmationCode(
-    user: UserAccountViewModel
-  ): Promise<boolean> {
+  async updateConfirmationCode(user: UserAccountViewModel): Promise<boolean> {
     const newConfirmationCode = uuidv4();
-    const { email } = user.accountData
+    const { email } = user.accountData;
     try {
       const updatedCode = await this.authUsersRepository.updateConfirmationCode(
         email,
-        newConfirmationCode
+        newConfirmationCode,
       );
 
       const confirmLetter =
         await this.emailManager.sendEmailConfirmationMessage(
           email,
-          newConfirmationCode
+          newConfirmationCode,
         );
     } catch (error) {
-      throw new InternalServerErrorException('during update confirmation occured some problems', error)
+      throw new InternalServerErrorException(
+        'during update confirmation occured some problems',
+        error,
+      );
     }
 
-    return !!newConfirmationCode
+    return !!newConfirmationCode;
   }
 
   private sendRecoveryMsg(email: string, recoveryPassInfo: UserRecoveryType) {

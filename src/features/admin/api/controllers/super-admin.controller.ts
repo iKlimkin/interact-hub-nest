@@ -12,13 +12,13 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { SortingQueryModel } from 'src/infra/SortingQueryModel';
-import { PaginationViewModel } from 'src/infra/paginationViewModel';
 import { AdminUserService } from '../../application/user.admins.service';
 import { InputUserModel } from '../models/create.userAdmin.model';
 import { UserViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
 import { UsersQueryRepository } from '../query-repositories/users.query.repo';
-import { BasicSAAuthGuard } from 'src/features/auth/infrastructure/guards/basic-auth.guard';
+import { SortingQueryModel } from '../../../../infra/SortingQueryModel';
+import { PaginationViewModel } from '../../../../infra/paginationViewModel';
+import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth.guard';
 
 @UseGuards(BasicSAAuthGuard)
 @Controller('users')

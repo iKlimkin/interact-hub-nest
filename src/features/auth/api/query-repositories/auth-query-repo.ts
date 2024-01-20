@@ -1,12 +1,12 @@
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
-import {
-  UserAccount,
-  UserAccountModelType,
-} from 'src/features/admin/domain/entities/userAccount.schema';
 import { UserAccountViewModel } from '../models/auth.output.models/auth.output.models';
 import { LoginOrEmailType } from '../models/auth.output.models/auth.user.types';
 import { getUserAccountViewModel } from '../models/auth.output.models/getUserAccount.view.model';
+import {
+  UserAccount,
+  UserAccountModelType,
+} from '../../../admin/domain/entities/userAccount.schema';
 
 @Injectable()
 export class AuthQueryRepository {

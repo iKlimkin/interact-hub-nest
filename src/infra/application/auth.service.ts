@@ -1,14 +1,10 @@
-import { v4 as uuidv4 } from 'uuid';
-import {
-  JwtTokens,
-  VerifyTokensType,
-  TokensMeta,
-  Payload,
-} from 'src/features/auth/api/models/jwt.types';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { jwtConstants } from 'src/features/auth/infrastructure/guards/constants';
-import { UserInfoType } from 'src/features/auth/api/controllers/auth.controller';
+import { v4 as uuidv4 } from 'uuid';
+import { UserInfoType } from '../../features/auth/api/controllers/auth.controller';
+import { VerifyTokensType, TokensMeta, Payload, JwtTokens } from '../../features/auth/api/models/jwt.types';
+import { jwtConstants } from '../../features/auth/infrastructure/guards/constants';
+
 
 @Injectable()
 export class AuthService {
@@ -58,7 +54,9 @@ export class AuthService {
     };
   }
 
-  private async createNewTokens(payload: UserInfoType): Promise<[accessToken: string, refreshToken: string]> {
+  private async createNewTokens(
+    payload: UserInfoType,
+  ): Promise<[accessToken: string, refreshToken: string]> {
     return await Promise.all([
       this.jwtService.signAsync(payload, {
         secret: jwtConstants.jwt_access_secret,

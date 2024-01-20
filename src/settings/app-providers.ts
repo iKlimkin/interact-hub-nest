@@ -1,19 +1,24 @@
 import { Provider } from '@nestjs/common';
-import { AppService } from 'src/app.service';
-import { BlogsQueryRepo } from 'src/features/blogs/api/query-repositories/blogs.query.repo';
-import { BlogsService } from 'src/features/blogs/application/blogs.service';
-import { BlogsRepository } from 'src/features/blogs/infrastructure/blogs.repository';
-import { FeedbacksQueryRepository } from 'src/features/comments/api/query-repositories/feedbacks.query.repository';
-import { FeedbacksService } from 'src/features/comments/application/feedbacks.service';
-import { FeedbacksRepository } from 'src/features/comments/infrastructure/feedbacks.repository';
-import { PostsQueryRepository } from 'src/features/posts/api/query-repositories/posts.query.repo';
-import { PostsService } from 'src/features/posts/application/posts.service';
-import { PostsRepository } from 'src/features/posts/infrastructure/posts.repository';
-import { BlogIdExistConstraint } from 'src/infra/decorators/validate/valid-blogId';
-import { TestDatabaseRepo } from 'src/mock-data/test.db';
+import { AppService } from '../app.service';
+import { BlogsQueryRepo } from '../features/blogs/api/query-repositories/blogs.query.repo';
+import { CreateBlogUseCase } from '../features/blogs/application/use-case/create-blog-use-case';
+import { DeleteBlogUseCase } from '../features/blogs/application/use-case/delete-blog-use-case';
+import { UpdateBlogUseCase } from '../features/blogs/application/use-case/update-blod-use-case';
+import { BlogsRepository } from '../features/blogs/infrastructure/blogs.repository';
+import { FeedbacksQueryRepository } from '../features/comments/api/query-repositories/feedbacks.query.repository';
+import { FeedbacksService } from '../features/comments/application/feedbacks.service';
+import { FeedbacksRepository } from '../features/comments/infrastructure/feedbacks.repository';
+import { PostsQueryRepository } from '../features/posts/api/query-repositories/posts.query.repo';
+import { PostsService } from '../features/posts/application/posts.service';
+import { CreatePostUseCase } from '../features/posts/application/use-cases/create-post-use-case';
+import { DeletePostUseCase } from '../features/posts/application/use-cases/delete-post-use-case';
+import { UpdatePostUseCase } from '../features/posts/application/use-cases/update-post-use-case';
+import { PostsRepository } from '../features/posts/infrastructure/posts.repository';
+import { BlogIdExistConstraint } from '../infra/decorators/validate/valid-blogId';
+import { ApiRequestCounterRepository } from '../infra/repositories/api-request-counter.repository';
+import { TestDatabaseRepo } from '../mock-data/test.db';
 
 const blogsProviders: Provider[] = [
-  BlogsService,
   BlogsQueryRepo,
   BlogsRepository,
 ];
@@ -30,8 +35,20 @@ const feedbacksProviders: Provider[] = [
   FeedbacksRepository,
 ];
 
+const useCases: Provider[] = [
+  CreatePostUseCase,
+  UpdatePostUseCase,
+  DeletePostUseCase,
+
+  CreateBlogUseCase,
+  UpdateBlogUseCase,
+  DeleteBlogUseCase,
+];
+
 export const providers = [
   AppService,
+  ApiRequestCounterRepository,
+  ...useCases,
 
   ...blogsProviders,
 

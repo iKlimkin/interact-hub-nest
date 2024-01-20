@@ -36,13 +36,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
-    
+
     if (status === HttpStatus.BAD_REQUEST) {
-      let errorResponse: any = {
+      const errorResponse: any = {
         errorsMessages: [],
       };
       const { message }: any = exception.getResponse();
-      
+
       if (Array.isArray(message)) {
         message.forEach((m: string) => errorResponse.errorsMessages.push(m));
       } else {

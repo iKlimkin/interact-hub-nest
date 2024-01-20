@@ -10,30 +10,33 @@ import {
   Post,
   Put,
   Query,
-  Res,
   UseGuards,
 } from '@nestjs/common';
-import { Response } from 'express';
-import { PostsService } from 'src/features/posts/application/posts.service';
-import { PostsQueryRepository } from 'src/features/posts/api/query-repositories/posts.query.repo';
-import { SortingQueryModel } from 'src/infra/SortingQueryModel';
-import { PaginationViewModel } from 'src/infra/paginationViewModel';
-import { BlogsService } from '../../application/blogs.service';
-import { BlogsQueryRepo } from '../query-repositories/blogs.query.repo';
+import { CommandBus } from '@nestjs/cqrs';
+import { SortingQueryModel } from '../../../../infra/SortingQueryModel';
+
+import { SetUserIdGuard } from '../../../../infra/guards/set-user-id.guard';
+import { PaginationViewModel } from '../../../../infra/paginationViewModel';
+import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth.guard';
+import { CreatePostModel } from '../../../posts/api/models/input.posts.models/create.post.model';
+import { PostViewModel } from '../../../posts/api/models/post.view.models/PostViewModel';
+import { PostsQueryRepository } from '../../../posts/api/query-repositories/posts.query.repo';
+import { CreatePostCommand } from '../../../posts/application/use-cases/create-post-use-case';
+import { CreateBlogCommand } from '../../application/use-case/create-blog-use-case';
+import { UpdateBlogCommand } from '../../application/use-case/update-blod-use-case';
 import { BlogViewModel } from '../models/blog.view.models/blog.view.models';
 import { InputBlogModel } from '../models/input.blog.models/create.blog.model';
 import { BlogType } from '../models/output.blog.models/blog.models';
-import { CreatePostModel } from 'src/features/posts/api/models/input.posts.models/create.post.model';
-import { PostViewModel } from 'src/features/posts/api/models/post.view.models/PostViewModel';
-import { BasicSAAuthGuard } from 'src/features/auth/infrastructure/guards/basic-auth.guard';
+import { BlogsQueryRepo } from '../query-repositories/blogs.query.repo';
+import { DeletBlogCommand } from '../../application/use-case/delete-blog-use-case';
+import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
 
 @Controller('blogs')
 export class BlogsController {
   constructor(
-    private readonly blogsService: BlogsService,
-    private readonly postsService: PostsService,
     private readonly blogsQueryRepo: BlogsQueryRepo,
     private readonly postsQueryRepo: PostsQueryRepository,
+    private readonly commandBus: CommandBus,
   ) {}
 
   @Get()
@@ -43,6 +46,7 @@ export class BlogsController {
   ): Promise<PaginationViewModel<BlogType>> {
     const { pageNumber, pageSize, sortBy, sortDirection, searchNameTerm } =
       query;
+    console.log('Blogs controller');
 
     const receivedBlogs = await this.blogsQueryRepo.getBlogsByQuery({
       pageNumber,
@@ -68,15 +72,12 @@ export class BlogsController {
   }
 
   @Get(':id/posts')
-  @HttpCode(HttpStatus.OK)
+  @UseGuards(SetUserIdGuard)
   async getPostsByBlogId(
+    @CurrentUserId() userId: string,
     @Param('id') blogId: string,
     @Query() query: SortingQueryModel,
-    @Res() res: Response<PaginationViewModel<PostViewModel>>,
-  ) {
-    const { userId } = res.locals;
-    const { pageNumber, pageSize, sortBy, sortDirection } = query;
-
+  ): Promise<PaginationViewModel<PostViewModel>> {
     const blog = await this.blogsQueryRepo.getBlogById(blogId);
 
     if (!blog) {
@@ -85,23 +86,22 @@ export class BlogsController {
 
     const foundPostsByBlogId = await this.postsQueryRepo.getPostsByBlogId(
       blogId,
-      {
-        pageNumber,
-        pageSize,
-        sortBy,
-        sortDirection,
-      },
+      query,
       userId,
     );
 
-    res.send(foundPostsByBlogId);
+    return foundPostsByBlogId;
   }
 
   @Post()
   @UseGuards(BasicSAAuthGuard)
   @HttpCode(HttpStatus.CREATED)
-  async createBlog(@Body() body: InputBlogModel): Promise<BlogViewModel> {
-    const createdBlog = await this.blogsService.createBlog(body);
+  async createBlog(
+    @Body() createBlogDto: InputBlogModel,
+  ): Promise<BlogViewModel> {
+    const createdBlog = await this.commandBus.execute(
+      new CreateBlogCommand(createBlogDto),
+    );
 
     const newlyCreatedBlog = await this.blogsQueryRepo.getBlogById(
       createdBlog.id,
@@ -121,14 +121,9 @@ export class BlogsController {
     @Param('id') blogId: string,
     @Body() body: CreatePostModel,
   ): Promise<PostViewModel> {
-    const { title, shortDescription, content } = body;
-
-    const createdPost = await this.postsService.createPost({
-      title,
-      shortDescription,
-      content,
-      blogId,
-    });
+    const createdPost = await this.commandBus.execute(
+      new CreatePostCommand({ ...body, blogId }),
+    );
 
     const newlyCreatedPost = await this.postsQueryRepo.getPostById(
       createdPost.id,
@@ -144,14 +139,13 @@ export class BlogsController {
   @Put(':id')
   @UseGuards(BasicSAAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async updateBlog(@Param('id') blogId: string, @Body() body: InputBlogModel) {
-    const { name, description, websiteUrl } = body;
-
-    const updatedBlog = await this.blogsService.updateBlog(blogId, {
-      name,
-      description,
-      websiteUrl,
-    });
+  async updateBlog(
+    @Param('id') blogId: string,
+    @Body() inputBlogDto: InputBlogModel,
+  ) {
+    const updatedBlog = await this.commandBus.execute(
+      new UpdateBlogCommand({ blogId, ...inputBlogDto }),
+    );
 
     if (!updatedBlog) {
       throw new NotFoundException('blog not found');
@@ -162,7 +156,9 @@ export class BlogsController {
   @UseGuards(BasicSAAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(@Param('id') blogId: string) {
-    const deleteBlog = await this.blogsService.deleteBlog(blogId);
+    const deleteBlog = await this.commandBus.execute(
+      new DeletBlogCommand(blogId),
+    );
 
     if (!deleteBlog) {
       throw new NotFoundException('blog not found');

@@ -1,6 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { OutputId, likeUserInfo } from 'src/infra/likes.types';
 import { UpdatePostModel } from '../api/models/input.posts.models/update.post.model';
 import { PostDBType } from '../api/models/post.view.models/getPostViewModel';
 import {
@@ -8,6 +7,7 @@ import {
   PostDocument,
   PostModelType,
 } from '../domain/entities/posts.schema';
+import { OutputId, likeUserInfo } from '../../../infra/likes.types';
 
 @Injectable()
 export class PostsRepository {
@@ -34,18 +34,6 @@ export class PostsRepository {
     updateData: UpdatePostModel,
   ): Promise<boolean> {
     try {
-      // const post = await this.PostModel.updateOne(
-      //   { _id: postId },
-      //   {
-      //     $set: {
-      //       title: updateData.title,
-      //       shortDescription: updateData.shortDescription,
-      //       content: updateData.content,
-      //       blogId: updateData.blogId,
-      //     },
-      //   },
-      // );
-
       const post = await this.PostModel.updateOne(
         {
           $and: [{ _id: postId }, { blogId: updateData.blogId }],
@@ -124,7 +112,7 @@ export class PostsRepository {
     }
   }
 
-  async deletePost(searchId: string): Promise<PostDBType> {
+  async deletePost(searchId: string): Promise<boolean> {
     try {
       return this.PostModel.findByIdAndDelete(searchId).lean();
     } catch (error) {

@@ -1,5 +1,5 @@
 import { WithId } from 'mongodb';
-import { UserViewModel } from 'src/features/admin/api/models/userAdmin.view.models/userAdmin.view.model';
+import { UserViewModel } from '../../../../admin/api/models/userAdmin.view.models/userAdmin.view.model';
 
 export type UserType = {
   login: string;

@@ -1,14 +1,14 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { BlogDBType, BlogType } from '../models/output.blog.models/blog.models';
-import { SortingQueryModel } from 'src/infra/SortingQueryModel';
-import { getPagination } from 'src/infra/utils/pagination';
+import { getPagination } from '../../../../infra/utils/pagination';
 import { BlogViewModel } from '../models/blog.view.models/blog.view.models';
 import { getBlogViewModel } from '../models/blog.view.models/getBlogViewModel';
 import { InjectModel } from '@nestjs/mongoose';
 import { Blog, BlogModelType } from '../../domain/entities/blog.schema';
-import { PaginationViewModel } from 'src/infra/paginationViewModel';
-import { BaseModel } from 'src/infra/utils/BasePaginationModel';
-import { getSearchTerm } from 'src/infra/utils/searchTerm';
+import { BaseModel } from '../../../../infra/utils/BasePaginationModel';
+import { getSearchTerm } from '../../../../infra/utils/searchTerm';
+import { SortingQueryModel } from '../../../../infra/SortingQueryModel';
+import { PaginationViewModel } from '../../../../infra/paginationViewModel';
 
 @Injectable()
 export class BlogsQueryRepo {
@@ -38,8 +38,8 @@ export class BlogsQueryRepo {
 
       return getBlogViewModel(foundedBlog);
     } catch (error) {
-      console.error(error)
-      return null
+      console.error(error);
+      return null;
     }
   }
 

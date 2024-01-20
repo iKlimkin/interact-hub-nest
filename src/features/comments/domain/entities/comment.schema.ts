@@ -1,5 +1,4 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-
 import {
   CommentType,
   CreateCommentType,
@@ -10,7 +9,7 @@ import {
   likesStatus,
   LikesUserInfoType,
   LikesCountType,
-} from 'src/infra/likes.types';
+} from '../../../../infra/likes.types';
 
 export type CommentDocument = HydratedDocument<Comment>;
 export type CommentModelType = Model<CommentDocument> & CommentModelStaticType;

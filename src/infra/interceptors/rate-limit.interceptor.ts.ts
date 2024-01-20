@@ -46,7 +46,7 @@ export class RateLimitInterceptor implements NestInterceptor {
 
     if (requestCount <= 5) return next.handle();
 
-    let result = {
+    const result = {
       requestInfo: [
         {
           ip: requestLogger[0].ip,

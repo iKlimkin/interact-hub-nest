@@ -1,7 +1,4 @@
 import { Provider } from '@nestjs/common';
-import { UsersQueryRepository } from 'src/features/admin/api/query-repositories/users.query.repo';
-import { AdminUserService } from 'src/features/admin/application/user.admins.service';
-import { UsersRepository } from 'src/features/admin/infrastructure/users.repository';
 import { BasicSAStrategy } from '../guards/strategies/basic-strategy';
 import {
   AccessTokenStrategy,
@@ -12,12 +9,15 @@ import { AuthQueryRepository } from '../../api/query-repositories/auth-query-rep
 import { AuthUserService } from '../../application/auth-user.service';
 import { AuthRepository } from '../authUsers-repository';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { ApiRequestCounterService } from 'src/infra/application/api-request-counter.service';
-import { RateLimitInterceptor } from 'src/infra/interceptors/rate-limit.interceptor.ts';
-import { ApiRequestCounterRepository } from 'src/infra/repositories/api-request-counter.repository';
-import { SecurityRepository } from 'src/features/security/infrastructure/security.repository';
-import { SecurityQueryRepo } from 'src/features/security/api/query-repositories/security.query.repo';
-import { SecurityService } from 'src/features/security/application/security.service';
+import { ApiRequestCounterService } from '../../../../infra/application/api-request-counter.service';
+import { RateLimitInterceptor } from '../../../../infra/interceptors/rate-limit.interceptor.ts';
+import { ApiRequestCounterRepository } from '../../../../infra/repositories/api-request-counter.repository';
+import { UsersQueryRepository } from '../../../admin/api/query-repositories/users.query.repo';
+import { AdminUserService } from '../../../admin/application/user.admins.service';
+import { UsersRepository } from '../../../admin/infrastructure/users.repository';
+import { SecurityQueryRepo } from '../../../security/api/query-repositories/security.query.repo';
+import { SecurityService } from '../../../security/application/security.service';
+import { SecurityRepository } from '../../../security/infrastructure/security.repository';
 
 export const userAccountProviders: Provider[] = [
   AuthUserService,
@@ -40,13 +40,13 @@ export const Strategies: Provider[] = [
 
 export const requestLoggerProviders: Provider[] = [
   ApiRequestCounterService,
-  ApiRequestCounterRepository
-]
+  ApiRequestCounterRepository,
+];
 
 export const RequestLoggerInterseptor = {
   provide: APP_INTERCEPTOR,
   useClass: RateLimitInterceptor,
-}
+};
 
 export const securitiesProviders: Provider[] = [
   SecurityService,

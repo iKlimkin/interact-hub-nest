@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { OutputId, likeUserInfo } from 'src/infra/likes.types';
+import { OutputId, likeUserInfo } from '../../../infra/likes.types';
 import { InputCommentModel } from '../api/models/input.comment.models';
 import {
   Comment,
@@ -7,7 +7,7 @@ import {
   CommentWholeModelTypes,
 } from '../domain/entities/comment.schema';
 import { FeedbacksRepository } from '../infrastructure/feedbacks.repository';
-import { UsersRepository } from 'src/features/admin/infrastructure/users.repository';
+import { UsersRepository } from '../../../features/admin/infrastructure/users.repository';
 import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()

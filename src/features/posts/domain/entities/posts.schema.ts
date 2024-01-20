@@ -1,7 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Model } from 'mongoose';
-import { LikesCountType, LikesUserInfoType } from 'src/infra/likes.types';
 import { CreatePostModel } from '../../api/models/input.posts.models/create.post.model';
+import {
+  LikesUserInfoType,
+  LikesCountType,
+} from '../../../../infra/likes.types';
 
 export type PostDocument = HydratedDocument<Post>;
 export type PostModelType = Model<PostDocument> & PostModelStaticType;

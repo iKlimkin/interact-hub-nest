@@ -1,12 +1,6 @@
-import { Matches } from 'class-validator';
-import { iSValidField } from 'src/infra/decorators/transform/is-valid-string';
-import {
-  emailMatches,
-  frequentLength,
-  loginLength,
-  loginMatch,
-  passwordLength,
-} from 'src/infra/validation.constants';
+import { iSValidField } from "../../../../../infra/decorators/transform/is-valid-string";
+import { loginLength, loginMatch, passwordLength, frequentLength, emailMatches } from "../../../../../infra/validation.constants";
+
 
 export class InputRegistrationModel {
   /**

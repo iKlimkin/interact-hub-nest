@@ -1,11 +1,11 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { OutputId } from 'src/infra/likes.types';
 import {
   Security,
   SecurityDocument,
   SecurityModelType,
 } from '../domain/entities/security.schema';
+import { OutputId } from '../../../infra/likes.types';
 
 @Injectable()
 export class SecurityRepository {

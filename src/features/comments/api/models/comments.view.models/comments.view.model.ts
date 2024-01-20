@@ -1,4 +1,4 @@
-import { likesStatus } from 'src/infra/likes.types';
+import { likesStatus } from "../../../../../infra/likes.types";
 
 export type CommentsViewModel = {
   /**

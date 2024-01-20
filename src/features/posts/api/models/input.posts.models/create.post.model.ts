@@ -1,11 +1,12 @@
-import { iSValidField } from 'src/infra/decorators/transform/is-valid-string';
-import { BlogIdIsExist } from 'src/infra/decorators/validate/valid-blogId';
+import { IsString } from 'class-validator';
+import { iSValidField } from '../../../../../infra/decorators/transform/is-valid-string';
+import { BlogIdIsExist } from '../../../../../infra/decorators/validate/valid-blogId';
 import {
-  blogIdLength,
-  contentLength,
-  frequentLength,
   titleLength,
-} from 'src/infra/validation.constants';
+  frequentLength,
+  contentLength,
+  blogIdLength,
+} from '../../../../../infra/validation.constants';
 
 export type CreatePostByBlog = Omit<CreatePostModel, 'blogId'>;
 
@@ -56,4 +57,11 @@ export class InputPostModel {
   @iSValidField(blogIdLength)
   @BlogIdIsExist("blogId doesn't exist")
   blogId: string;
+}
+
+export class UpdatePostModel {
+  inputPostDto: InputPostModel
+
+  @IsString()
+  postId: string
 }

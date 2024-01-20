@@ -34,7 +34,9 @@ export class Security extends Document implements SecurityDeviceType {
     security.deviceId = dto.userPayload.deviceId;
     security.refreshToken = dto.refreshToken;
     security.issuedAt = new Date(dto.userPayload.iat! * 1000).toISOString();
-    security.expirationDate = new Date(dto.userPayload.exp! * 1000).toISOString();
+    security.expirationDate = new Date(
+      dto.userPayload.exp! * 1000,
+    ).toISOString();
 
     return security;
   }
@@ -47,11 +49,10 @@ export type SecurityModelType = Model<SecurityDocument> &
   SecurityModelStaticType;
 export type SecurityModelDocumentType = Model<SecurityDocument>;
 
-
 export const SecurityStaticMethods = {
   makeInstance: Security.makeInstance,
 };
 
-SecuritySchema.statics = SecurityStaticMethods
+SecuritySchema.statics = SecurityStaticMethods;
 
-type SecurityModelStaticType = typeof SecurityStaticMethods
+type SecurityModelStaticType = typeof SecurityStaticMethods;

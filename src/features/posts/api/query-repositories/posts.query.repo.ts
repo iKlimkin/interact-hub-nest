@@ -1,14 +1,14 @@
-import { PaginationViewModel } from 'src/infra/paginationViewModel';
-import { getLikeStatus } from 'src/infra/utils/likesStatusFounder';
-import { getPagination } from 'src/infra/utils/pagination';
-import { getSearchTerm } from 'src/infra/utils/searchTerm';
+import { getPagination } from '../../../../infra/utils/pagination';
+import { getSearchTerm } from '../../../../infra/utils/searchTerm';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostModelType } from '../../domain/entities/posts.schema';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { SortingQueryModel } from 'src/infra/SortingQueryModel';
-import { likesStatus } from 'src/infra/likes.types';
+import { SortingQueryModel } from '../../../../infra/SortingQueryModel';
+import { likesStatus } from '../../../../infra/likes.types';
 import { PostViewModel } from '../models/post.view.models/PostViewModel';
 import { getPostViewModel } from '../models/post.view.models/getPostViewModel';
+import { PaginationViewModel } from '../../../../infra/paginationViewModel';
+import { getLikeStatus } from '../../../../infra/utils/get-like-status';
 
 @Injectable()
 export class PostsQueryRepository {

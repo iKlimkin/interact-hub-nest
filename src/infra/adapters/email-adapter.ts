@@ -11,7 +11,7 @@ export class EmailAdapter {
     const recoveryLink = `https://somesite.com/password-recovery?recoveryCode=${inputData.recoveryCode}`;
 
     const transporter = this.createTransport();
-    
+
     const message = `
     <p>To finish password recovery please follow the link below:
       <a href='${recoveryLink}'>recovery password</a>

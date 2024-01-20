@@ -1,15 +1,16 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { SortingQueryModel } from 'src/infra/SortingQueryModel';
-import { PaginationViewModel } from 'src/infra/paginationViewModel';
-import { getPagination } from 'src/infra/utils/pagination';
-import { getSearchTerm } from 'src/infra/utils/searchTerm';
+
 import {
   UserAccount,
   UserAccountModelType,
 } from '../../domain/entities/userAccount.schema';
 import { getUserViewModel } from '../models/userAdmin.view.models/getUserAdmin.view.model';
 import { UserViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
+import { SortingQueryModel } from '../../../../infra/SortingQueryModel';
+import { PaginationViewModel } from '../../../../infra/paginationViewModel';
+import { getPagination } from '../../../../infra/utils/pagination';
+import { getSearchTerm } from '../../../../infra/utils/searchTerm';
 
 @Injectable()
 export class UsersQueryRepository {

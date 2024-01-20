@@ -1,8 +1,8 @@
-import { WithId } from "mongodb";
-import { UserAccountType, UserAccountViewModel } from "./auth.output.models";
+import { WithId } from 'mongodb';
+import { UserAccountType, UserAccountViewModel } from './auth.output.models';
 
 export const getUserAccountViewModel = (
-  user: WithId<UserAccountType>
+  user: WithId<UserAccountType>,
 ): UserAccountViewModel => ({
   accountData: {
     id: user._id.toString(),

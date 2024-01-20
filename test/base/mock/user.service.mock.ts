@@ -1,12 +1,11 @@
+import { EmailManager } from '../../../src/infra/application/managers/email-manager';
 
-
-//  .overrideProvider(UsersService)
-
-import { UsersQueryRepository } from "src/features/admin/api/query-repositories/users.query.repo";
-
-//  .useValue(UserServiceMockObject)
-export const UserServiceMockObject = {
-  sendMessageOnEmail: jest.fn().mockImplementation(async () => {
+export const EmailServiceMockObject = {
+  sendEmailConfirmationMessage: jest.fn().mockImplementation(async () => {
+    console.log('Call mock method sendPasswordRecoveryMail / MailService');
+    return true;
+  }),
+  sendEmailRecoveryMessage: jest.fn().mockImplementation(async () => {
     console.log('Call mock method sendPasswordRecoveryMail / MailService');
     return true;
   }),
@@ -23,8 +22,18 @@ export const UserServiceMockObject = {
 //      inject: [UsersRepository]
 //      }
 //     )
-export class UserServiceMock {
-  constructor(private usersQueryRepo: UsersQueryRepository) {}
 
-  sendMessageOnEmail: () => true;
+export class EmailManagerMock extends EmailManager {
+  async sendEmailConfirmationMessage(
+    email: string,
+    confirmationCode: string,
+  ): Promise<void> {
+    await Promise.resolve();
+  }
+  async sendEmailRecoveryMessage(
+    email: string,
+    recoveryCode: string,
+  ): Promise<void> {
+    await Promise.resolve();
+  }
 }

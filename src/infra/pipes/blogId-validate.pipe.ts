@@ -5,8 +5,7 @@ import {
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
-import { BlogsQueryRepo } from 'src/features/blogs/api/query-repositories/blogs.query.repo';
-
+import { BlogsQueryRepo } from '../../features/blogs/api/query-repositories/blogs.query.repo';
 
 @Injectable()
 export class BlogIdValidationPipe implements PipeTransform {
@@ -20,7 +19,7 @@ export class BlogIdValidationPipe implements PipeTransform {
     }
 
     const blogExists = await this.blogsQueryRepo.getBlogById(blogId);
- 
+
     if (!blogExists) {
       throw new BadRequestException('Invalid blogId');
     }

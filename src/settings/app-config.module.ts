@@ -1,6 +1,6 @@
 import { ConfigModule } from '@nestjs/config';
 import Joi from 'joi';
-import { getConfiguration } from 'src/config/configuration';
+import { getConfiguration } from '../config/configuration';
 
 export const configModule = ConfigModule.forRoot({
   envFilePath: ['.env'], // envFilePath: ['.env.local', '.env'] prioritize

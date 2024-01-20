@@ -1,6 +1,9 @@
 import { WithId } from 'mongodb';
-import { LikesUserInfoType, likesStatus } from 'src/infra/likes.types';
-import { getLikeStatus } from 'src/infra/utils/likesStatusFounder';
+import {
+  LikesUserInfoType,
+  likesStatus,
+} from '../../../../../infra/likes.types';
+import { getLikeStatus } from '../../../../../infra/utils/get-like-status';
 import { PostType } from '../output.post.models/output.post.models';
 import { PostStatusInfo, PostViewModel } from './PostViewModel';
 

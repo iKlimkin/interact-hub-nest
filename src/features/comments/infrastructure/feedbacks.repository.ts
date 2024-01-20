@@ -1,11 +1,11 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { OutputId, likeUserInfo } from 'src/infra/likes.types';
 import {
   Comment,
   CommentDocument,
   CommentModelType,
 } from '../domain/entities/comment.schema';
+import { OutputId, likeUserInfo } from '../../../infra/likes.types';
 
 @Injectable()
 export class FeedbacksRepository {
@@ -50,7 +50,8 @@ export class FeedbacksRepository {
       return this.CommentModel.findByIdAndDelete(commentId).lean();
     } catch (error) {
       throw new InternalServerErrorException(
-        'Database fails during delete comment operation', error
+        'Database fails during delete comment operation',
+        error,
       );
     }
   }
@@ -77,7 +78,8 @@ export class FeedbacksRepository {
       return createdLikeStatus !== null;
     } catch (error) {
       throw new InternalServerErrorException(
-        'Database fails during make likeStatus in comment operation', error
+        'Database fails during make likeStatus in comment operation',
+        error,
       );
     }
   }
@@ -106,7 +108,8 @@ export class FeedbacksRepository {
       return updatedLike !== null;
     } catch (error) {
       throw new InternalServerErrorException(
-        'Database fails during update likeStatus in comment operation', error
+        'Database fails during update likeStatus in comment operation',
+        error,
       );
     }
   }

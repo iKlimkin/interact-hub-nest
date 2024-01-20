@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { OutputId } from 'src/infra/likes.types';
 import { InputSessionData } from '../api/models/security-input.models/create.session.type';
 import {
   Security,
@@ -7,6 +6,7 @@ import {
 } from '../domain/entities/security.schema';
 import { SecurityRepository } from '../infrastructure/security.repository';
 import { InjectModel } from '@nestjs/mongoose';
+import { OutputId } from '../../../infra/likes.types';
 
 @Injectable()
 export class SecurityService {

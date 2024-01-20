@@ -1,12 +1,12 @@
 import { Matches } from 'class-validator';
-import { iSValidField } from 'src/infra/decorators/transform/is-valid-string';
+import { iSValidField } from '../../../../infra/decorators/transform/is-valid-string';
 import {
+  loginMatch,
   nameLength,
   passwordLength,
-  frequentLength,
   emailMatches,
-  loginMatch,
-} from 'src/infra/validation.constants';
+  frequentLength,
+} from '../../../../infra/validation.constants';
 
 export type CreateUserDto = {
   login: string;

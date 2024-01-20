@@ -4,10 +4,13 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ValidationError, useContainer } from 'class-validator';
-import { AppModule } from 'src/app.module';
-import { HttpExceptionFilter } from 'src/infra/exception-filters/exception.filter';
+import cookieParser from 'cookie-parser';
+import { AppModule } from '../app.module';
+import { HttpExceptionFilter } from '../infra/exception-filters/exception.filter';
+
 
 export const applyAppSettings = (app: INestApplication) => {
+  app.use(cookieParser());
   // Для внедрения зависимостей в validator constraint
   // {fallbackOnErrors: true} требуется, поскольку Nest генерирует исключение,
   // когда DI не имеет необходимого класса.
