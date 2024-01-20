@@ -1,13 +1,12 @@
 import {
+  CallHandler,
+  ExecutionContext,
+  HttpStatus,
   Injectable,
   NestInterceptor,
-  ExecutionContext,
-  CallHandler,
-  HttpStatus,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
 import { Request, Response } from 'express';
+import { Observable } from 'rxjs';
 import { ApiRequestCounterService } from '../application/api-request-counter.service';
 
 @Injectable()

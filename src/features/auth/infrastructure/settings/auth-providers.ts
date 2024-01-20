@@ -18,6 +18,8 @@ import { UsersRepository } from '../../../admin/infrastructure/users.repository'
 import { SecurityQueryRepo } from '../../../security/api/query-repositories/security.query.repo';
 import { SecurityService } from '../../../security/application/security.service';
 import { SecurityRepository } from '../../../security/infrastructure/security.repository';
+import { CreateUserUseCase } from '../../application/use-cases/create-user-use-case';
+import { CheckCredentialsCommand } from '../../application/use-cases/check-credentials-user-use-case';
 
 export const userAccountProviders: Provider[] = [
   AuthUserService,
@@ -52,4 +54,10 @@ export const securitiesProviders: Provider[] = [
   SecurityService,
   SecurityRepository,
   SecurityQueryRepo,
+];
+
+
+export const authUseCases: Provider[] = [
+  CreateUserUseCase,
+  CheckCredentialsCommand
 ];

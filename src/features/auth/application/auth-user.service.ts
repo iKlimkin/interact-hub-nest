@@ -25,6 +25,8 @@ import {
   UserAccountModelType,
   UserAccountDocument,
 } from '../../admin/domain/entities/userAccount.schema';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreateUserCommand } from './use-cases/create-user-use-case';
 
 export type UserIdType = {
   userId: string;
@@ -34,69 +36,11 @@ export type UserIdType = {
 export class AuthUserService {
   constructor(
     @InjectModel(UserAccount.name)
-    private UserAccountModel: UserAccountModelType,
+    private commandBus: CommandBus,
     private authUsersRepository: AuthRepository,
     private bcryptAdapter: BcryptAdapter,
     private emailManager: EmailManager,
   ) {}
-
-  async createUser(
-    inputData: AuthUserType,
-  ): Promise<UserAccountDocument | null> {
-    const { email, login, password } = inputData;
-
-    const { passwordSalt, passwordHash } =
-      await this.bcryptAdapter.createHash(password);
-
-    const foundUserByEmail = await this.authUsersRepository.findByLoginOrEmail({
-      email,
-    });
-
-    if (foundUserByEmail) return null;
-
-    const smartUserModel = this.UserAccountModel.makeInstance({
-      login,
-      email,
-      passwordHash,
-      passwordSalt,
-    });
-
-    const result = await this.authUsersRepository.save(smartUserModel);
-
-    try {
-      if (result)
-        this.emailManager.sendEmailConfirmationMessage(
-          email,
-          result.emailConfirmation.confirmationCode,
-        );
-    } catch (error) {
-      await this.authUsersRepository.deleteUser(smartUserModel.id);
-      return null;
-    }
-
-    return result;
-  }
-
-  async checkCredentials(
-    credentials: LoginCredentials,
-  ): Promise<UserIdType | null> {
-    const user = await this.authUsersRepository.findByLoginOrEmail({
-      loginOrEmail: credentials.loginOrEmail,
-    });
-
-    if (!user) return null;
-
-    const validPassword = this.bcryptAdapter.compareAsync(
-      credentials.password,
-      user.accountData.passwordHash,
-    );
-
-    if (!validPassword) return null;
-
-    return {
-      userId: user._id.toString(),
-    };
-  }
 
   async createTemporaryUserAccount(email: string): Promise<OutputId> {
     const recoveryPassInfo: UserRecoveryType = createRecoveryCode();
@@ -156,11 +100,13 @@ export class AuthUserService {
     if (foundTemporaryUserAccount) {
       const uniqueLogin = uuidv4();
 
-      const createdUser = await this.createUser({
-        login: uniqueLogin,
-        email: foundTemporaryUserAccount.email,
-        password: newPassword,
-      });
+      const createdUser = await this.commandBus.execute(
+        new CreateUserCommand({
+          login: uniqueLogin,
+          email: foundTemporaryUserAccount.email,
+          password: newPassword,
+      })
+      )
 
       const deleteTempAccount =
         await this.authUsersRepository.deleteTemporaryUserAccount(recoveryCode);
@@ -170,19 +116,17 @@ export class AuthUserService {
     return false;
   }
 
-  async confirmEmail(code: string): Promise<UserAccountDocument> {
+  async confirmEmail(code: string): Promise<UserAccountDocument | null> {
     const user =
       await this.authUsersRepository.findUserByConfirmationCode(code);
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+    // throw new BadRequestException([{ message: 'confirmation code not found', field: 'code' }]);
+    if (!user) return null
 
     const { isConfirmed, confirmationCode } = user.emailConfirmation;
 
-    if (isConfirmed || confirmationCode !== code) {
-      throw new BadRequestException();
-    }
+    //  throw new BadRequestException([{ message: 'user is already confirmed', field: 'code' }]);
+
+    if (isConfirmed || confirmationCode !== code) return null
 
     // user.confirm(); user.confirm is not a function
     user.emailConfirmation.isConfirmed = true;

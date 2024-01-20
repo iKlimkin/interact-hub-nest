@@ -33,7 +33,7 @@ export const makeErrorsMessages = (msg: string): ErrorType => {
 
   if (msg === 'code') {
     errorsMessages.push({
-      message: `Confirmation ${msg} is incorrect, expired or already been applied`,
+      message: `incorrect confirmation ${msg}, please check entered data or request again`,
       field: `${msg}`,
     });
   }

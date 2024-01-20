@@ -17,15 +17,18 @@ import { getAuthConfiguration } from './config/configuration';
 import {
   RequestLoggerInterseptor,
   Strategies,
+  authUseCases,
   requestLoggerProviders,
   securitiesProviders,
   userAccountProviders,
   usersProviders,
 } from './infrastructure/settings/auth-providers';
 import { mongooseModels } from './infrastructure/settings/mongoose-models';
+import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
   imports: [
+    CqrsModule,
     JwtModule.register({}),
     PassportModule,
     MongooseModule.forFeature(mongooseModels),
@@ -36,7 +39,7 @@ import { mongooseModels } from './infrastructure/settings/mongoose-models';
     ...Strategies,
 
     RequestLoggerInterseptor,
-
+    ...authUseCases,
     ...requestLoggerProviders,
 
     EmailManager,

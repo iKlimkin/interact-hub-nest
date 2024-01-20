@@ -8,4 +8,6 @@ export type BlogType = {
   isMembership: boolean;
 };
 
+export type BlogsTypeWithId = BlogType & { id: string }
+
 export type BlogDBType = WithId<BlogType>;

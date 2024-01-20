@@ -1,7 +1,11 @@
 export type LoginCredentials = {
+
   loginOrEmail: string;
+
   password: string;
 };
+
+
 
 export type LoginOrEmailType = {
   login?: string | null;

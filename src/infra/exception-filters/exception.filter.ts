@@ -8,8 +8,14 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
+
+type ErrorsMessageType = {
+  message: string;
+  field: string;
+};
+
 type errorsMessages = {
-  errorsMessages: string[];
+  errorsMessages: ErrorsMessageType[] | [];
 };
 
 @Catch(GoneException)
@@ -44,7 +50,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       const { message }: any = exception.getResponse();
 
       if (Array.isArray(message)) {
-        message.forEach((m: string) => errorResponse.errorsMessages.push(m));
+        message.forEach((m: ErrorsMessageType) => errorResponse.errorsMessages.push(m));
       } else {
         errorResponse.errorsMessages.push({ message });
       }

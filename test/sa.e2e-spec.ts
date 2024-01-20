@@ -1,6 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import { TestingModule, Test } from '@nestjs/testing';
-import { UsersTestManager } from './base/UsersTestManager';
+import { UsersTestManager } from './base/managers/UsersTestManager';
 import { aDescribe } from './base/aDescribe';
 import { expectLength } from './base/utils/expect-length.test-utils';
 import { skipSettings } from './tests-settings';

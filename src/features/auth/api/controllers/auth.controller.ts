@@ -32,6 +32,8 @@ import { InputRegistrationCodeModel } from '../models/auth-input.models.ts/input
 import { InputRegistrationModel } from '../models/auth-input.models.ts/input-registration.model';
 import { AuthQueryRepository } from '../query-repositories/auth-query-repo';
 import { Response } from 'express';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreateUserCommand } from '../../application/use-cases/create-user-use-case';
 
 type ClientInfo = {
   ip: string;
@@ -51,9 +53,11 @@ export class AuthController {
     private authUserService: AuthUserService,
     private securityService: SecurityService,
     private authService: AuthService,
+    private commandBus: CommandBus
   ) {}
 
   @UseGuards(LocalAuthGuard)
+  @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(
     @CurrentUserInfo() userInfo: UserInfoType,
@@ -109,7 +113,7 @@ export class AuthController {
     res.send({ accessToken });
   }
 
-  @UseInterceptors(RateLimitInterceptor)
+  //@UseInterceptors(RateLimitInterceptor)
   @Post('new-password')
   @HttpCode(HttpStatus.NO_CONTENT)
   async newPassword(@Body() body: InputRecoveryPassModel) {
@@ -125,7 +129,7 @@ export class AuthController {
     }
   }
 
-  @UseInterceptors(RateLimitInterceptor)
+  //@UseInterceptors(RateLimitInterceptor)
   @Post('password-recovery')
   @HttpCode(HttpStatus.NO_CONTENT)
   async passwordRecovery(@Body() body: InputRecoveryEmailModel) {
@@ -147,10 +151,10 @@ export class AuthController {
   @Post('registration')
   @HttpCode(HttpStatus.NO_CONTENT)
   async registration(
-    @Body() body: InputRegistrationModel,
+    @Body() inputModel: InputRegistrationModel,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { login, email, password } = body;
+    const { login, email } = inputModel;
 
     const foundUser = await this.authQueryRepository.findByLoginOrEmail({
       login,
@@ -172,30 +176,25 @@ export class AuthController {
       return;
     }
 
-    const newUser = await this.authUserService.createUser({
-      login,
-      email,
-      password,
-    });
+    const newUser = await this.commandBus.execute(new CreateUserCommand(inputModel));
   }
 
-  @UseInterceptors(RateLimitInterceptor)
+  //@UseInterceptors(RateLimitInterceptor)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('registration-confirmation')
   async registrationConfirmation(
-    @Body() body: InputRegistrationCodeModel,
+    @Body() inputCode: InputRegistrationCodeModel,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const confirmedUser = await this.authUserService.confirmEmail(body.code);
+    const confirmedUser = await this.authUserService.confirmEmail(inputCode.code);
 
     if (!confirmedUser) {
       const errors = makeErrorsMessages('code');
       res.status(HttpStatus.BAD_REQUEST).send(errors);
-      return;
     }
   }
 
-  @UseInterceptors(RateLimitInterceptor)
+  //@UseInterceptors(RateLimitInterceptor)
   @Post('registration-email-resending')
   @HttpCode(HttpStatus.NO_CONTENT)
   async registrationEmailResending(
