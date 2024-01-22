@@ -16,12 +16,12 @@ import { UpdatePostUseCase } from '../features/posts/application/use-cases/updat
 import { PostsRepository } from '../features/posts/infrastructure/posts.repository';
 import { BlogIdExistConstraint } from '../infra/decorators/validate/valid-blogId';
 import { ApiRequestCounterRepository } from '../infra/repositories/api-request-counter.repository';
-import { TestDatabaseRepo } from '../mock-data/test.db';
+import { TestDatabaseRepo } from '../data-testing/test.db';
+import { CreateCommentUseCase } from '../features/comments/application/use-cases/create-comment.use-case';
+import { UpdateCommentUseCase } from '../features/comments/application/use-cases/update-comment.use-case';
+import { DeleteCommentUseCase } from '../features/comments/application/use-cases/delete-comment.use-case';
 
-const blogsProviders: Provider[] = [
-  BlogsQueryRepo,
-  BlogsRepository,
-];
+const blogsProviders: Provider[] = [BlogsQueryRepo, BlogsRepository];
 
 const postsProviders: Provider[] = [
   PostsService,
@@ -43,6 +43,10 @@ const useCases: Provider[] = [
   CreateBlogUseCase,
   UpdateBlogUseCase,
   DeleteBlogUseCase,
+
+  UpdateCommentUseCase,
+  CreateCommentUseCase,
+  DeleteCommentUseCase,
 ];
 
 export const providers = [
@@ -60,36 +64,3 @@ export const providers = [
 
   TestDatabaseRepo,
 ];
-
-// providers: [
-//   AppService,
-
-//   JwtService,
-
-//   BcryptAdapter,
-//   EmailAdapter,
-
-//   BlogsService,
-// BlogsQueryRepo,
-// BlogsRepository,
-
-// PostsService,
-// PostsQueryRepository,
-// PostsRepository,
-
-//   BlogIdExistConstraint,
-
-//   AdminUserService,
-// UsersQueryRepository,
-// UsersRepository,,
-
-// FeedbacksService,
-// FeedbacksQueryRepository,
-// FeedbacksRepository,
-
-// SecurityService,
-// SecurityRepository,
-// SecurityQueryRepo,
-
-//   TestDatabaseRepo,
-// ],

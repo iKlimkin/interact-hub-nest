@@ -8,18 +8,27 @@ import {
   Post,
   Res,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
+import { CommandBus } from '@nestjs/cqrs';
+import { Response } from 'express';
 import { AuthService } from '../../../../infra/application/auth.service';
-import { RateLimitInterceptor } from '../../../../infra/interceptors/rate-limit.interceptor.ts';
 import { getDeviceInfo } from '../../../../infra/utils/deviceHandler';
 import {
   ErrorType,
   makeErrorsMessages,
 } from '../../../../infra/utils/errorHandler';
 import { UsersQueryRepository } from '../../../admin/api/query-repositories/users.query.repo';
-import { SecurityService } from '../../../security/application/security.service';
-import { AuthUserService } from '../../application/auth-user.service';
+import { UserAccountDocument } from '../../../admin/domain/entities/userAccount.schema';
+import { InputSessionDataValidator } from '../../../security/api/models/security-input.models/create-session.model';
+import { CreateUserSessionCommand } from '../../../security/application/use-cases/commands/create-session.command';
+import { DeleteActiveSessionCommand } from '../../../security/application/use-cases/commands/delete-active-session.command';
+import { UpdateIssuedTokenCommand } from '../../../security/application/use-cases/commands/update-Issued-token.command';
+import { ConfirmEmailCommand } from '../../application/use-cases/confirm-email-use-case';
+import { CreateTempAccountCommand } from '../../application/use-cases/create-temprorary-account.use-case';
+import { CreateUserCommand } from '../../application/use-cases/create-user.use-case';
+import { PasswordRecoveryCommand } from '../../application/use-cases/recovery-password.use-case';
+import { UpdateConfirmationCodeCommand } from '../../application/use-cases/update-confirmation-code.use-case';
+import { UpdatePasswordCommand } from '../../application/use-cases/update-password.use-case';
 import { GetClientInfo } from '../../infrastructure/decorators/client-ip.decorator';
 import { CurrentUserInfo } from '../../infrastructure/decorators/current-user-info.decorator';
 import { AccessTokenGuard } from '../../infrastructure/guards/accessToken.guard';
@@ -30,19 +39,12 @@ import { InputRecoveryEmailModel } from '../models/auth-input.models.ts/input-pa
 import { InputRecoveryPassModel } from '../models/auth-input.models.ts/input-recovery.model';
 import { InputRegistrationCodeModel } from '../models/auth-input.models.ts/input-registration-code.model';
 import { InputRegistrationModel } from '../models/auth-input.models.ts/input-registration.model';
+import { UserInfoType } from '../models/user-models';
 import { AuthQueryRepository } from '../query-repositories/auth-query-repo';
-import { Response } from 'express';
-import { CommandBus } from '@nestjs/cqrs';
-import { CreateUserCommand } from '../../application/use-cases/create-user-use-case';
 
 type ClientInfo = {
   ip: string;
   userAgentInfo: any;
-};
-
-export type UserInfoType = {
-  userId: string;
-  deviceId: string;
 };
 
 @Controller('auth')
@@ -50,10 +52,8 @@ export class AuthController {
   constructor(
     private authQueryRepository: AuthQueryRepository,
     private usersQueryRepo: UsersQueryRepository,
-    private authUserService: AuthUserService,
-    private securityService: SecurityService,
     private authService: AuthService,
-    private commandBus: CommandBus
+    private commandBus: CommandBus,
   ) {}
 
   @UseGuards(LocalAuthGuard)
@@ -74,7 +74,7 @@ export class AuthController {
 
     const { browser, deviceType } = getDeviceInfo(clientInfo.userAgentInfo);
 
-    const createSessionData = {
+    const createSessionData: InputSessionDataValidator = {
       userPayload,
       browser,
       deviceType,
@@ -84,7 +84,9 @@ export class AuthController {
       refreshToken,
     };
 
-    await this.securityService.createUserSession(createSessionData);
+    const command = new CreateUserSessionCommand(createSessionData);
+
+    await this.commandBus.execute(command);
 
     res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
 
@@ -107,7 +109,9 @@ export class AuthController {
 
     const issuedAt = new Date(userInfoAfterRefresh!.iat * 1000).toISOString();
 
-    await this.securityService.updateIssuedToken(deviceId, issuedAt);
+    const command = new UpdateIssuedTokenCommand(deviceId, issuedAt);
+
+    await this.commandBus.execute(command);
 
     res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
     res.send({ accessToken });
@@ -119,10 +123,12 @@ export class AuthController {
   async newPassword(@Body() body: InputRecoveryPassModel) {
     const { newPassword, recoveryCode } = body;
 
-    const updatedPassword = await this.authUserService.updatePassword({
-      newPassword,
-      recoveryCode,
-    });
+    const updatedPassword = await this.commandBus.execute(
+      new UpdatePasswordCommand({
+        newPassword,
+        recoveryCode,
+      }),
+    );
 
     if (!updatedPassword) {
       throw new NotFoundException();
@@ -132,20 +138,19 @@ export class AuthController {
   //@UseInterceptors(RateLimitInterceptor)
   @Post('password-recovery')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async passwordRecovery(@Body() body: InputRecoveryEmailModel) {
-    const { email } = body;
-
-    const foundUserAccount = await this.authQueryRepository.findByLoginOrEmail({
-      email,
-    });
+  async passwordRecovery(@Body() inputEmailModel: InputRecoveryEmailModel) {
+    const foundUserAccount =
+      await this.authQueryRepository.findByLoginOrEmail(inputEmailModel);
 
     if (!foundUserAccount) {
-      const codeForNonExistentUser =
-        await this.authUserService.createTemporaryUserAccount(email);
+      const codeForNonExistentUser = await this.commandBus.execute(
+        new CreateTempAccountCommand(inputEmailModel),
+      );
     }
 
-    const recoveredPassword =
-      await this.authUserService.passwordRecovery(email);
+    const recoveredPassword = await this.commandBus.execute(
+      new PasswordRecoveryCommand(inputEmailModel),
+    );
   }
 
   @Post('registration')
@@ -175,8 +180,12 @@ export class AuthController {
       res.status(HttpStatus.BAD_REQUEST).send(errors!);
       return;
     }
+    const command = new CreateUserCommand(inputModel);
 
-    const newUser = await this.commandBus.execute(new CreateUserCommand(inputModel));
+    const newUser = await this.commandBus.execute<
+      CreateUserCommand,
+      UserAccountDocument
+    >(command);
   }
 
   //@UseInterceptors(RateLimitInterceptor)
@@ -186,7 +195,9 @@ export class AuthController {
     @Body() inputCode: InputRegistrationCodeModel,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const confirmedUser = await this.authUserService.confirmEmail(inputCode.code);
+    const confirmedUser = await this.commandBus.execute(
+      new ConfirmEmailCommand(inputCode),
+    );
 
     if (!confirmedUser) {
       const errors = makeErrorsMessages('code');
@@ -212,8 +223,9 @@ export class AuthController {
       return;
     }
 
-    const updatedUserConfirmation =
-      await this.authUserService.updateConfirmationCode(confirmedUser);
+    const updatedUserConfirmation = await this.commandBus.execute(
+      new UpdateConfirmationCodeCommand(confirmedUser),
+    );
   }
 
   @UseGuards(AccessTokenGuard)
@@ -238,6 +250,7 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
   async logout(@CurrentUserInfo() userInfo: UserInfoType) {
-    await this.securityService.deleteActiveSession(userInfo.deviceId);
+    const command = new DeleteActiveSessionCommand(userInfo.deviceId);
+    await this.commandBus.execute(command);
   }
 }

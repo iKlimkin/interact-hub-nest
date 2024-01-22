@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { v4 as uuidv4 } from 'uuid';
-import { UserInfoType } from '../../features/auth/api/controllers/auth.controller';
+
 import { VerifyTokensType, TokensMeta, Payload, JwtTokens } from '../../features/auth/api/models/jwt.types';
 import { jwtConstants } from '../../features/auth/infrastructure/guards/constants';
+import { UserInfoType } from '../../features/auth/api/models/user-models';
 
 
 @Injectable()

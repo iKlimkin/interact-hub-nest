@@ -25,7 +25,7 @@ type PasswordsType = {
 };
 
 @Injectable()
-export class AuthRepository {
+export class AuthUsersRepository {
   constructor(
     @InjectModel(UserAccount.name)
     private UserAccountModel: UserAccountModelType,
@@ -33,9 +33,9 @@ export class AuthRepository {
     private TempUserAccountModel: TempUserAccountModelType,
   ) {}
 
-  async save(user: UserAccountDocument): Promise<UserAccountDocument> {
+  async save(smartUser: UserAccountDocument): Promise<UserAccountDocument> {
     try {
-      return await user.save();
+      return await smartUser.save();
     } catch (error) {
       throw new InternalServerErrorException(
         'Database fails operate with create user',

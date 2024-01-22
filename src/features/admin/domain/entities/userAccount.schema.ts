@@ -12,8 +12,6 @@ import { HydratedDocument, Model } from 'mongoose';
 export type UserAccountDocument = HydratedDocument<UserAccount>;
 export type UserAccountModelType = Model<UserAccountDocument> &
   UserAccountModelStaticsType;
-export type UserAccountWholeModelTypes = UserAccountModelType &
-  UserAccountModelMethodsType;
 
 const accountData = {
   login: { type: String, required: true },
@@ -38,10 +36,10 @@ const passwordRecovery = {
   timestamps: true,
 })
 export class UserAccount {
-  @Prop({ type: accountData })
+  @Prop({ _id: false, type: accountData })
   accountData: UserType;
 
-  @Prop({ type: emailConfirmation })
+  @Prop({ _id: false, type: emailConfirmation })
   emailConfirmation: UserConfirmationType;
 
   @Prop({ type: passwordRecovery })
@@ -65,6 +63,17 @@ export class UserAccount {
 
     return userAccount;
   }
+
+  canBeConfirmed(code: string): boolean {
+    return (
+      !this.emailConfirmation.isConfirmed &&
+      this.emailConfirmation.confirmationCode === code
+    );
+  }
+
+  confirm(): void {
+    this.emailConfirmation.isConfirmed = true;
+  }
 }
 
 export const UserAccountSchema = SchemaFactory.createForClass(UserAccount);
@@ -74,7 +83,8 @@ export const UserAccountStatics = {
 };
 
 export const UserAccountMethods = {
-  someMethods: UserAccount.prototype,
+  confirm: UserAccount.prototype.confirm,
+  canBeConfirmed: UserAccount.prototype.canBeConfirmed,
 };
 
 type UserAccountModelStaticsType = typeof UserAccountStatics;

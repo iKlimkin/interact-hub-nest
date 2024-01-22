@@ -9,15 +9,15 @@ import {
   blogEqualTo,
   blogValidationErrors,
 } from './base/rest-models-helpers/blog-models';
+import { RouterPaths } from './base/utils/routing';
 
 describe('BlogsController (e2e)', () => {
   let app: INestApplication;
-  let httpServer: any;
   let blogTestManager: BlogsTestManager;
   let basicAuthManager: BasicAuthorization;
 
   const dropDataBase = async () =>
-    await request(httpServer).delete('/testing/all-data');
+    await request(app.getHttpServer()).delete(`${RouterPaths.test}`);
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -36,24 +36,21 @@ describe('BlogsController (e2e)', () => {
     blogTestManager = new BlogsTestManager(app);
     basicAuthManager = new BasicAuthorization(app);
 
-    httpServer = app.getHttpServer();
-
     await dropDataBase();
   });
 
   afterAll(async () => {
     await app.close();
-    await dropDataBase();
   });
 
   describe('createBlog', () => {
-    // afterAll(async () => {
-    //   await request(httpServer).delete('/testing/all-data')
-    // });
+    afterAll(async () => {
+      await dropDataBase();
+    });
 
     it('/blogs (GET)', async () => {
       // checkStatus();
-      await request(httpServer).get('/blogs').expect(HttpStatus.OK, {
+      await request(app.getHttpServer()).get('/blogs').expect(HttpStatus.OK, {
         pagesCount: 0,
         page: 1,
         pageSize: 10,

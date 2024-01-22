@@ -9,8 +9,21 @@ import {
 } from '../domain/entities/blog.schema';
 import { OutputId } from '../../../infra/likes.types';
 
+export interface IBlogsRepository {
+  save(smartBlogModel: BlogDocument): Promise<OutputId>;
+  getBlogById(blogId: string): Promise<BlogDBType | null>;
+
+  updateBlog(
+    blogId: string,
+    updateData: UpdateBlogModel,
+  ): Promise<BlogModelType | null>;
+
+  deleteBlog(blogId: string): Promise<boolean>;
+}
+
+
 @Injectable()
-export class BlogsRepository {
+export class BlogsRepository implements IBlogsRepository {
   constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType) {}
 
   async save(smartBlogModel: BlogDocument): Promise<OutputId> {

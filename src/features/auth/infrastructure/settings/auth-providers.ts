@@ -1,13 +1,4 @@
 import { Provider } from '@nestjs/common';
-import { BasicSAStrategy } from '../guards/strategies/basic-strategy';
-import {
-  AccessTokenStrategy,
-  RefreshTokenStrategy,
-} from '../guards/strategies/jwt-strategy';
-import { LocalStrategy } from '../guards/strategies/local-strategy';
-import { AuthQueryRepository } from '../../api/query-repositories/auth-query-repo';
-import { AuthUserService } from '../../application/auth-user.service';
-import { AuthRepository } from '../authUsers-repository';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ApiRequestCounterService } from '../../../../infra/application/api-request-counter.service';
 import { RateLimitInterceptor } from '../../../../infra/interceptors/rate-limit.interceptor.ts';
@@ -18,12 +9,33 @@ import { UsersRepository } from '../../../admin/infrastructure/users.repository'
 import { SecurityQueryRepo } from '../../../security/api/query-repositories/security.query.repo';
 import { SecurityService } from '../../../security/application/security.service';
 import { SecurityRepository } from '../../../security/infrastructure/security.repository';
-import { CreateUserUseCase } from '../../application/use-cases/create-user-use-case';
-import { CheckCredentialsCommand } from '../../application/use-cases/check-credentials-user-use-case';
+import { AuthQueryRepository } from '../../api/query-repositories/auth-query-repo';
+import { CheckCredentialsUseCase } from '../../application/use-cases/check-credentials.use-case';
+import { ConfirmEmailUseCase } from '../../application/use-cases/confirm-email-use-case';
+import { CreateTempAccountUseCase } from '../../application/use-cases/create-temprorary-account.use-case';
+import { CreateUserUseCase } from '../../application/use-cases/create-user.use-case';
+import { PasswordRecoveryUseCase } from '../../application/use-cases/recovery-password.use-case';
+import { SendRecoveryMsgUseCase } from '../../application/use-cases/send-recovery-msg.use-case';
+import { UpdateConfirmationCodeUseCase } from '../../application/use-cases/update-confirmation-code.use-case';
+import { UpdatePasswordUseCase } from '../../application/use-cases/update-password.use-case';
+import { AuthUsersRepository } from '../authUsers-repository';
+import { BasicSAStrategy } from '../guards/strategies/basic-strategy';
+import {
+  AccessTokenStrategy,
+  RefreshTokenStrategy,
+} from '../guards/strategies/jwt-strategy';
+import { LocalStrategy } from '../guards/strategies/local-strategy';
+import { UserCreatedEventHandler } from '../../application/use-cases/events/handlers/user-created.event-handler';
+import { EmailAdapter } from '../../../../infra/adapters/email-adapter';
+import { EmailManager } from '../../../../infra/application/managers/email-manager';
+import { BcryptAdapter } from '../../../../infra/adapters/bcrypt-adapter';
+import { CreateUserSessionUseCase } from '../../../security/application/use-cases/create-user-session.use-case';
+import { UpdateIssuedTokenUseCase } from '../../../security/application/use-cases/update-issued-token.use-case';
+import { DeleteActiveSessionUseCase } from '../../../security/application/use-cases/delete-active-session.use-case';
+import { DeleteOtherUserSessionsUseCase } from '../../../security/application/use-cases/delete-other-user-sessions.use-case';
 
 export const userAccountProviders: Provider[] = [
-  AuthUserService,
-  AuthRepository,
+  AuthUsersRepository,
   AuthQueryRepository,
 ];
 
@@ -56,8 +68,24 @@ export const securitiesProviders: Provider[] = [
   SecurityQueryRepo,
 ];
 
-
 export const authUseCases: Provider[] = [
   CreateUserUseCase,
-  CheckCredentialsCommand
+  CheckCredentialsUseCase,
+  CreateTempAccountUseCase,
+  SendRecoveryMsgUseCase,
+  PasswordRecoveryUseCase,
+  UpdatePasswordUseCase,
+  ConfirmEmailUseCase,
+  UpdateConfirmationCodeUseCase,
 ];
+
+export const securityUseCases: Provider[] = [
+  CreateUserSessionUseCase,
+  UpdateIssuedTokenUseCase,
+  DeleteActiveSessionUseCase,
+  DeleteOtherUserSessionsUseCase,
+];
+
+export const authEventHandlers: Provider[] = [UserCreatedEventHandler];
+
+export const adapters: Provider[] = [BcryptAdapter, EmailManager, EmailAdapter];

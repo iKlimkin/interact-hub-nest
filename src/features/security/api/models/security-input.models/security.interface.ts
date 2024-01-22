@@ -1,5 +1,6 @@
 import { MatchApiType } from "../../../../../infra/interceptors/models/rate-limiter.models";
-import { UserInfoType } from "../../../../auth/api/controllers/auth.controller";
+import { UserInfoType } from "../../../../auth/api/models/user-models";
+
 import { SecurityViewDeviceModel } from "../security.view.models/security.view.types";
 
 

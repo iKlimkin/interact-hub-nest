@@ -1,9 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BcryptAdapter } from '../../../../infra/adapters/bcrypt-adapter';
 import { InputCredentialsModel } from '../../api/models/auth-input.models.ts/input-credentials.model';
-import { AuthRepository } from '../../infrastructure/authUsers-repository';
-import { UserIdType } from '../auth-user.service';
-import { validateOrRejectModel } from '../../../blogs/application/validate-model.helper';
+import { AuthUsersRepository } from '../../infrastructure/authUsers-repository';
+import { validateOrRejectModel } from '../../../../infra/validators/validate-model.helper';
+import { UserIdType } from '../../../admin/api/models/outputSA.models.ts/user-models';
 
 export class CheckCredentialsCommand {
   constructor(public inputData: InputCredentialsModel) {}
@@ -14,13 +14,13 @@ export class CheckCredentialsUseCase
   implements ICommandHandler<CheckCredentialsCommand>
 {
   constructor(
-    private authUsersRepository: AuthRepository,
+    private authUsersRepository: AuthUsersRepository,
     private bcryptAdapter: BcryptAdapter,
   ) {}
 
   async execute(command: CheckCredentialsCommand): Promise<UserIdType | null> {
-    await validateOrRejectModel(command, CheckCredentialsCommand)
-    
+    await validateOrRejectModel(command, CheckCredentialsCommand);
+
     const user = await this.authUsersRepository.findByLoginOrEmail({
       loginOrEmail: command.inputData.loginOrEmail,
     });

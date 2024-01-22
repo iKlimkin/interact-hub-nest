@@ -3,7 +3,7 @@ import { BlogsController } from '../features/blogs/api/controllers/blogs.control
 import { FeedbacksController } from '../features/comments/api/controllers/feedbacks.controller';
 import { PostsController } from '../features/posts/api/controllers/posts.controller';
 import { SecurityController } from '../features/security/api/controllers/security.controller';
-import { TestDatabaseController } from '../mock-data/test.db.contoller';
+import { TestDatabaseController } from '../data-testing/test.db.contoller';
 
 export const controllers = [
   AppController,

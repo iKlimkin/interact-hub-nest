@@ -10,6 +10,7 @@ import {
   LikesUserInfoType,
   LikesCountType,
 } from '../../../../infra/likes.types';
+import { validateOrReject } from 'class-validator';
 
 export type CommentDocument = HydratedDocument<Comment>;
 export type CommentModelType = Model<CommentDocument> & CommentModelStaticType;
@@ -38,7 +39,7 @@ export class Comment {
   @Prop({ required: true, type: String })
   postId: string;
 
-  @Prop({ type: { commentatorInfoType } })
+  @Prop({ _id: false, type: commentatorInfoType })
   commentatorInfo: CommentatorInfoType;
 
   @Prop({ type: String, required: true })
@@ -47,11 +48,12 @@ export class Comment {
   @Prop({ type: [LikesUsersInfo] })
   likesUserInfo: LikesUserInfoType[];
 
-  @Prop({ type: likesCountInfo })
+  @Prop({ _id: false, type: likesCountInfo })
   likesCountInfo: LikesCountType;
 
-  static makeInstance(dto: CreateCommentType): CommentDocument {
+  static async makeInstance(dto: CreateCommentType): Promise<CommentDocument> {
     const comment = new this() as CommentDocument;
+
     comment.content = dto.content;
     comment.postId = dto.postId;
     comment.commentatorInfo = {
@@ -62,6 +64,7 @@ export class Comment {
     comment.likesUserInfo = [];
     comment.likesCountInfo = { likesCount: 0, dislikesCount: 0 };
 
+    await validateOrReject(comment);
     return comment;
   }
 }

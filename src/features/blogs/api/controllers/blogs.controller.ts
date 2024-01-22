@@ -30,6 +30,7 @@ import { BlogType } from '../models/output.blog.models/blog.models';
 import { BlogsQueryRepo } from '../query-repositories/blogs.query.repo';
 import { DeletBlogCommand } from '../../application/use-case/delete-blog-use-case';
 import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
+import { OutputId } from '../../../../infra/likes.types';
 
 @Controller('blogs')
 export class BlogsController {
@@ -44,17 +45,7 @@ export class BlogsController {
   async getBlogs(
     @Query() query: SortingQueryModel,
   ): Promise<PaginationViewModel<BlogType>> {
-    const { pageNumber, pageSize, sortBy, sortDirection, searchNameTerm } =
-      query;
-    console.log('Blogs controller');
-
-    const receivedBlogs = await this.blogsQueryRepo.getBlogsByQuery({
-      pageNumber,
-      pageSize,
-      sortBy,
-      sortDirection,
-      searchNameTerm,
-    });
+    const receivedBlogs = await this.blogsQueryRepo.getBlogsByQuery(query);
 
     return receivedBlogs;
   }
@@ -99,9 +90,12 @@ export class BlogsController {
   async createBlog(
     @Body() createBlogDto: InputBlogModel,
   ): Promise<BlogViewModel> {
-    const createdBlog = await this.commandBus.execute(
-      new CreateBlogCommand(createBlogDto),
-    );
+    const command = new CreateBlogCommand(createBlogDto);
+
+    const createdBlog = await this.commandBus.execute<
+      CreateBlogCommand,
+      OutputId
+    >(command);
 
     const newlyCreatedBlog = await this.blogsQueryRepo.getBlogById(
       createdBlog.id,

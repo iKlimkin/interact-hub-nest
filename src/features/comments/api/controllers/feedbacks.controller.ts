@@ -10,7 +10,6 @@ import {
   Param,
   Put,
   Query,
-  Res,
   UseGuards,
 } from '@nestjs/common';
 
@@ -22,19 +21,22 @@ import { getStatusCounting } from '../../../../infra/utils/statusCounter';
 import { FeedbacksService } from '../../application/feedbacks.service';
 import { CommentsViewModel } from '../models/comments.view.models/comments.view.model';
 
+import { CurrentUserInfo } from '../../../auth/infrastructure/decorators/current-user-info.decorator';
+import { AccessTokenGuard } from '../../../auth/infrastructure/guards/accessToken.guard';
 import { InputLikeStatusModel } from '../../../posts/api/models/input.posts.models/input-post..model';
 import { InputContentModel } from '../models/input.comment.models';
 import { FeedbacksQueryRepository } from '../query-repositories/feedbacks.query.repository';
-import { AccessTokenGuard } from '../../../auth/infrastructure/guards/accessToken.guard';
-import { CurrentUserInfo } from '../../../auth/infrastructure/decorators/current-user-info.decorator';
-import { UserInfo } from 'os';
-import { UserInfoType } from '../../../auth/api/controllers/auth.controller';
+import { UserInfoType } from '../../../auth/api/models/user-models';
+import { UpdateCommentCommand } from '../../application/use-cases/commands/update-comment.command';
+import { CommandBus } from '@nestjs/cqrs';
+import { DeleteCommentCommand } from '../../application/use-cases/commands/delete-comment.command';
 
 @Controller('comments')
 export class FeedbacksController {
   constructor(
     private feedbacksQueryRepo: FeedbacksQueryRepository,
     private feedbacksService: FeedbacksService,
+    private commandBus: CommandBus,
   ) {}
 
   @Get(':id')
@@ -56,7 +58,7 @@ export class FeedbacksController {
     return comment;
   }
 
-  @Get('user/:userId')
+  @Get('user/:id')
   @HttpCode(HttpStatus.OK)
   async getUserComments(
     @Param('id') userId: string,
@@ -78,7 +80,7 @@ export class FeedbacksController {
     return comment;
   }
 
-  @Put(':commentId')
+  @Put(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AccessTokenGuard)
   async updateComment(
@@ -98,14 +100,12 @@ export class FeedbacksController {
     if (userInfo.userId !== foundedCommentById.commentatorInfo.userId) {
       throw new ForbiddenException('Do not have permission');
     }
+    const command = new UpdateCommentCommand(commentId, content);
 
-    const updatedComment = await this.feedbacksService.updateComment(
-      commentId,
-      content,
-    );
+    const updatedComment = await this.commandBus.execute(command);
   }
 
-  @Put(':commentId/like-status')
+  @Put(':id/like-status')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AccessTokenGuard)
   async updateLikesStatus(
@@ -114,7 +114,7 @@ export class FeedbacksController {
     @Body() inputStatus: InputLikeStatusModel,
   ) {
     const { likeStatus } = inputStatus;
-    const { userId } = userInfo
+    const { userId } = userInfo;
 
     const foundComment = await this.feedbacksQueryRepo.getCommentById(
       commentId,
@@ -153,7 +153,7 @@ export class FeedbacksController {
     const updatedLike = await this.feedbacksService.updateLike(likeData);
   }
 
-  @Delete(':commentId')
+  @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AccessTokenGuard)
   async deleteComment(
@@ -170,7 +170,8 @@ export class FeedbacksController {
     if (userInfo.userId !== foundedCommentById.commentatorInfo.userId) {
       throw new ForbiddenException('Do not have permission');
     }
+    const command = new DeleteCommentCommand(commentId);
 
-    const deletedComment = await this.feedbacksService.deleteComment(commentId);
+    const deletedComment = await this.commandBus.execute(command);
   }
 }

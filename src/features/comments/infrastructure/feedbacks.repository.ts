@@ -13,13 +13,9 @@ export class FeedbacksRepository {
     @InjectModel(Comment.name) private CommentModel: CommentModelType,
   ) {}
 
-  async save(commentSmartModel: CommentDocument): Promise<OutputId> {
+  async save(commentSmartModel: CommentDocument): Promise<CommentDocument> {
     try {
-      const commentDB = await commentSmartModel.save();
-
-      return {
-        id: commentDB._id.toString(),
-      };
+      return commentSmartModel.save();
     } catch (error) {
       throw new InternalServerErrorException(
         'Database fails during save comment operation',

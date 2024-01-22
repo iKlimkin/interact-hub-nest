@@ -34,9 +34,7 @@ export class UsersRepository {
 
       if (!foundUser) return null;
 
-      return {
-        ...foundUser,
-      };
+      return foundUser
     } catch (error) {
       throw new InternalServerErrorException(
         'Database fails operate with fiind user',

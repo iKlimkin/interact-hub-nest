@@ -18,7 +18,8 @@ export class EmailManager {
     confirmationCode: string,
   ): Promise<SentMessageInfo> {
     const subject = 'Email Confirmation';
-    return await this.emailAdapter.confirmationMessage({
+
+    return this.emailAdapter.confirmationMessage({
       email,
       subject,
       confirmationCode,

@@ -11,13 +11,17 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { ApiRequestCounterRepository } from '../../../../infra/repositories/api-request-counter.repository';
-import { UserInfoType } from '../../../auth/api/controllers/auth.controller';
+
 import { CurrentUserInfo } from '../../../auth/infrastructure/decorators/current-user-info.decorator';
 import { RefreshTokenGuard } from '../../../auth/infrastructure/guards/refreshToken.guard';
 import { SecurityService } from '../../application/security.service';
 import { SecurityInterface } from '../models/security-input.models/security.interface';
 import { SecurityViewDeviceModel } from '../models/security.view.models/security.view.types';
 import { SecurityQueryRepo } from '../query-repositories/security.query.repo';
+import { UserInfoType } from '../../../auth/api/models/user-models';
+import { DeleteOtherUserSessionsCommand } from '../../application/use-cases/commands/delete-other-user-sessions.command';
+import { CommandBus } from '@nestjs/cqrs';
+import { DeleteActiveSessionCommand } from '../../application/use-cases/commands/delete-active-session.command';
 
 @Controller('security/devices')
 @UseGuards(RefreshTokenGuard)
@@ -26,6 +30,7 @@ export class SecurityController implements SecurityInterface {
     private securityQueryRepo: SecurityQueryRepo,
     private securityService: SecurityService,
     private apiRequestCounterRepository: ApiRequestCounterRepository,
+    private commandBus: CommandBus,
   ) {}
 
   @Get()
@@ -47,7 +52,8 @@ export class SecurityController implements SecurityInterface {
   @Delete()
   @HttpCode(HttpStatus.NO_CONTENT)
   async terminateOtherUserSessions(@CurrentUserInfo() userInfo: UserInfoType) {
-    await this.securityService.deleteOtherUserSessions(userInfo.deviceId);
+    const command = new DeleteOtherUserSessionsCommand(userInfo.deviceId);
+    await this.commandBus.execute(command);
   }
 
   @Delete(':id')
@@ -70,7 +76,9 @@ export class SecurityController implements SecurityInterface {
       throw new ForbiddenException('do not have permission');
     }
 
-    await this.securityService.deleteActiveSession(deviceId);
+    const command = new DeleteActiveSessionCommand(deviceId);
+
+    await this.commandBus.execute(command);
   }
 
   @Get('requestLogs')

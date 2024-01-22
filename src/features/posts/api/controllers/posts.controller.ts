@@ -11,34 +11,38 @@ import {
   Post,
   Put,
   Query,
-  Res,
   UseGuards,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
-import { Response } from 'express';
 import { SortingQueryModel } from '../../../../infra/SortingQueryModel';
+import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
+import { SetUserIdGuard } from '../../../../infra/guards/set-user-id.guard';
 import { likesStatus } from '../../../../infra/likes.types';
 import { PaginationViewModel } from '../../../../infra/paginationViewModel';
 import { getStatusCounting } from '../../../../infra/utils/statusCounter';
 import { UsersQueryRepository } from '../../../admin/api/query-repositories/users.query.repo';
-import { UserInfoType } from '../../../auth/api/controllers/auth.controller';
+
 import { CurrentUserInfo } from '../../../auth/infrastructure/decorators/current-user-info.decorator';
 import { AccessTokenGuard } from '../../../auth/infrastructure/guards/accessToken.guard';
 import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth.guard';
 import { CommentsViewModel } from '../../../comments/api/models/comments.view.models/comments.view.model';
+import {
+  InputCommentModel,
+  InputContentModel,
+} from '../../../comments/api/models/input.comment.models';
 import { FeedbacksQueryRepository } from '../../../comments/api/query-repositories/feedbacks.query.repository';
 import { FeedbacksService } from '../../../comments/application/feedbacks.service';
 import { PostsService } from '../../application/posts.service';
 import { CreatePostCommand } from '../../application/use-cases/create-post-use-case';
+import { DeletePostCommand } from '../../application/use-cases/delete-post-use-case';
 import { UpdatePostCommand } from '../../application/use-cases/update-post-use-case';
 import { InputPostModel } from '../models/input.posts.models/create.post.model';
 import { InputLikeStatusModel } from '../models/input.posts.models/input-post..model';
 import { PostViewModel } from '../models/post.view.models/PostViewModel';
 import { PostsQueryRepository } from '../query-repositories/posts.query.repo';
-import { SetUserIdGuard } from '../../../../infra/guards/set-user-id.guard';
-import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
-import { DeletePostCommand } from '../../application/use-cases/delete-post-use-case';
-import { InputContentModel } from '../../../comments/api/models/input.comment.models';
+import { UserInfoType } from '../../../auth/api/models/user-models';
+import { CreateCommentCommand } from '../../../comments/application/use-cases/commands/create-comment.command';
+import { CommentDocument } from '../../../comments/domain/entities/comment.schema';
 
 @Controller('posts')
 export class PostsController {
@@ -88,7 +92,7 @@ export class PostsController {
     return foundPost;
   }
 
-  @Put(':postId/like-status')
+  @Put(':id/like-status')
   @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateLikesStatus(
@@ -166,7 +170,7 @@ export class PostsController {
     return comments;
   }
 
-  @Post(':postId/comments')
+  @Post(':id/comments')
   @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.CREATED)
   async createCommentByPostId(
@@ -177,24 +181,23 @@ export class PostsController {
     const { userId } = userInfo;
     const { content } = body;
 
-    const createCommentData = {
+    const createCommentData: InputCommentModel = {
       content,
       userId,
       postId,
     };
+    const command = new CreateCommentCommand(createCommentData);
 
-    const createdComment =
-      await this.feedbacksService.createComment(createCommentData);
-
-    if (!createdComment) {
-      throw new InternalServerErrorException('Database fail operation');
-    }
+    const { _id } = await this.commandBus.execute<
+      CreateCommentCommand,
+      CommentDocument
+    >(command);
 
     const foundNewComment = await this.feedbacksQueryRepo.getCommentById(
-      createdComment.id,
+      _id.toString(),
     );
 
-    return foundNewComment!
+    return foundNewComment!;
   }
 
   @Post()

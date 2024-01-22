@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { OutputId } from '../../../../infra/likes.types';
-import { validateOrRejectModel } from '../../../blogs/application/validate-model.helper';
+import { validateOrRejectModel } from '../../../../infra/validators/validate-model.helper';
 import { BlogsRepository } from '../../../blogs/infrastructure/blogs.repository';
 import { InputPostModel } from '../../api/models/input.posts.models/create.post.model';
 import { Post, PostModelType } from '../../domain/entities/posts.schema';

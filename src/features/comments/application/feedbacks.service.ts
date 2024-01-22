@@ -1,41 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { OutputId, likeUserInfo } from '../../../infra/likes.types';
-import { InputCommentModel } from '../api/models/input.comment.models';
-import {
-  Comment,
-  CommentModelType,
-  CommentWholeModelTypes,
-} from '../domain/entities/comment.schema';
+import { Injectable } from '@nestjs/common';
+import { likeUserInfo } from '../../../infra/likes.types';
 import { FeedbacksRepository } from '../infrastructure/feedbacks.repository';
-import { UsersRepository } from '../../../features/admin/infrastructure/users.repository';
-import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class FeedbacksService {
-  constructor(
-    @InjectModel(Comment.name) private CommentModel: CommentModelType,
-    private feedbacksRepository: FeedbacksRepository,
-    private usersRepository: UsersRepository,
-  ) {}
-
-  async createComment(inputData: InputCommentModel): Promise<OutputId | null> {
-    const user = await this.usersRepository.getUserById(inputData.userId);
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    const commentSmartModel = this.CommentModel.makeInstance({
-      commentatorInfo: {
-        userId: inputData.userId,
-        userLogin: user.accountData.login,
-      },
-      content: inputData.content,
-      postId: inputData.postId,
-    });
-
-    return this.feedbacksRepository.save(commentSmartModel);
-  }
+  constructor(private feedbacksRepository: FeedbacksRepository) {}
 
   async createLike(inputData: likeUserInfo): Promise<boolean> {
     const createdLike =
@@ -47,13 +16,5 @@ export class FeedbacksService {
     const updatedComment =
       await this.feedbacksRepository.updateLikeStatus(inputData);
     return updatedComment;
-  }
-
-  async updateComment(commentId: string, content: string): Promise<boolean> {
-    return this.feedbacksRepository.updateComment(commentId, content);
-  }
-
-  async deleteComment(commentId: string): Promise<boolean> {
-    return await this.feedbacksRepository.deleteComment(commentId);
   }
 }

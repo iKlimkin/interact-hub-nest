@@ -1,5 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import nodemailer, { SentMessageInfo } from 'nodemailer';
+import { config } from 'dotenv';
+config();
 
 @Injectable()
 export class EmailAdapter {
@@ -16,6 +18,7 @@ export class EmailAdapter {
     <p>To finish password recovery please follow the link below:
       <a href='${recoveryLink}'>recovery password</a>
     </p>`;
+    console.log({ message });
 
     try {
       const info: SentMessageInfo = await this.sendMail(
@@ -26,10 +29,7 @@ export class EmailAdapter {
 
       return info.messageId;
     } catch (error) {
-      throw new HttpException(
-        'Failed to send email for password recovery',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      console.error('Failed to send confirmation message', error);
     }
   }
 
@@ -56,10 +56,7 @@ export class EmailAdapter {
 
       return info.messageId;
     } catch (error) {
-      throw new HttpException(
-        'Failed to send confirmation message',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      console.error('Failed to send confirmation message', error);
     }
   }
 
@@ -68,7 +65,7 @@ export class EmailAdapter {
     inputData: { email: string; subject: string },
     message: string,
   ): Promise<SentMessageInfo> {
-    return await transporter.sendMail({
+    return transporter.sendMail({
       from: 'Social Hub👻 <iklimkin50@gmail.com>',
       to: inputData.email,
       subject: inputData.subject,

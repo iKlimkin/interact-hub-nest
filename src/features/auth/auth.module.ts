@@ -17,6 +17,8 @@ import { getAuthConfiguration } from './config/configuration';
 import {
   RequestLoggerInterseptor,
   Strategies,
+  adapters,
+  authEventHandlers,
   authUseCases,
   requestLoggerProviders,
   securitiesProviders,
@@ -37,15 +39,13 @@ import { CqrsModule } from '@nestjs/cqrs';
 
   providers: [
     ...Strategies,
-
+    ...authEventHandlers,
     RequestLoggerInterseptor,
     ...authUseCases,
     ...requestLoggerProviders,
 
-    EmailManager,
-    EmailAdapter,
-    BcryptAdapter,
-
+    ...adapters,
+  
     AuthService,
 
     ...securitiesProviders,

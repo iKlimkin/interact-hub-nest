@@ -4,7 +4,7 @@ import { OutputId } from '../../../../infra/likes.types';
 import { InputBlogModel } from '../../api/models/input.blog.models/create.blog.model';
 import { Blog, BlogModelType } from '../../domain/entities/blog.schema';
 import { BlogsRepository } from '../../infrastructure/blogs.repository';
-import { validateOrRejectModel } from '../validate-model.helper';
+import { validateOrRejectModel } from '../../../../infra/validators/validate-model.helper';
 
 export class CreateBlogCommand {
   constructor(public createBlogDto: InputBlogModel) {}
@@ -23,6 +23,6 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
     const smartBlogModel = await this.BlogModel.makeInstance(
       command.createBlogDto,
     );
-    return await this.blogsRepository.save(smartBlogModel);
+    return this.blogsRepository.save(smartBlogModel);
   }
 }

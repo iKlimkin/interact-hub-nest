@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { validateOrRejectModel } from '../../../blogs/application/validate-model.helper';
+import { validateOrRejectModel } from '../../../../infra/validators/validate-model.helper';
 import { UpdatePostModel } from '../../api/models/input.posts.models/create.post.model';
 import { PostsRepository } from '../../infrastructure/posts.repository';
 
