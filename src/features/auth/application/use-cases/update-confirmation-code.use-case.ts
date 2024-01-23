@@ -2,12 +2,8 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { v4 as uuidv4 } from 'uuid';
 import { EmailManager } from '../../../../infra/application/managers/email-manager';
-import { UserAccountViewModel } from '../../api/models/auth.output.models/auth.output.models';
 import { AuthUsersRepository } from '../../infrastructure/authUsers-repository';
-
-export class UpdateConfirmationCodeCommand {
-  constructor(public inputModel: UserAccountViewModel) {}
-}
+import { UpdateConfirmationCodeCommand } from './commands/update-confirmation-code.command';
 
 @CommandHandler(UpdateConfirmationCodeCommand)
 export class UpdateConfirmationCodeUseCase

@@ -9,16 +9,16 @@ export class SetUserIdGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const refreshToken = this.extractTokenFromHeaders(request);
+    const accessToken = this.extractTokenFromHeaders(request);
 
-    if (refreshToken) {
+    if (accessToken) {
       try {
-        const userPayload = await this.jwtService.verifyAsync(refreshToken, {
+        const userPayload = await this.jwtService.verifyAsync(accessToken, {
           secret: jwtConstants.jwt_access_secret,
         });
         request.userId = userPayload.userId;
       } catch (error) {
-        console.error(`invalid refreshToken ${error}`);
+        console.error(`invalid accessToken ${error}`);
         return true;
       }
     }

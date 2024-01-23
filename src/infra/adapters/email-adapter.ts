@@ -1,7 +1,5 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import nodemailer, { SentMessageInfo } from 'nodemailer';
-import { config } from 'dotenv';
-config();
 
 @Injectable()
 export class EmailAdapter {
@@ -18,7 +16,6 @@ export class EmailAdapter {
     <p>To finish password recovery please follow the link below:
       <a href='${recoveryLink}'>recovery password</a>
     </p>`;
-    console.log({ message });
 
     try {
       const info: SentMessageInfo = await this.sendMail(

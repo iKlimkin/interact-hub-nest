@@ -8,6 +8,14 @@ export type LikeUserType = {
 export type likeUserInfo = LikesCountType &
   LikeUserType & { commentId?: string; login?: string; postId?: string };
 
+export type ReactionType = {
+  commentId: string;
+  userId: string;
+  inputStatus: LikeStatusType;
+  likesCount: number;
+  dislikesCount: number;
+};
+
 export enum likesStatus {
   None = 'None',
   Like = 'Like',

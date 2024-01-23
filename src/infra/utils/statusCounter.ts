@@ -6,13 +6,13 @@ type StatusCounter = {
 };
 
 export const getStatusCounting = (
-  status: LikeStatusType,
+  inputStatus: LikeStatusType,
   statusInRepo: LikeStatusType,
 ): StatusCounter => {
   let dislikesCount = 0;
   let likesCount = 0;
 
-  switch (status) {
+  switch (inputStatus) {
     case 'Like':
       if (statusInRepo === 'Dislike') {
         dislikesCount--;

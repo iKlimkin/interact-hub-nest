@@ -17,7 +17,7 @@ import { CommandBus } from '@nestjs/cqrs';
 import { SortingQueryModel } from '../../../../infra/SortingQueryModel';
 import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
 import { SetUserIdGuard } from '../../../../infra/guards/set-user-id.guard';
-import { likesStatus } from '../../../../infra/likes.types';
+import { OutputId, likesStatus } from '../../../../infra/likes.types';
 import { PaginationViewModel } from '../../../../infra/paginationViewModel';
 import { getStatusCounting } from '../../../../infra/utils/statusCounter';
 import { UsersQueryRepository } from '../../../admin/api/query-repositories/users.query.repo';
@@ -206,8 +206,10 @@ export class PostsController {
   async createPost(
     @Body() createPostDto: InputPostModel,
   ): Promise<PostViewModel> {
-    const post = await this.commandBus.execute(
-      new CreatePostCommand(createPostDto),
+    const command = new CreatePostCommand(createPostDto);
+
+    const post = await this.commandBus.execute<CreatePostCommand, OutputId>(
+      command,
     );
 
     const newlyCreatedPost = await this.postsQueryRepo.getPostById(post.id);
@@ -226,9 +228,12 @@ export class PostsController {
     @Param('id') postId: string,
     @Body() inputPostDto: InputPostModel,
   ) {
-    const updatedPost = await this.commandBus.execute(
-      new UpdatePostCommand({ inputPostDto, postId }),
-    );
+    const command = new UpdatePostCommand({ inputPostDto, postId });
+
+    const updatedPost = await this.commandBus.execute<
+      UpdatePostCommand,
+      boolean
+    >(command);
 
     if (!updatedPost) {
       throw new NotFoundException('Post or blog not found');

@@ -1,13 +1,9 @@
-import { CommandHandler, ICommandHandler, CommandBus } from '@nestjs/cqrs';
+import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UserRecoveryType } from '../../api/models/auth.output.models/auth.output.models';
 import { AuthUsersRepository } from '../../infrastructure/authUsers-repository';
-import { SendRecoveryMsgCommand } from './send-recovery-msg.use-case';
-import { InputRecoveryEmailModel } from '../../api/models/auth-input.models.ts/input-password-rec.type';
+import { PasswordRecoveryCommand } from './commands/recovery-password.command';
 import { createRecoveryCode } from './helpers/create-recovery-message.helper';
-
-export class PasswordRecoveryCommand {
-  constructor(public inputData: InputRecoveryEmailModel) {}
-}
+import { SendRecoveryMsgCommand } from './commands/send-recovery-msg.command';
 
 @CommandHandler(PasswordRecoveryCommand)
 export class PasswordRecoveryUseCase
@@ -30,12 +26,12 @@ export class PasswordRecoveryUseCase
 
     if (!updateRecoveryCode) return updateRecoveryCode;
 
-    this.commandBus.execute(
-      new SendRecoveryMsgCommand({
-        email,
-        recoveryCode: recoveryPassInfo.recoveryCode,
-      }),
-    );
+    const sendRecoveryMsgCommand = new SendRecoveryMsgCommand({
+      email,
+      recoveryCode: recoveryPassInfo.recoveryCode,
+    });
+
+    this.commandBus.execute(sendRecoveryMsgCommand);
 
     return updateRecoveryCode;
   }

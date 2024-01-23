@@ -5,7 +5,7 @@ export const CurrentUserInfo = createParamDecorator(
     const request = context.switchToHttp().getRequest();
 
     const { userId, deviceId } = request.user;
-
+    
     if (!userId && !deviceId) throw new Error('Should be used Guard!');
 
     return {

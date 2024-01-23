@@ -20,15 +20,8 @@ import {
 import { UsersQueryRepository } from '../../../admin/api/query-repositories/users.query.repo';
 import { UserAccountDocument } from '../../../admin/domain/entities/userAccount.schema';
 import { InputSessionDataValidator } from '../../../security/api/models/security-input.models/create-session.model';
-import { CreateUserSessionCommand } from '../../../security/application/use-cases/commands/create-session.command';
 import { DeleteActiveSessionCommand } from '../../../security/application/use-cases/commands/delete-active-session.command';
 import { UpdateIssuedTokenCommand } from '../../../security/application/use-cases/commands/update-Issued-token.command';
-import { ConfirmEmailCommand } from '../../application/use-cases/confirm-email-use-case';
-import { CreateTempAccountCommand } from '../../application/use-cases/create-temprorary-account.use-case';
-import { CreateUserCommand } from '../../application/use-cases/create-user.use-case';
-import { PasswordRecoveryCommand } from '../../application/use-cases/recovery-password.use-case';
-import { UpdateConfirmationCodeCommand } from '../../application/use-cases/update-confirmation-code.use-case';
-import { UpdatePasswordCommand } from '../../application/use-cases/update-password.use-case';
 import { GetClientInfo } from '../../infrastructure/decorators/client-ip.decorator';
 import { CurrentUserInfo } from '../../infrastructure/decorators/current-user-info.decorator';
 import { AccessTokenGuard } from '../../infrastructure/guards/accessToken.guard';
@@ -41,6 +34,14 @@ import { InputRegistrationCodeModel } from '../models/auth-input.models.ts/input
 import { InputRegistrationModel } from '../models/auth-input.models.ts/input-registration.model';
 import { UserInfoType } from '../models/user-models';
 import { AuthQueryRepository } from '../query-repositories/auth-query-repo';
+import { OutputId } from '../../../../infra/likes.types';
+import { ConfirmEmailCommand } from '../../application/use-cases/commands/confirm-email.command';
+import { CreateTempAccountCommand } from '../../application/use-cases/commands/create-temp-account.command';
+import { CreateUserCommand } from '../../application/use-cases/commands/create-user.command';
+import { PasswordRecoveryCommand } from '../../application/use-cases/commands/recovery-password.command';
+import { UpdateConfirmationCodeCommand } from '../../application/use-cases/commands/update-confirmation-code.command';
+import { UpdatePasswordCommand } from '../../application/use-cases/commands/update-password.command';
+import { CreateSessionCommand } from '../../application/use-cases/commands/create-session.command';
 
 type ClientInfo = {
   ip: string;
@@ -84,9 +85,9 @@ export class AuthController {
       refreshToken,
     };
 
-    const command = new CreateUserSessionCommand(createSessionData);
+    const command = new CreateSessionCommand(createSessionData);
 
-    await this.commandBus.execute(command);
+    await this.commandBus.execute<CreateSessionCommand, OutputId>(command);
 
     res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
 
@@ -123,15 +124,17 @@ export class AuthController {
   async newPassword(@Body() body: InputRecoveryPassModel) {
     const { newPassword, recoveryCode } = body;
 
-    const updatedPassword = await this.commandBus.execute(
-      new UpdatePasswordCommand({
-        newPassword,
-        recoveryCode,
-      }),
-    );
+    const command = new UpdatePasswordCommand({
+      newPassword,
+      recoveryCode,
+    });
+    const updatedPassword = await this.commandBus.execute<
+      UpdatePasswordCommand,
+      boolean
+    >(command);
 
     if (!updatedPassword) {
-      throw new NotFoundException();
+      throw new NotFoundException('Account not found');
     }
   }
 
@@ -143,14 +146,22 @@ export class AuthController {
       await this.authQueryRepository.findByLoginOrEmail(inputEmailModel);
 
     if (!foundUserAccount) {
-      const codeForNonExistentUser = await this.commandBus.execute(
-        new CreateTempAccountCommand(inputEmailModel),
-      );
+      const command = new CreateTempAccountCommand(inputEmailModel);
+      
+      const codeForNonExistentUser = await this.commandBus.execute<
+        CreateTempAccountCommand,
+        OutputId
+      >(command);
+      
+      return;
     }
 
-    const recoveredPassword = await this.commandBus.execute(
-      new PasswordRecoveryCommand(inputEmailModel),
-    );
+    const command = new PasswordRecoveryCommand(inputEmailModel);
+
+    const recoveredPassword = await this.commandBus.execute<
+      PasswordRecoveryCommand,
+      boolean
+    >(command);
   }
 
   @Post('registration')
@@ -195,9 +206,12 @@ export class AuthController {
     @Body() inputCode: InputRegistrationCodeModel,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const confirmedUser = await this.commandBus.execute(
-      new ConfirmEmailCommand(inputCode),
-    );
+    const command = new ConfirmEmailCommand(inputCode);
+
+    const confirmedUser = await this.commandBus.execute<
+      ConfirmEmailCommand,
+      boolean
+    >(command);
 
     if (!confirmedUser) {
       const errors = makeErrorsMessages('code');
@@ -222,10 +236,9 @@ export class AuthController {
       res.status(HttpStatus.BAD_REQUEST).send(errors);
       return;
     }
+    const command = new UpdateConfirmationCodeCommand(confirmedUser);
 
-    const updatedUserConfirmation = await this.commandBus.execute(
-      new UpdateConfirmationCodeCommand(confirmedUser),
-    );
+    const updatedUserConfirmation = await this.commandBus.execute(command);
   }
 
   @UseGuards(AccessTokenGuard)
@@ -234,7 +247,7 @@ export class AuthController {
     const user = await this.usersQueryRepo.getUserById(userInfo.userId);
 
     if (!user) {
-      throw new NotFoundException();
+      throw new NotFoundException('User not found');
     }
 
     const userViewModel = {

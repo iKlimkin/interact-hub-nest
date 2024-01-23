@@ -5,21 +5,21 @@ import { validateOrRejectModel } from '../../../../infra/validators/validate-mod
 import {
   Security,
   SecurityModelType,
-} from '../../domain/entities/security.schema';
-import { SecurityRepository } from '../../infrastructure/security.repository';
-import { CreateUserSessionCommand } from './commands/create-session.command';
+} from '../../../security/domain/entities/security.schema';
+import { SecurityRepository } from '../../../security/infrastructure/security.repository';
+import { CreateSessionCommand } from './commands/create-session.command';
 
-@CommandHandler(CreateUserSessionCommand)
+@CommandHandler(CreateSessionCommand)
 export class CreateUserSessionUseCase
-  implements ICommandHandler<CreateUserSessionCommand>
+  implements ICommandHandler<CreateSessionCommand>
 {
   constructor(
     @InjectModel(Security.name) private SecurityModel: SecurityModelType,
     private securityRepository: SecurityRepository,
   ) {}
 
-  async execute(command: CreateUserSessionCommand): Promise<OutputId> {
-    validateOrRejectModel(command, CreateUserSessionCommand);
+  async execute(command: CreateSessionCommand): Promise<OutputId> {
+    validateOrRejectModel(command, CreateSessionCommand);
 
     const sessionModel = this.SecurityModel.makeInstance(command.inputData);
 

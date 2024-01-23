@@ -17,25 +17,23 @@ import { SortingQueryModel } from '../../../../infra/SortingQueryModel';
 import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
 import { SetUserIdGuard } from '../../../../infra/guards/set-user-id.guard';
 import { PaginationViewModel } from '../../../../infra/paginationViewModel';
-import { getStatusCounting } from '../../../../infra/utils/statusCounter';
-import { FeedbacksService } from '../../application/feedbacks.service';
 import { CommentsViewModel } from '../models/comments.view.models/comments.view.model';
 
+import { CommandBus } from '@nestjs/cqrs';
+import { UserInfoType } from '../../../auth/api/models/user-models';
 import { CurrentUserInfo } from '../../../auth/infrastructure/decorators/current-user-info.decorator';
 import { AccessTokenGuard } from '../../../auth/infrastructure/guards/accessToken.guard';
 import { InputLikeStatusModel } from '../../../posts/api/models/input.posts.models/input-post..model';
+import { DeleteCommentCommand } from '../../application/use-cases/commands/delete-comment.command';
+import { UpdateCommentCommand } from '../../application/use-cases/commands/update-comment.command';
+import { UpdateUserReactionCommand } from '../../application/use-cases/commands/update-user-reaction.command';
 import { InputContentModel } from '../models/input.comment.models';
 import { FeedbacksQueryRepository } from '../query-repositories/feedbacks.query.repository';
-import { UserInfoType } from '../../../auth/api/models/user-models';
-import { UpdateCommentCommand } from '../../application/use-cases/commands/update-comment.command';
-import { CommandBus } from '@nestjs/cqrs';
-import { DeleteCommentCommand } from '../../application/use-cases/commands/delete-comment.command';
 
 @Controller('comments')
 export class FeedbacksController {
   constructor(
     private feedbacksQueryRepo: FeedbacksQueryRepository,
-    private feedbacksService: FeedbacksService,
     private commandBus: CommandBus,
   ) {}
 
@@ -125,32 +123,19 @@ export class FeedbacksController {
       throw new NotFoundException('Comment not found');
     }
 
-    if (foundComment.likesInfo.myStatus === likeStatus) return;
+    const { myStatus } = foundComment.likesInfo;
 
-    const { likesCount, dislikesCount } = getStatusCounting(
-      likeStatus,
-      foundComment.likesInfo.myStatus,
-    );
+    if (myStatus === likeStatus) return;
 
-    const likeData = {
+    const reactionData = {
       commentId,
       userId,
-      status: likeStatus,
-      likesCount,
-      dislikesCount,
+      inputStatus: likeStatus,
     };
 
-    const userReactions = await this.feedbacksQueryRepo.getUserLikes(
-      userId,
-      commentId,
-    );
+    const command = new UpdateUserReactionCommand(reactionData);
 
-    if (!userReactions) {
-      const createdUserLike = await this.feedbacksService.createLike(likeData);
-      return;
-    }
-
-    const updatedLike = await this.feedbacksService.updateLike(likeData);
+    await this.commandBus.execute(command);
   }
 
   @Delete(':id')

@@ -1,9 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { EmailManager } from '../../../../infra/application/managers/email-manager';
-
-export class SendRecoveryMsgCommand {
-  constructor(public inputData: { email: string; recoveryCode: string }) {}
-}
+import { SendRecoveryMsgCommand } from './commands/send-recovery-msg.command';
 
 @CommandHandler(SendRecoveryMsgCommand)
 export class SendRecoveryMsgUseCase

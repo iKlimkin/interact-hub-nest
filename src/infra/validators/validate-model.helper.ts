@@ -5,7 +5,7 @@ export const validateOrRejectModel = async (
   ctor: new (args?: any) => any
 ) => {
   if (model instanceof ctor === false) {
-    throw new Error('Incorrect input blog data');
+    throw new Error('Incorrect input data');
   }
   try {
     await validateOrReject(model);

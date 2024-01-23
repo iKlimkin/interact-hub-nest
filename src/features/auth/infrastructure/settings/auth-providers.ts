@@ -29,7 +29,7 @@ import { UserCreatedEventHandler } from '../../application/use-cases/events/hand
 import { EmailAdapter } from '../../../../infra/adapters/email-adapter';
 import { EmailManager } from '../../../../infra/application/managers/email-manager';
 import { BcryptAdapter } from '../../../../infra/adapters/bcrypt-adapter';
-import { CreateUserSessionUseCase } from '../../../security/application/use-cases/create-user-session.use-case';
+import { CreateUserSessionUseCase } from '../../application/use-cases/create-user-session.use-case';
 import { UpdateIssuedTokenUseCase } from '../../../security/application/use-cases/update-issued-token.use-case';
 import { DeleteActiveSessionUseCase } from '../../../security/application/use-cases/delete-active-session.use-case';
 import { DeleteOtherUserSessionsUseCase } from '../../../security/application/use-cases/delete-other-user-sessions.use-case';
@@ -77,11 +77,11 @@ export const authUseCases: Provider[] = [
   UpdatePasswordUseCase,
   ConfirmEmailUseCase,
   UpdateConfirmationCodeUseCase,
+  CreateUserSessionUseCase,
+  UpdateIssuedTokenUseCase,
 ];
 
 export const securityUseCases: Provider[] = [
-  CreateUserSessionUseCase,
-  UpdateIssuedTokenUseCase,
   DeleteActiveSessionUseCase,
   DeleteOtherUserSessionsUseCase,
 ];

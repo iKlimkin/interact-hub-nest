@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   ValidationArguments,
   ValidationOptions,
@@ -15,7 +15,8 @@ export class BlogIdExistConstraint implements ValidatorConstraintInterface {
 
   async validate(value: any, args: ValidationArguments) {
     const existBlog = await this.blogsQueryRepo.getBlogById(value);
-    return !!existBlog;
+    if (!existBlog) throw new BadRequestException([{field: 'blogId', message: 'blog not found'}])
+    return true
   }
 }
 

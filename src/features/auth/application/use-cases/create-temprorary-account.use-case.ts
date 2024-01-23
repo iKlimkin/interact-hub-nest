@@ -1,14 +1,10 @@
 import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { InputRecoveryEmailModel } from '../../api/models/auth-input.models.ts/input-password-rec.type';
 import { OutputId } from '../../../../infra/likes.types';
 import { UserRecoveryType } from '../../api/models/auth.output.models/auth.output.models';
 import { AuthUsersRepository } from '../../infrastructure/authUsers-repository';
-import { SendRecoveryMsgCommand } from './send-recovery-msg.use-case';
+import { CreateTempAccountCommand } from './commands/create-temp-account.command';
+import { SendRecoveryMsgCommand } from './commands/send-recovery-msg.command';
 import { createRecoveryCode } from './helpers/create-recovery-message.helper';
-
-export class CreateTempAccountCommand {
-  constructor(public inputData: InputRecoveryEmailModel) {}
-}
 
 @CommandHandler(CreateTempAccountCommand)
 export class CreateTempAccountUseCase
@@ -22,18 +18,19 @@ export class CreateTempAccountUseCase
   async execute(command: CreateTempAccountCommand): Promise<OutputId> {
     const recoveryPassInfo: UserRecoveryType = createRecoveryCode();
     const { email } = command.inputData;
+
     const temporaryUserAccount =
       await this.authUsersRepository.createTemporaryUserAccount(
         recoveryPassInfo,
         email,
       );
 
-    this.commandBus.execute(
-      new SendRecoveryMsgCommand({
-        email,
-        recoveryCode: recoveryPassInfo.recoveryCode,
-      }),
-    );
+    const sendRecoveryMsgCommand = new SendRecoveryMsgCommand({
+      email,
+      recoveryCode: recoveryPassInfo.recoveryCode,
+    });
+
+    this.commandBus.execute(sendRecoveryMsgCommand);
 
     return temporaryUserAccount;
   }

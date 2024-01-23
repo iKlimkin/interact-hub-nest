@@ -70,7 +70,7 @@ describe('BlogsController (e2e)', () => {
       expect.setState({ correctInputData: inputData });
     });
 
-    it("/blogs (post) - shouldn't create blog with empty body ", async () => {
+    it("/blogs (POST) - shouldn't create blog with empty body ", async () => {
       const inputData = blogTestManager.createInputData();
 
       const newBlog = await blogTestManager.createBlog(

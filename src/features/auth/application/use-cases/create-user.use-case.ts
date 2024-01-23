@@ -1,18 +1,14 @@
 import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { InjectModel } from '@nestjs/mongoose';
 import { BcryptAdapter } from '../../../../infra/adapters/bcrypt-adapter';
-import { InputUserModel } from '../../../admin/api/models/create.userAdmin.model';
 import {
   UserAccount,
   UserAccountDocument,
   UserAccountModelType,
 } from '../../../admin/domain/entities/userAccount.schema';
 import { AuthUsersRepository } from '../../infrastructure/authUsers-repository';
+import { CreateUserCommand } from './commands/create-user.command';
 import { UserCreatedEvent } from './events/user-created-event';
-
-export class CreateUserCommand {
-  constructor(public inputUserDto: InputUserModel) {}
-}
 
 @CommandHandler(CreateUserCommand)
 export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
@@ -47,7 +43,7 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
       );
 
       this.eventBus.publish(userCreatedEvent);
-        
+
       return user;
     } catch (e) {
       console.error(`Error during user registration: ${e.message}`);

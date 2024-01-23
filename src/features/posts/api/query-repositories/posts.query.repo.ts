@@ -1,14 +1,14 @@
-import { getPagination } from '../../../../infra/utils/pagination';
-import { getSearchTerm } from '../../../../infra/utils/searchTerm';
-import { InjectModel } from '@nestjs/mongoose';
-import { Post, PostModelType } from '../../domain/entities/posts.schema';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 import { SortingQueryModel } from '../../../../infra/SortingQueryModel';
 import { likesStatus } from '../../../../infra/likes.types';
-import { PostViewModel } from '../models/post.view.models/PostViewModel';
-import { getPostViewModel } from '../models/post.view.models/getPostViewModel';
 import { PaginationViewModel } from '../../../../infra/paginationViewModel';
 import { getLikeStatus } from '../../../../infra/utils/get-like-status';
+import { getPagination } from '../../../../infra/utils/pagination';
+import { getSearchTerm } from '../../../../infra/utils/searchTerm';
+import { Post, PostModelType } from '../../domain/entities/posts.schema';
+import { PostViewModel } from '../models/post.view.models/PostViewModel';
+import { getPostViewModel } from '../models/post.view.models/getPostViewModel';
 
 @Injectable()
 export class PostsQueryRepository {
@@ -119,15 +119,14 @@ export class PostsQueryRepository {
     userId?: string,
   ): Promise<PostViewModel | null> {
     try {
-      const foundedPost = await this.PostModel.findById(postId).lean();
+      const foundedPost = await this.PostModel.findById(postId);
 
       if (!foundedPost) return null;
 
       return getPostViewModel(foundedPost, userId);
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Database fails operate during find post',
-      );
+      console.error(`Database fails operate during find post ${error}`);
+      return null;
     }
   }
 }

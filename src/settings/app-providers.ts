@@ -20,6 +20,7 @@ import { TestDatabaseRepo } from '../data-testing/test.db';
 import { CreateCommentUseCase } from '../features/comments/application/use-cases/create-comment.use-case';
 import { UpdateCommentUseCase } from '../features/comments/application/use-cases/update-comment.use-case';
 import { DeleteCommentUseCase } from '../features/comments/application/use-cases/delete-comment.use-case';
+import { UpdateUserReactionUseCase } from '../features/comments/application/use-cases/update-user-reaction.use-case';
 
 const blogsProviders: Provider[] = [BlogsQueryRepo, BlogsRepository];
 
@@ -47,6 +48,7 @@ const useCases: Provider[] = [
   UpdateCommentUseCase,
   CreateCommentUseCase,
   DeleteCommentUseCase,
+  UpdateUserReactionUseCase,
 ];
 
 export const providers = [

@@ -1,14 +1,11 @@
 import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { BcryptAdapter } from '../../../../infra/adapters/bcrypt-adapter';
-import { AuthUsersRepository } from '../../infrastructure/authUsers-repository';
 import { v4 as uuidv4 } from 'uuid';
-import { CreateUserCommand } from './create-user.use-case';
-import { InputRecoveryPassModel } from '../../api/models/auth-input.models.ts/input-recovery.model';
+import { BcryptAdapter } from '../../../../infra/adapters/bcrypt-adapter';
 import { validateOrRejectModel } from '../../../../infra/validators/validate-model.helper';
-
-export class UpdatePasswordCommand {
-  constructor(public inputData: InputRecoveryPassModel) {}
-}
+import { InputRecoveryPassModel } from '../../api/models/auth-input.models.ts/input-recovery.model';
+import { AuthUsersRepository } from '../../infrastructure/authUsers-repository';
+import { UpdatePasswordCommand } from './commands/update-password.command';
+import { CreateUserCommand } from './commands/create-user.command';
 
 @CommandHandler(UpdatePasswordCommand)
 export class UpdatePasswordUseCase
@@ -21,7 +18,7 @@ export class UpdatePasswordUseCase
   ) {}
 
   async execute(command: UpdatePasswordCommand): Promise<boolean> {
-    await validateOrRejectModel(command, InputRecoveryPassModel);
+    await validateOrRejectModel(command, UpdatePasswordCommand);
 
     const { recoveryCode, newPassword } = command.inputData;
 
@@ -50,13 +47,13 @@ export class UpdatePasswordUseCase
     if (foundTemporaryUserAccount) {
       const uniqueLogin = uuidv4();
 
-      const createdUser = await this.commandBus.execute(
-        new CreateUserCommand({
-          login: uniqueLogin,
-          email: foundTemporaryUserAccount.email,
-          password: newPassword,
-        }),
-      );
+      const createUserCommand = new CreateUserCommand({
+        login: uniqueLogin,
+        email: foundTemporaryUserAccount.email,
+        password: newPassword,
+      });
+
+      const createdUser = await this.commandBus.execute(createUserCommand);
 
       const deleteTempAccount =
         await this.authUsersRepository.deleteTemporaryUserAccount(recoveryCode);

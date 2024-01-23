@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { v4 as uuidv4 } from 'uuid';
-
-import { VerifyTokensType, TokensMeta, Payload, JwtTokens } from '../../features/auth/api/models/jwt.types';
+import {
+  VerifyTokensType,
+  TokensMeta,
+  Payload,
+  JwtTokens,
+} from '../../features/auth/api/models/jwt.types';
 import { jwtConstants } from '../../features/auth/infrastructure/guards/constants';
 import { UserInfoType } from '../../features/auth/api/models/user-models';
-
 
 @Injectable()
 export class AuthService {
@@ -61,7 +64,7 @@ export class AuthService {
     return await Promise.all([
       this.jwtService.signAsync(payload, {
         secret: jwtConstants.jwt_access_secret,
-        expiresIn: '15m',
+        expiresIn: '2h',
       }),
       this.jwtService.signAsync(payload, {
         secret: jwtConstants.refresh_secret,

@@ -1,13 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BcryptAdapter } from '../../../../infra/adapters/bcrypt-adapter';
-import { InputCredentialsModel } from '../../api/models/auth-input.models.ts/input-credentials.model';
-import { AuthUsersRepository } from '../../infrastructure/authUsers-repository';
 import { validateOrRejectModel } from '../../../../infra/validators/validate-model.helper';
 import { UserIdType } from '../../../admin/api/models/outputSA.models.ts/user-models';
-
-export class CheckCredentialsCommand {
-  constructor(public inputData: InputCredentialsModel) {}
-}
+import { AuthUsersRepository } from '../../infrastructure/authUsers-repository';
+import { CheckCredentialsCommand } from './commands/check-credentials.command';
 
 @CommandHandler(CheckCredentialsCommand)
 export class CheckCredentialsUseCase
