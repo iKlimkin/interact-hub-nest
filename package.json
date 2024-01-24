@@ -33,7 +33,6 @@
     "@nestjs/swagger": "^7.1.17",
     "@types/passport-jwt": "^4.0.0",
     "class-transformer": "^0.5.1",
-    "module-alias": "^2.2.3",
     "mongodb": "^6.3.0",
     "nestjs-rate-limit": "^1.1.1",
     "passport": "^0.7.0",
