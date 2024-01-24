@@ -64,7 +64,6 @@ export class AuthController {
     @CurrentUserInfo() userInfo: UserInfoType,
     @GetClientInfo() clientInfo: ClientInfo,
     @Res({ passthrough: true }) res: Response,
-    @Body() body: InputCredentialsModel,
   ) {
     const { accessToken, refreshToken } = await this.authService.getTokens(
       userInfo.userId,

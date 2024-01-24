@@ -8,7 +8,6 @@ import cookieParser from 'cookie-parser';
 import { AppModule } from '../app.module';
 import { HttpExceptionFilter } from '../infra/exception-filters/exception.filter';
 
-
 export const applyAppSettings = (app: INestApplication) => {
   app.use(cookieParser());
   // Для внедрения зависимостей в validator constraint

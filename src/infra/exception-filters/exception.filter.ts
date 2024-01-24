@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
-
 type ErrorsMessageType = {
   message: string;
   field: string;
@@ -48,9 +47,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
         errorsMessages: [],
       };
       const { message }: any = exception.getResponse();
-      debugger
+
       if (Array.isArray(message)) {
-        message.forEach((m: ErrorsMessageType) => errorResponse.errorsMessages.push(m));
+        message.forEach((m: ErrorsMessageType) =>
+          errorResponse.errorsMessages.push(m),
+        );
       } else {
         errorResponse.errorsMessages.push({ message });
       }

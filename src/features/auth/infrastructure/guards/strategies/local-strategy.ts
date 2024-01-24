@@ -1,8 +1,14 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { PassportStrategy } from '@nestjs/passport';
+import { ValidationError, validateOrReject } from 'class-validator';
 import { Strategy } from 'passport-local';
 import { UserIdType } from '../../../../admin/api/models/outputSA.models.ts/user-models';
+import { InputCredentialsModel } from '../../../api/models/auth-input.models.ts/input-credentials.model';
 import { CheckCredentialsCommand } from '../../../application/use-cases/commands/check-credentials.command';
 
 @Injectable()
@@ -14,7 +20,8 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(loginOrEmail: string, password: string): Promise<UserIdType> {
-    
+    await this.validateInputModel(loginOrEmail, password);
+
     const command = new CheckCredentialsCommand({
       loginOrEmail,
       password,
@@ -27,5 +34,35 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     }
 
     return userId;
+  }
+
+  private async validateInputModel(loginOrEmail: string, password: string) {
+    const validation = new InputCredentialsModel();
+    validation.loginOrEmail = loginOrEmail;
+    validation.password = password;
+    try {
+      await validateOrReject(validation);
+    } catch (errors) {
+      await this.handleValidationErrors(errors);
+    }
+  }
+
+  private async handleValidationErrors(
+    errors: ValidationError[],
+  ): Promise<void> {
+    const errorResponse: any = {
+      message: [],
+    };
+    for (const error of errors) {
+      const constraints = Object.values(error.constraints || {});
+
+      for (const constraint of constraints) {
+        errorResponse.message.push({
+          field: error.property,
+          message: constraint,
+        });
+      }
+    }
+    throw new BadRequestException(errorResponse);
   }
 }
