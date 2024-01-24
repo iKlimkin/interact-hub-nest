@@ -96,6 +96,21 @@ export class PostsTestManager {
     expect(body.totalCount).toBe(totalCount);
   }
 
+  async deletePost (postId: number) {
+    const beforeDelete = await request(this.application).get(`${RouterPaths.posts}/${postId}`);
+
+    expect(beforeDelete.body).toBeDefined()
+
+    await request(this.application)
+      .delete(`${RouterPaths.posts}/${postId}`)
+      .set("Authorization", "Basic YWRtaW46cXdlcnR5")
+      .expect(HttpStatus.NO_CONTENT);
+
+    const afterDelete = await request(this.application)
+      .get(`${RouterPaths.posts}/${postId}`)
+      .expect(HttpStatus.NOT_FOUND);
+  }
+
   static createErrorsMessageTest(fields: string[], message?: string) {
     const errorsMessages: ErrorsMessages[] = [];
     for (const field of fields) {

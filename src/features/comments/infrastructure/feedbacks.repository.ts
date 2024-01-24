@@ -102,7 +102,7 @@ export class FeedbacksRepository {
         { new: true },
       );
 
-      return !!updatedLike
+      return !!updatedLike;
     } catch (error) {
       throw new InternalServerErrorException(
         'Database fails during update likeStatus in comment operation',

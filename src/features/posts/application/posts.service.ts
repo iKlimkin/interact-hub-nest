@@ -5,9 +5,7 @@ import { PostsRepository } from '../infrastructure/posts.repository';
 
 @Injectable()
 export class PostsService {
-  constructor(
-    private postsRepository: PostsRepository,
-  ) {}
+  constructor(private postsRepository: PostsRepository) {}
 
   async createLike(inputData: likeUserInfo): Promise<boolean> {
     return this.postsRepository.createLikeStatus(inputData);
@@ -17,4 +15,3 @@ export class PostsService {
     return this.postsRepository.updateLikeStatus(inputData);
   }
 }
-

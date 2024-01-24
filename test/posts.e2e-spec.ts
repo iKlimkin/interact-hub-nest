@@ -1,20 +1,28 @@
-import { INestApplication, HttpStatus } from '@nestjs/common';
-import { TestingModule, Test } from '@nestjs/testing';
+import { HttpStatus, INestApplication } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { applyAppSettings } from '../src/settings/apply-app.settings';
 import { BasicAuthorization } from './base/managers/BasicAuthManager';
 import { BlogsTestManager } from './base/managers/BlogsTestManager';
-import { RouterPaths } from './base/utils/routing';
 import { PostsTestManager } from './base/managers/PostsTestManager';
 import { postConstants } from './base/rest-models-helpers/post-models';
-import { likesStatus } from '../src/infra/likes.types';
+import { feedbacksConstants } from './base/rest-models-helpers/feedbacks.constants';
+import { aDescribe } from './base/aDescribe';
+import { skipSettings } from './tests-settings'
+import { RouterPaths } from './base/utils/routing';
+import { SAManager } from './base/managers/SAManager';
+import { AuthManager } from './base/managers/AuthManager';
+import { FeedbacksTestManager } from './base/managers/FeedbacksTestManager';
 
-describe('BlogsController (e2e)', () => {
+aDescribe(skipSettings.for('appTests'))('PostsController (e2e)', () => {
   let app: INestApplication;
   let postTestManager: PostsTestManager;
   let blogTestManager: BlogsTestManager;
   let basicAuthManager: BasicAuthorization;
+  let authManager: AuthManager;
+  let saManager: SAManager;
+  let feedbacksTestManager: FeedbacksTestManager;
 
   const dropDataBase = async () =>
     await request(app.getHttpServer()).delete(`${RouterPaths.test}`);
@@ -36,6 +44,9 @@ describe('BlogsController (e2e)', () => {
     postTestManager = new PostsTestManager(app);
     blogTestManager = new BlogsTestManager(app);
     basicAuthManager = new BasicAuthorization(app);
+    authManager = new AuthManager(app);
+    saManager = new SAManager(app);
+    feedbacksTestManager = new FeedbacksTestManager(app);
 
     await dropDataBase();
   });
@@ -69,7 +80,9 @@ describe('BlogsController (e2e)', () => {
         HttpStatus.BAD_REQUEST,
       );
 
-      postTestManager.checkPostData(post, postConstants.postValidationErrors);
+      const error = PostsTestManager.createErrorsMessageTest(['blogId']);
+
+      postTestManager.checkPostData(post, error);
     });
 
     it('/posts (POST) - should not create post without correct blogId in body', async () => {
@@ -123,19 +136,18 @@ describe('BlogsController (e2e)', () => {
     });
 
     it("/posts (PUT) - shouldn't update the post with incorrect input data", async () => {
-      const { blog } = expect.getState();
-      const inputData = postTestManager.createInputData();
+      const { post } = expect.getState();
+      const invalidInputData = postTestManager.createInputData();
 
       const result = await postTestManager.updatePost(
-        inputData,
-        blog.id,
+        invalidInputData,
+        post.id,
         HttpStatus.BAD_REQUEST,
       );
 
-      postTestManager.checkPostData(
-        result.body,
-        postConstants.postValidationErrors,
-      );
+      const error = PostsTestManager.createErrorsMessageTest(['blogId']);
+
+      postTestManager.checkPostData(result.body, error);
     });
     it('should update post', async () => {
       const { post, blog } = expect.getState();
@@ -157,6 +169,67 @@ describe('BlogsController (e2e)', () => {
         receivedPostAfterUpdate.title,
         newInputData.title,
       );
+    });
+  });
+
+  describe('deletePost', () => {
+    it("/posts (DELETE) - shouldn't remove post without auth", async () => {
+      const { post } = expect.getState();
+
+      await basicAuthManager.testDeleteAuthorization('posts', post.id);
+    });
+
+    it('/posts (DELETE) - should delete post', async () => {
+      const { post } = expect.getState();
+      await postTestManager.deletePost(post.id);
+    });
+  });
+
+  describe('createComment', () => {
+    beforeAll(async () => {
+      const { blog } = expect.getState();
+      const userInputData = saManager.createInputData({});
+      const { user: user1 } = await saManager.createUser(userInputData);
+      const result1 = await authManager.login(userInputData);
+
+      const userAnotherData = saManager.createInputData({
+        login: 'login',
+        email: 'email@test.test',
+      });
+      const { user: user2 } = await saManager.createUser(userAnotherData);
+      const result2 = await authManager.login(userAnotherData);
+
+      const inputPostData = postTestManager.createInputData({
+        blogId: blog.id,
+      });
+      const post = await postTestManager.createPost(inputPostData);
+
+      expect.setState({
+        post,
+        user1,
+        user2,
+        accesToken1: result1.accessToken,
+        accesToken2: result2.accessToken,
+      });
+    });
+
+    it("/posts (POST) - shouldn't create comment with invalid token", async () => {
+      const { post, accesToken1, user1 } = expect.getState();
+
+      const { comment } = await feedbacksTestManager.createComment(
+        { user: user1, token: accesToken1, post },
+        feedbacksConstants.createdContent[0],
+      );
+    });
+    it("/posts (POST) - shouldn't create comment with invalid postId", async () => {
+      const { post } = expect.getState();
+    });
+    it("/posts (POST) - shouldn't create comment with invalid body message (content)", async () => {
+      const { post } = expect.getState();
+    });
+
+    it('/posts (DELETE) - should delete post', async () => {
+      const { post } = expect.getState();
     });
   });
 });
