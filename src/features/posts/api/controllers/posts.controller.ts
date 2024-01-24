@@ -11,6 +11,7 @@ import {
   Post,
   Put,
   Query,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
@@ -21,7 +22,6 @@ import { OutputId, likesStatus } from '../../../../infra/likes.types';
 import { PaginationViewModel } from '../../../../infra/paginationViewModel';
 import { getStatusCounting } from '../../../../infra/utils/statusCounter';
 import { UsersQueryRepository } from '../../../admin/api/query-repositories/users.query.repo';
-
 import { CurrentUserInfo } from '../../../auth/infrastructure/decorators/current-user-info.decorator';
 import { AccessTokenGuard } from '../../../auth/infrastructure/guards/accessToken.guard';
 import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth.guard';
@@ -43,6 +43,7 @@ import { PostsQueryRepository } from '../query-repositories/posts.query.repo';
 import { UserInfoType } from '../../../auth/api/models/user-models';
 import { CreateCommentCommand } from '../../../comments/application/use-cases/commands/create-comment.command';
 import { CommentDocument } from '../../../comments/domain/entities/comment.schema';
+import { userInfo } from 'os';
 
 @Controller('posts')
 export class PostsController {
@@ -144,7 +145,8 @@ export class PostsController {
   ): Promise<PaginationViewModel<CommentsViewModel>> {
     const { pageNumber, pageSize, sortBy, sortDirection, searchContentTerm } =
       query;
-
+    console.log({searchContentTerm});
+    
     const post = await this.postsQueryRepo.getPostById(postId);
 
     if (!post) {
@@ -178,14 +180,21 @@ export class PostsController {
     @Body() body: InputContentModel,
     @CurrentUserInfo() userInfo: UserInfoType,
   ): Promise<CommentsViewModel> {
-    const { userId } = userInfo;
     const { content } = body;
+    const { userId } = userInfo;
+
+    const existPost = await this.postsQueryRepo.getPostById(postId);
+
+    if (!existPost) {
+      throw new NotFoundException('Post not found');
+    }
 
     const createCommentData: InputCommentModel = {
       content,
       userId,
       postId,
     };
+
     const command = new CreateCommentCommand(createCommentData);
 
     const { _id } = await this.commandBus.execute<

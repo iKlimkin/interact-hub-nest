@@ -7,3 +7,16 @@ export const getAuthConfiguration = registerAs('auth', () => ({
 export type AuthConfigurationType = {
   auth: ReturnType<typeof getAuthConfiguration>;
 };
+
+
+export const getMailerConfiguration = registerAs('eMailer', 
+  () => ({
+    password: process.env.EMAIL_PASSWORD ?? "lzyi mbrs wclb kink",
+    email: process.env.EMAIL_USER ?? "iklimkin50@gmail.com",
+    service: process.env.EMAIL_SERVICE ?? "gmail"
+  })
+)
+
+export type EmailDeliveryConfigType = {
+  eMailer: ReturnType<typeof getMailerConfiguration>
+}

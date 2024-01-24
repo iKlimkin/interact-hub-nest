@@ -30,7 +30,7 @@ export class UsersRepository {
 
   async getUserById(userId: string): Promise<UserAccountDBType | null> {
     try {
-      const foundUser = await this.UserAccountModel.findById(userId);
+      const foundUser = await this.UserAccountModel.findOne({ _id: userId});
 
       if (!foundUser) return null;
 

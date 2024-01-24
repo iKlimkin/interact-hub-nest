@@ -67,7 +67,7 @@ export class AuthService {
         expiresIn: '2h',
       }),
       this.jwtService.signAsync(payload, {
-        secret: jwtConstants.refresh_secret,
+        secret: jwtConstants.jwt_refresh_secret,
         expiresIn: '1d',
       }),
     ]);

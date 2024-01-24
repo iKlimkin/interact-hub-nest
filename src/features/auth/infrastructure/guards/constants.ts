@@ -1,6 +1,7 @@
 export const jwtConstants = {
-  jwt_access_secret: process.env.JWT_SECRET || 'JWT_SECRET_KEY',
-  refresh_secret: process.env.REFRESH_JWT_SECRET || 'REFRESH_SECRET_KEY',
+  jwt_access_secret: process.env.ACCESS_TOKEN_SECRET || 'jwt_access_secret_key',
+  jwt_refresh_secret:
+    process.env.REFRESH_TOKEN_SECRET || 'jwt_refresh_secret_KEY',
 };
 
 export const basicConstants = {

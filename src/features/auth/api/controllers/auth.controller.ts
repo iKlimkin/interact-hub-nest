@@ -12,6 +12,7 @@ import {
 import { CommandBus } from '@nestjs/cqrs';
 import { Response } from 'express';
 import { AuthService } from '../../../../infra/application/auth.service';
+import { OutputId } from '../../../../infra/likes.types';
 import { getDeviceInfo } from '../../../../infra/utils/deviceHandler';
 import {
   ErrorType,
@@ -22,26 +23,24 @@ import { UserAccountDocument } from '../../../admin/domain/entities/userAccount.
 import { InputSessionDataValidator } from '../../../security/api/models/security-input.models/create-session.model';
 import { DeleteActiveSessionCommand } from '../../../security/application/use-cases/commands/delete-active-session.command';
 import { UpdateIssuedTokenCommand } from '../../../security/application/use-cases/commands/update-Issued-token.command';
+import { ConfirmEmailCommand } from '../../application/use-cases/commands/confirm-email.command';
+import { CreateSessionCommand } from '../../application/use-cases/commands/create-session.command';
+import { CreateTempAccountCommand } from '../../application/use-cases/commands/create-temp-account.command';
+import { CreateUserCommand } from '../../application/use-cases/commands/create-user.command';
+import { PasswordRecoveryCommand } from '../../application/use-cases/commands/recovery-password.command';
+import { UpdateConfirmationCodeCommand } from '../../application/use-cases/commands/update-confirmation-code.command';
+import { UpdatePasswordCommand } from '../../application/use-cases/commands/update-password.command';
 import { GetClientInfo } from '../../infrastructure/decorators/client-ip.decorator';
 import { CurrentUserInfo } from '../../infrastructure/decorators/current-user-info.decorator';
 import { AccessTokenGuard } from '../../infrastructure/guards/accessToken.guard';
 import { LocalAuthGuard } from '../../infrastructure/guards/local-auth.guard';
 import { RefreshTokenGuard } from '../../infrastructure/guards/refreshToken.guard';
-import { InputCredentialsModel } from '../models/auth-input.models.ts/input-credentials.model';
 import { InputRecoveryEmailModel } from '../models/auth-input.models.ts/input-password-rec.type';
 import { InputRecoveryPassModel } from '../models/auth-input.models.ts/input-recovery.model';
 import { InputRegistrationCodeModel } from '../models/auth-input.models.ts/input-registration-code.model';
 import { InputRegistrationModel } from '../models/auth-input.models.ts/input-registration.model';
 import { UserInfoType } from '../models/user-models';
 import { AuthQueryRepository } from '../query-repositories/auth-query-repo';
-import { OutputId } from '../../../../infra/likes.types';
-import { ConfirmEmailCommand } from '../../application/use-cases/commands/confirm-email.command';
-import { CreateTempAccountCommand } from '../../application/use-cases/commands/create-temp-account.command';
-import { CreateUserCommand } from '../../application/use-cases/commands/create-user.command';
-import { PasswordRecoveryCommand } from '../../application/use-cases/commands/recovery-password.command';
-import { UpdateConfirmationCodeCommand } from '../../application/use-cases/commands/update-confirmation-code.command';
-import { UpdatePasswordCommand } from '../../application/use-cases/commands/update-password.command';
-import { CreateSessionCommand } from '../../application/use-cases/commands/create-session.command';
 
 type ClientInfo = {
   ip: string;
@@ -146,12 +145,12 @@ export class AuthController {
 
     if (!foundUserAccount) {
       const command = new CreateTempAccountCommand(inputEmailModel);
-      
+
       const codeForNonExistentUser = await this.commandBus.execute<
         CreateTempAccountCommand,
         OutputId
       >(command);
-      
+
       return;
     }
 

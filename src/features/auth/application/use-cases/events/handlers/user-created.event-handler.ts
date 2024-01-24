@@ -8,13 +8,7 @@ export class UserCreatedEventHandler
 {
   constructor(private emailManager: EmailManager) {}
   handle(event: UserCreatedEvent) {
-    try {
-      this.emailManager.sendEmailConfirmationMessage(
-        event.email,
-        event.confirmationCode,
-      );
-    } catch (error) {
-      console.error(`UserCreatedEventHandler underperformance ${error}`);
-    }
+    this.emailManager
+      .sendEmailConfirmationMessage(event.email, event.confirmationCode)
   }
 }

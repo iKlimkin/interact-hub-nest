@@ -119,6 +119,7 @@ export class PostsQueryRepository {
     userId?: string,
   ): Promise<PostViewModel | null> {
     try {
+      
       const foundedPost = await this.PostModel.findById(postId);
 
       if (!foundedPost) return null;

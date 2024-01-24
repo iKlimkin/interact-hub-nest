@@ -17,8 +17,6 @@ export class AppController {
     return {
       hello: this.appService.getHello(),
       env: this.configService.get('NODE_ENV', { infer: true }),
-      CASE1: this.configService.get('CASE1'),
-      CASE2: this.configService.get('CASE2'),
       auth: this.configAuthService.get('auth', { infer: true }),
       // auth: this.configService.get('auth', { infer: true })?.type
     };

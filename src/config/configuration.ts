@@ -1,19 +1,23 @@
-export const getConfiguration = () => {
-  return {
-    NODE_ENV: process.env.NODE_ENV || 'development',
-    PORT: Number(process.env.PORT) || 5555,
-    CASE1: Number(process.env.CASE1) || 'case1...',
-    CASE2: Number(process.env.CASE2) ?? 0,
-    db: {
-      mongo: {
-        MONGO_URI: process.env.MONGO_URI ?? 'connection_to_db',
-      },
-    },
-    // auth: getAuthConfiguration()
-  };
-};
+export const getEnvConfiguration = () => ({
+  Port: parseInt(process.env.PORT ?? '5000'),
+  jwtSetting: {
+    ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,
+    REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET,
+  },
+  emailSetting: {
+    EMAIL_PASSWORD: process.env.EMAIL_PASSWORD,
+    EMAIL_USER: process.env.EMAIL_USER,
+    EMAIL_SERVICE: process.env.EMAIL_SERVICE,
+  },
+  authBasic: {
+    HTTP_BASIC_USER: process.env.HTTP_BASIC_USER,
+    HTTP_BASIC_PASS: process.env.HTTP_BASIC_PASS,
+  },
+  // auth: getAuthConfiguration()
+});
 
-type ConfigurationType = ReturnType<typeof getConfiguration>;
+export type ConfigurationType = ReturnType<typeof getEnvConfiguration>;
+
 export type ConfigType = ConfigurationType & {
   MONGO_URI: string;
   MONGO_URI2: string;

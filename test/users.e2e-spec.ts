@@ -26,6 +26,9 @@ describe('AuthController (e2e)', () => {
       .useClass(EmailManagerMock)
       .compile();
 
+
+      // const UseCaseExample = app.get<>(UserCase)
+
     app = moduleFixture.createNestApplication();
 
     applyAppSettings(app);

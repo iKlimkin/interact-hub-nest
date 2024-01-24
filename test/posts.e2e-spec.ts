@@ -7,9 +7,12 @@ import { BasicAuthorization } from './base/managers/BasicAuthManager';
 import { BlogsTestManager } from './base/managers/BlogsTestManager';
 import { PostsTestManager } from './base/managers/PostsTestManager';
 import { postConstants } from './base/rest-models-helpers/post-models';
-import { feedbacksConstants } from './base/rest-models-helpers/feedbacks.constants';
+import {
+  authConstants,
+  feedbacksConstants,
+} from './base/rest-models-helpers/feedbacks.constants';
 import { aDescribe } from './base/aDescribe';
-import { skipSettings } from './tests-settings'
+import { skipSettings } from './tests-settings';
 import { RouterPaths } from './base/utils/routing';
 import { SAManager } from './base/managers/SAManager';
 import { AuthManager } from './base/managers/AuthManager';
@@ -213,23 +216,70 @@ aDescribe(skipSettings.for('appTests'))('PostsController (e2e)', () => {
       });
     });
 
-    it("/posts (POST) - shouldn't create comment with invalid token", async () => {
-      const { post, accesToken1, user1 } = expect.getState();
+    it("/posts/:postId/comments (POST) - shouldn't create comment with invalid token, expect UNAUTHORIZED", async () => {
+      const { post, user1 } = expect.getState();
 
-      const { comment } = await feedbacksTestManager.createComment(
-        { user: user1, token: accesToken1, post },
+      const invalidToken = authConstants.invalidToken;
+      await feedbacksTestManager.createComment(
+        { user: user1, token: invalidToken, post },
         feedbacksConstants.createdContent[0],
+        HttpStatus.UNAUTHORIZED,
       );
     });
-    it("/posts (POST) - shouldn't create comment with invalid postId", async () => {
-      const { post } = expect.getState();
-    });
-    it("/posts (POST) - shouldn't create comment with invalid body message (content)", async () => {
-      const { post } = expect.getState();
+
+    it("/posts/:postId/comments (POST) - shouldn't create comment with invalid postId, expect NOT_FOUND", async () => {
+      const { post, accesToken1, user1 } = expect.getState();
+      const invalidPost = post;
+      invalidPost.id = post.id.slice(-2);
+
+      await feedbacksTestManager.createComment(
+        { user: user1, token: accesToken1, post: invalidPost },
+        feedbacksConstants.createdContent[0],
+        HttpStatus.NOT_FOUND,
+      );
     });
 
-    it('/posts (DELETE) - should delete post', async () => {
-      const { post } = expect.getState();
+    it("/posts/:postId/comments (POST) - shouldn't create comment with invalid body message (content), expect BAD_REQUEST", async () => {
+      const { post, accesToken1, user1 } = expect.getState();
+
+      const content = '';
+
+      await feedbacksTestManager.createComment(
+        { user: user1, token: accesToken1, post },
+        content,
+        HttpStatus.BAD_REQUEST,
+      );
+    });
+
+    it("/posts/:postId/comments (POST) - shouldn't create comment with invalid body message (content), expect BAD_REQUEST", async () => {
+      const { post, accesToken1, user1 } = expect.getState();
+
+      const content = '';
+
+      await feedbacksTestManager.createComment(
+        { user: user1, token: accesToken1, post },
+        content,
+        HttpStatus.BAD_REQUEST,
+      );
+    });
+
+    it('/posts/:postId/comments (POST) - should create 5 comments, expect CREATED', async () => {
+      const { post, accesToken1, user1 } = expect.getState();
+
+      for (let i = 0; i < 5; i++) {
+        let content = feedbacksConstants.createdContent[i];
+        await feedbacksTestManager.createComment(
+          { user: user1, token: accesToken1, post },
+          content,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    });
+
+    it('/posts/:postId/comments (GET) - should recieve 5 comments for current post, expect CREATED', async () => {
+      const { post, accesToken1, user1 } = expect.getState();
+
+      
     });
   });
 });

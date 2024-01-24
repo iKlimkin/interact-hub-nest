@@ -1,6 +1,5 @@
 import { NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { OutputId } from '../../../../infra/likes.types';
 import { validateOrRejectModel } from '../../../../infra/validators/validate-model.helper';

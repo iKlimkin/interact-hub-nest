@@ -30,7 +30,7 @@ export class RefreshTokenStrategy extends PassportStrategy(
       jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
       ignoreExpiration: false,
       passReqToCallback: true,
-      secretOrKey: jwtConstants.refresh_secret,
+      secretOrKey: jwtConstants.jwt_refresh_secret,
     });
   }
 

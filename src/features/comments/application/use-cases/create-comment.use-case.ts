@@ -22,17 +22,13 @@ export class CreateCommentUseCase
 
   async execute(command: CreateCommentCommand): Promise<CommentDocument> {
     const { userId, content, postId } = command.inputData;
-    
-    const user = await this.usersRepository.getUserById(userId);
 
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+    const user = await this.usersRepository.getUserById(userId);
 
     const commentSmartModel = await this.CommentModel.makeInstance({
       commentatorInfo: {
         userId: userId,
-        userLogin: user.accountData.login,
+        userLogin: user!.accountData.login,
       },
       content: content,
       postId: postId,

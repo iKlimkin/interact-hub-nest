@@ -9,6 +9,7 @@ import {
 import { AuthUsersRepository } from '../../infrastructure/authUsers-repository';
 import { CreateUserCommand } from './commands/create-user.command';
 import { UserCreatedEvent } from './events/user-created-event';
+import { validateOrRejectModel } from '../../../../infra/validators/validate-model.helper';
 
 @CommandHandler(CreateUserCommand)
 export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
@@ -25,6 +26,8 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
   ): Promise<UserAccountDocument | null> {
     const { email, login, password } = command.inputUserDto;
     try {
+      validateOrRejectModel(command, CreateUserCommand);
+
       const { passwordSalt, passwordHash } =
         await this.bcryptAdapter.createHash(password);
 
@@ -37,12 +40,12 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
 
       const user = await this.authUsersRepository.save(smartUserModel);
 
-      const userCreatedEvent = new UserCreatedEvent(
+      const event = new UserCreatedEvent(
         email,
         user.emailConfirmation.confirmationCode,
       );
 
-      this.eventBus.publish(userCreatedEvent);
+      this.eventBus.publish(event);
 
       return user;
     } catch (e) {

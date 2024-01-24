@@ -10,16 +10,23 @@ import { RouterPaths } from '../../base/utils/routing';
 import { AppModule } from '../../../src/app.module';
 import { applyAppSettings } from '../../../src/settings/apply-app.settings';
 import { CreateUserCommand } from '../../../src/features/auth/application/use-cases/commands/create-user.command';
-
-class EventBusMock {
-  publish = jest.fn();
-}
+import { EmailManager } from '../../../src/infra/application/managers/email-manager';
 
 class MockAuthRepository {
   async save(smartUser: UserAccountDocument): Promise<UserAccountDocument> {
     return await smartUser.save();
   }
 }
+
+class MockEmailManager {
+  async sendEmailConfirmationMessage() {
+    return Promise.resolve()
+  } 
+  sendEmailRecoveryMessage() {
+    return Promise.resolve()
+  }
+}
+
 
 class MockBcryptAdapter {
   async createHash(password: string) {
@@ -49,6 +56,8 @@ describe('CreateUserUseCase', () => {
       .useValue(MockAuthRepository)
       .overrideProvider(BcryptAdapter)
       .useClass(MockBcryptAdapter)
+      .overrideProvider(EmailManager)
+      .useClass(MockEmailManager)
       .compile();
 
     app = moduleFixture.createNestApplication();
