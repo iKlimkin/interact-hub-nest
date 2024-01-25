@@ -1,3 +1,5 @@
+import { getDbConnection } from "../features/auth/config/configuration";
+
 export const getEnvConfiguration = () => ({
   Port: parseInt(process.env.PORT ?? '5000'),
   jwtSetting: {
@@ -13,7 +15,7 @@ export const getEnvConfiguration = () => ({
     HTTP_BASIC_USER: process.env.HTTP_BASIC_USER,
     HTTP_BASIC_PASS: process.env.HTTP_BASIC_PASS,
   },
-  // auth: getAuthConfiguration()
+  // dbConnection: getDbConnection()
 });
 
 export type ConfigurationType = ReturnType<typeof getEnvConfiguration>;
