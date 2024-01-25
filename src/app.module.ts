@@ -1,3 +1,5 @@
+import { ConfigModule } from '@nestjs/config';
+ConfigModule.forRoot()
 import { configModule } from './settings/app-config.module';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -11,7 +13,8 @@ import { CqrsModule } from '@nestjs/cqrs';
 @Module({
   imports: [
     CqrsModule,
-    configModule,
+    ConfigModule.forRoot(),
+    // configModule,
     MongooseModule.forRoot(settings.MONGO_URL),
     MongooseModule.forFeature(mongooseSchemas),
     AuthModule,

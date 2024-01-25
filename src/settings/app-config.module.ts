@@ -6,11 +6,12 @@ export const configModule = ConfigModule.forRoot({
   // envFilePath: ['.env.local', '.env'] prioritize
   isGlobal: true,
   load: [getEnvConfiguration],
-  // cache: true,
-  // validationSchema: Joi.object({
-  //   PORT: Joi.number().valid(5000),
-  //   MONGO_URL: Joi.string().uri(),
-  //   DB_LOCAL: Joi.string().required(),
-  // }),
-  // expandVariables: true,
+  cache: true,
+  validationSchema: Joi.object({
+    PORT: Joi.number().valid(5000),
+    MONGO_URL: Joi.string().uri(),
+    DB_LOCAL: Joi.string().required(),
+  }),
+  expandVariables: true,
 });
+
