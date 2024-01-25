@@ -9,7 +9,7 @@ import { providers } from './settings/app-providers';
 import { mongooseSchemas } from './settings/mongoose-schemas';
 import { AuthModule } from './features/auth/auth.module';
 import { CqrsModule } from '@nestjs/cqrs';
-
+const a = 1;
 @Module({
   imports: [
     CqrsModule,
