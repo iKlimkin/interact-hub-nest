@@ -1,6 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
 import {
   MatchApiLimitType,
   MatchApiType,
