@@ -53,7 +53,7 @@ export class RateLimitInterceptor implements NestInterceptor {
         },
       ],
     };
-    response.status(HttpStatus.TOO_MANY_REQUESTS).send(result);
+    // response.status(HttpStatus.TOO_MANY_REQUESTS).send(result);
     return new Observable();
   }
 }
