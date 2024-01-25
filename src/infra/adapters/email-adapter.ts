@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import nodemailer, { SentMessageInfo } from 'nodemailer';
-import { EmailDeliveryConfigType } from '../../features/auth/config/configuration';
+import { ConfigurationType } from '../../config/configuration';
 
 @Injectable()
 export class EmailAdapter {
   constructor(
-    private readonly configEMailerService: ConfigService<EmailDeliveryConfigType>,
+    private readonly configService: ConfigService<ConfigurationType>,
   ) {}
 
   async sendEmail(inputData: {
@@ -56,8 +56,8 @@ export class EmailAdapter {
         inputData,
         message,
       );
-        console.log({info});
-        
+      console.log({ info });
+
       return info.messageId;
     } catch (error) {
       console.error('Failed to send confirmation message', error);
@@ -78,13 +78,15 @@ export class EmailAdapter {
   }
 
   private createTransport() {
-    const config = this.configEMailerService.get('eMailer', { infer: true });
+    const config = this.configService.get('emailSetting', {
+      infer: true,
+    });
 
     return nodemailer.createTransport({
-      service: config?.service,
+      service: config?.EMAIL_SERVICE,
       auth: {
-        user: config?.email,
-        pass: config?.password,
+        user: config?.EMAIL_USER,
+        pass: config?.EMAIL_PASSWORD,
       },
     });
   }

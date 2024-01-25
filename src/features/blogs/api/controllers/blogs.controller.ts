@@ -31,6 +31,8 @@ import { BlogsQueryRepo } from '../query-repositories/blogs.query.repo';
 import { DeletBlogCommand } from '../../application/use-case/delete-blog-use-case';
 import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
 import { OutputId } from '../../../../infra/likes.types';
+import { ConfigService } from '@nestjs/config';
+import { ConfigurationType } from '../../../../config/configuration';
 
 @Controller('blogs')
 export class BlogsController {
@@ -38,6 +40,7 @@ export class BlogsController {
     private readonly blogsQueryRepo: BlogsQueryRepo,
     private readonly postsQueryRepo: PostsQueryRepository,
     private readonly commandBus: CommandBus,
+    private readonly configService: ConfigService
   ) {}
 
   @Get()
@@ -46,7 +49,6 @@ export class BlogsController {
     @Query() query: SortingQueryModel,
   ): Promise<PaginationViewModel<BlogType>> {
     const receivedBlogs = await this.blogsQueryRepo.getBlogsByQuery(query);
-
     return receivedBlogs;
   }
 

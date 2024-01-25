@@ -19,13 +19,3 @@ export const getDbConnection = registerAs('dbConnection', () => ({
 export type dbConnectionConfigType = {
   dbConnection: ReturnType<typeof getDbConnection>;
 };
-
-export const getMailerConfiguration = registerAs('eMailer', () => ({
-  password: process.env.EMAIL_PASSWORD ?? 'someprotectpassword',
-  email: process.env.EMAIL_USER ?? 'iklimkin50@gmail.com',
-  service: process.env.EMAIL_SERVICE ?? 'gmail',
-}));
-
-export type EmailDeliveryConfigType = {
-  eMailer: ReturnType<typeof getMailerConfiguration>;
-};

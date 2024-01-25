@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -12,7 +11,6 @@ import { UsersRepository } from '../admin/infrastructure/users.repository';
 import { SecurityQueryRepo } from '../security/api/query-repositories/security.query.repo';
 import { SecurityService } from '../security/application/security.service';
 import { AuthController } from './api/controllers/auth.controller';
-import { getAuthConfiguration, getMailerConfiguration } from './config/configuration';
 import {
   RequestLoggerInterseptor,
   Strategies,
@@ -26,14 +24,12 @@ import {
 } from './infrastructure/settings/auth-providers';
 import { mongooseModels } from './infrastructure/settings/mongoose-models';
 
-
 @Module({
   imports: [
     CqrsModule,
     JwtModule.register({}),
     PassportModule,
     MongooseModule.forFeature(mongooseModels),
-    ConfigModule.forFeature(getMailerConfiguration)
   ],
 
   providers: [
@@ -44,7 +40,7 @@ import { mongooseModels } from './infrastructure/settings/mongoose-models';
     ...requestLoggerProviders,
 
     ...adapters,
-  
+
     AuthService,
 
     ...securitiesProviders,

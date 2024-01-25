@@ -1,11 +1,14 @@
-import { ConfigService } from "@nestjs/config";
-import { dbConnectionConfigType } from "../features/auth/config/configuration";
+import { ConfigService } from '@nestjs/config';
+import { ConfigurationType } from '../config/configuration';
 
-
-const dbConfig = new ConfigService<dbConnectionConfigType>().get('dbConnection', { infer: true })
-
-
-export default {
-  MONGO_URL:
-  process.env.MONGO_URL || `mongodb://127.0.0.1:27017/nest-studying-project` 
+export const createAsyncMongoConnection = async (
+  configService: ConfigService,
+) => {
+  const config = configService.get<ConfigurationType>('dbConnection', {
+    infer: true,
+  });
+  console.log(`Connecting to MongoDB ${!!config.mongo_url}`);
+  return {
+    uri: config.mongo_url,
+  };
 };
