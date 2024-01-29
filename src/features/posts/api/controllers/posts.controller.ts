@@ -5,23 +5,23 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  InternalServerErrorException,
   NotFoundException,
   Param,
   Post,
   Put,
   Query,
-  Res,
   UseGuards,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
+import { OutputId, likesStatus } from '../../../../domain/likes.types';
+import { PaginationViewModel } from '../../../../domain/pagination-view.model';
 import { SortingQueryModel } from '../../../../domain/sorting-base-filter';
 import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
 import { SetUserIdGuard } from '../../../../infra/guards/set-user-id.guard';
-import { OutputId, likesStatus } from '../../../../domain/likes.types';
-import { PaginationViewModel } from '../../../../domain/pagination-view.model';
+import { ObjectIdPipe } from '../../../../infra/pipes/valid-objectId.pipe';
 import { getStatusCounting } from '../../../../infra/utils/status-counter';
 import { UsersQueryRepository } from '../../../admin/api/query-repositories/users.query.repo';
+import { UserInfoType } from '../../../auth/api/models/user-models';
 import { CurrentUserInfo } from '../../../auth/infrastructure/decorators/current-user-info.decorator';
 import { AccessTokenGuard } from '../../../auth/infrastructure/guards/accessToken.guard';
 import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth.guard';
@@ -31,7 +31,8 @@ import {
   InputContentModel,
 } from '../../../comments/api/models/input.comment.models';
 import { FeedbacksQueryRepository } from '../../../comments/api/query-repositories/feedbacks.query.repository';
-import { FeedbacksService } from '../../../comments/application/feedbacks.service';
+import { CreateCommentCommand } from '../../../comments/application/use-cases/commands/create-comment.command';
+import { CommentDocument } from '../../../comments/domain/entities/comment.schema';
 import { PostsService } from '../../application/posts.service';
 import { CreatePostCommand } from '../../application/use-cases/create-post-use-case';
 import { DeletePostCommand } from '../../application/use-cases/delete-post-use-case';
@@ -40,10 +41,6 @@ import { InputPostModel } from '../models/input.posts.models/create.post.model';
 import { InputLikeStatusModel } from '../models/input.posts.models/input-post..model';
 import { PostViewModel } from '../models/post.view.models/PostViewModel';
 import { PostsQueryRepository } from '../query-repositories/posts.query.repo';
-import { UserInfoType } from '../../../auth/api/models/user-models';
-import { CreateCommentCommand } from '../../../comments/application/use-cases/commands/create-comment.command';
-import { CommentDocument } from '../../../comments/domain/entities/comment.schema';
-import { userInfo } from 'os';
 
 @Controller('posts')
 export class PostsController {
@@ -51,7 +48,6 @@ export class PostsController {
     private feedbacksQueryRepo: FeedbacksQueryRepository,
     private postsQueryRepo: PostsQueryRepository,
     private postsService: PostsService,
-    private feedbacksService: FeedbacksService,
     private usersQueryRepo: UsersQueryRepository,
     private commandBus: CommandBus,
   ) {}
@@ -81,7 +77,7 @@ export class PostsController {
   @Get(':id')
   @UseGuards(SetUserIdGuard)
   async getPostById(
-    @Param('id') postId: string,
+    @Param('id', ObjectIdPipe) postId: string,
     @CurrentUserId() userId: string,
   ): Promise<PostViewModel> {
     const foundPost = await this.postsQueryRepo.getPostById(postId, userId);
@@ -97,7 +93,7 @@ export class PostsController {
   @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateLikesStatus(
-    @Param('id') postId: string,
+    @Param('id', ObjectIdPipe) postId: string,
     @Body() status: InputLikeStatusModel,
     @CurrentUserInfo() userInfo: UserInfoType,
   ) {
@@ -139,13 +135,12 @@ export class PostsController {
   @Get(':id/comments')
   @UseGuards(SetUserIdGuard)
   async getCommentsByPostId(
-    @Param('id') postId: string,
+    @Param('id', ObjectIdPipe) postId: string,
     @CurrentUserId() userId: string,
     @Query() query: SortingQueryModel,
   ): Promise<PaginationViewModel<CommentsViewModel>> {
     const { pageNumber, pageSize, sortBy, sortDirection, searchContentTerm } =
       query;
-    console.log({ searchContentTerm });
 
     const post = await this.postsQueryRepo.getPostById(postId);
 
@@ -176,7 +171,7 @@ export class PostsController {
   @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.CREATED)
   async createCommentByPostId(
-    @Param('id') postId: string,
+    @Param('id', ObjectIdPipe) postId: string,
     @Body() body: InputContentModel,
     @CurrentUserInfo() userInfo: UserInfoType,
   ): Promise<CommentsViewModel> {
@@ -234,7 +229,7 @@ export class PostsController {
   @UseGuards(BasicSAAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePost(
-    @Param('id') postId: string,
+    @Param('id', ObjectIdPipe) postId: string,
     @Body() inputPostDto: InputPostModel,
   ) {
     const command = new UpdatePostCommand({ inputPostDto, postId });
@@ -252,7 +247,7 @@ export class PostsController {
   @Delete(':id')
   @UseGuards(BasicSAAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deletePost(@Param('id') postId: string) {
+  async deletePost(@Param('id', ObjectIdPipe) postId: string) {
     const deletedPost = await this.commandBus.execute(
       new DeletePostCommand(postId),
     );

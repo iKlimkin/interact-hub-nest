@@ -1,5 +1,5 @@
 import { WithId } from 'mongodb';
-import { UserViewModel } from '../../../../admin/api/models/userAdmin.view.models/userAdmin.view.model';
+import { SAViewModel } from '../../../../admin/api/models/userAdmin.view.models/userAdmin.view.model';
 
 export type UserType = {
   login: string;
@@ -23,7 +23,7 @@ export type UserAccountType = {
 };
 
 export type UserAccountViewModel = {
-  accountData: UserViewModel;
+  accountData: SAViewModel;
   emailConfirmation: UserConfirmationType;
 };
 

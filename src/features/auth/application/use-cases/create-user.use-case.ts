@@ -10,6 +10,8 @@ import { AuthUsersRepository } from '../../infrastructure/authUsers-repository';
 import { CreateUserCommand } from './commands/create-user.command';
 import { UserCreatedEvent } from './events/user-created-event';
 import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
+import { LayerNoticeInterceptor } from '../../../../infra/utils/error-layer-interceptor';
+import { CreateUserErrors } from '../../../../infra/utils/interlayer-error-handler.ts/user-errors';
 
 @CommandHandler(CreateUserCommand)
 export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
@@ -26,7 +28,14 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
   ): Promise<UserAccountDocument | null> {
     const { email, login, password } = command.inputUserDto;
     try {
-      validateOrRejectModel(command, CreateUserCommand);
+      const notice = new LayerNoticeInterceptor()
+      try {
+        await validateOrRejectModel(command, CreateUserCommand);
+      } catch (error) {
+        notice.addError(`couldn't pass validation`,
+        'validation',
+        CreateUserErrors.Validation)
+      }
 
       const { passwordSalt, passwordHash } =
         await this.bcryptAdapter.createHash(password);

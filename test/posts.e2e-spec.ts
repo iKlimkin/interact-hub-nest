@@ -15,7 +15,7 @@ import {
 } from './base/rest-models-helpers/feedbacks.constants';
 import { postConstants } from './base/rest-models-helpers/post-models';
 import { dropDataBase } from './base/utils/dataBase-clean-up';
-import { skipSettings } from './tests-settings';
+import { skipSettings } from './base/utils/tests-settings';
 import { createErrorsMessages } from './base/utils/make-errors-messages';
 
 aDescribe(skipSettings.for('appTests'))('PostsController (e2e)', () => {

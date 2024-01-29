@@ -7,4 +7,4 @@ export class BlogsQueryFilter extends BaseFilter {
     sortBy: string;
     sortDirection: 'asc' | 'desc';
     searchNameTerm: string;
-}
+} 

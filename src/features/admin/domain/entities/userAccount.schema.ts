@@ -2,12 +2,14 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { add } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 import {
+  UserAccountViewModel,
   UserConfirmationType,
   UserRecoveryType,
   UserType,
 } from '../../../auth/api/models/auth.output.models/auth.output.models';
 import { CreateUserDto } from '../../api/models/create-user.model';
 import { HydratedDocument, Model } from 'mongoose';
+import { SAViewModel } from '../../api/models/userAdmin.view.models/userAdmin.view.model';
 
 export type UserAccountDocument = HydratedDocument<UserAccount>;
 export type UserAccountModelType = Model<UserAccountDocument> &
@@ -71,8 +73,38 @@ export class UserAccount {
     );
   }
 
+  updateHashAndSalt(hash: string, salt: string) {
+    this.accountData.passwordHash = hash;
+    this.accountData.passwordSalt = salt;
+  }
+
   confirm(): void {
     this.emailConfirmation.isConfirmed = true;
+  }
+
+  getUserAccountViewModel(user: UserAccountDocument): UserAccountViewModel {
+    return {
+      accountData: {
+        id: user._id.toString(),
+        login: this.accountData.login,
+        email: this.accountData.email,
+        createdAt: this.accountData.createdAt,
+      },
+      emailConfirmation: {
+        confirmationCode: this.emailConfirmation.confirmationCode,
+        expirationDate: this.emailConfirmation.expirationDate,
+        isConfirmed: this.emailConfirmation.isConfirmed,
+      },
+    };
+  }
+
+  getSAViewModel(user: UserAccountDocument): SAViewModel {
+    return {
+      id: user._id.toString(),
+      login: user.accountData.login,
+      email: user.accountData.email,
+      createdAt: user.accountData.createdAt,
+    };
   }
 }
 
@@ -85,6 +117,9 @@ export const UserAccountStatics = {
 export const UserAccountMethods = {
   confirm: UserAccount.prototype.confirm,
   canBeConfirmed: UserAccount.prototype.canBeConfirmed,
+  getSAViewModel: UserAccount.prototype.getSAViewModel,
+  updateHashAndSalt: UserAccount.prototype.updateHashAndSalt,
+  getUserAccountViewModel: UserAccount.prototype.getUserAccountViewModel,
 };
 
 type UserAccountModelStaticsType = typeof UserAccountStatics;

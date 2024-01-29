@@ -11,6 +11,7 @@ import {
   Put,
   Query,
   UseGuards,
+  UsePipes,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
@@ -31,6 +32,7 @@ import { BlogType } from '../models/output.blog.models/blog.models';
 import { BlogsQueryRepo } from '../query-repositories/blogs.query.repo';
 import { SortingQueryModel } from '../../../../domain/sorting-base-filter';
 import { BlogsQueryFilter } from '../models/output.blog.models/blogs-query.filter';
+import { ObjectIdPipe } from '../../../../infra/pipes/valid-objectId.pipe';
 
 @Controller('blogs')
 export class BlogsController {
@@ -50,7 +52,9 @@ export class BlogsController {
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  async getBlogById(@Param('id') blogId: string): Promise<BlogViewModel> {
+  async getBlogById(
+    @Param('id', ObjectIdPipe) blogId: string,
+  ): Promise<BlogViewModel> {
     const foundBlog = await this.blogsQueryRepo.getBlogById(blogId);
 
     if (!foundBlog) {
@@ -64,7 +68,7 @@ export class BlogsController {
   @UseGuards(SetUserIdGuard)
   async getPostsByBlogId(
     @CurrentUserId() userId: string,
-    @Param('id') blogId: string,
+    @Param('id', ObjectIdPipe) blogId: string,
     @Query() query: SortingQueryModel,
   ): Promise<PaginationViewModel<PostViewModel>> {
     const blog = await this.blogsQueryRepo.getBlogById(blogId);
@@ -110,7 +114,7 @@ export class BlogsController {
   @UseGuards(BasicSAAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async createPostByBlogId(
-    @Param('id') blogId: string,
+    @Param('id', ObjectIdPipe) blogId: string,
     @Body() body: InputPostModelByBlogId,
   ): Promise<PostViewModel> {
     const command = new CreatePostCommand({ ...body, blogId });
@@ -132,7 +136,7 @@ export class BlogsController {
   @UseGuards(BasicSAAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateBlog(
-    @Param('id') blogId: string,
+    @Param('id', ObjectIdPipe) blogId: string,
     @Body() inputBlogDto: InputBlogModel,
   ) {
     const updatedBlog = await this.commandBus.execute(
@@ -147,7 +151,7 @@ export class BlogsController {
   @Delete(':id')
   @UseGuards(BasicSAAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteBlog(@Param('id') blogId: string) {
+  async deleteBlog(@Param('id', ObjectIdPipe) blogId: string) {
     const deleteBlog = await this.commandBus.execute(
       new DeletBlogCommand(blogId),
     );

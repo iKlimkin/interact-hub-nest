@@ -1,12 +1,10 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-
 import {
   UserAccount,
   UserAccountModelType,
 } from '../../domain/entities/userAccount.schema';
-import { getUserViewModel } from '../models/userAdmin.view.models/getUserAdmin.view.model';
-import { UserViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
+import { SAViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
 import { SortingQueryModel } from '../../../../domain/sorting-base-filter';
 import { PaginationViewModel } from '../../../../domain/pagination-view.model';
 import { getPagination } from '../../../../infra/utils/pagination';
@@ -21,7 +19,7 @@ export class UsersQueryRepository {
 
   async getAllUsers(
     inputData: SortingQueryModel,
-  ): Promise<PaginationViewModel<UserViewModel>> {
+  ): Promise<PaginationViewModel<SAViewModel>> {
     const filter = getSearchTerm(
       {
         searchEmailTerm: inputData.searchEmailTerm,
@@ -39,17 +37,20 @@ export class UsersQueryRepository {
       const users = await this.UserAccountModel.find(filter)
         .sort(sort)
         .skip(skip)
-        .limit(pageSize);
+        .limit(pageSize)
+        .lean();
 
       const totalCount = await this.UserAccountModel.countDocuments(filter);
       const pagesCount = Math.ceil(totalCount / pageSize);
+
+      const userModel = new this.UserAccountModel();
 
       return {
         pagesCount,
         page: pageNumber,
         pageSize,
         totalCount,
-        items: users.map(getUserViewModel),
+        items: users.map(userModel.getSAViewModel),
       };
     } catch (error) {
       throw new InternalServerErrorException(
@@ -59,18 +60,16 @@ export class UsersQueryRepository {
     }
   }
 
-  async getUserById(userId: string): Promise<UserViewModel | null> {
+  async getUserById(userId: string): Promise<SAViewModel | null> {
     try {
       const user = await this.UserAccountModel.findById(userId);
 
       if (!user) return null;
 
-      return getUserViewModel(user);
+      return user.getSAViewModel(user);
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Database fails operate with find user',
-        error,
-      );
+      console.error('Database fails operate with find adminUser', error);
+      return null;
     }
   }
 }

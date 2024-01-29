@@ -12,7 +12,6 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-
 import { SortingQueryModel } from '../../../../domain/sorting-base-filter';
 import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
 import { SetUserIdGuard } from '../../../../infra/guards/set-user-id.guard';
@@ -29,6 +28,7 @@ import { UpdateCommentCommand } from '../../application/use-cases/commands/updat
 import { UpdateUserReactionCommand } from '../../application/use-cases/commands/update-user-reaction.command';
 import { InputContentModel } from '../models/input.comment.models';
 import { FeedbacksQueryRepository } from '../query-repositories/feedbacks.query.repository';
+import { ObjectIdPipe } from '../../../../infra/pipes/valid-objectId.pipe';
 
 @Controller('comments')
 export class FeedbacksController {
@@ -41,7 +41,7 @@ export class FeedbacksController {
   @UseGuards(SetUserIdGuard)
   @HttpCode(HttpStatus.OK)
   async getComment(
-    @Param('id') commentId: string,
+    @Param('id', ObjectIdPipe) commentId: string,
     @CurrentUserId() userId: string,
   ): Promise<CommentsViewModel> {
     const comment = await this.feedbacksQueryRepo.getCommentById(
@@ -59,7 +59,7 @@ export class FeedbacksController {
   @Get('user/:id')
   @HttpCode(HttpStatus.OK)
   async getUserComments(
-    @Param('id') userId: string,
+    @Param('id', ObjectIdPipe) userId: string,
     @Query() query: SortingQueryModel,
   ): Promise<PaginationViewModel<CommentsViewModel>> {
     const { pageNumber, pageSize, sortBy, sortDirection } = query;
@@ -82,7 +82,7 @@ export class FeedbacksController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AccessTokenGuard)
   async updateComment(
-    @Param('id') commentId: string,
+    @Param('id', ObjectIdPipe) commentId: string,
     @CurrentUserInfo() userInfo: UserInfoType,
     @Body() body: InputContentModel,
   ) {
@@ -107,7 +107,7 @@ export class FeedbacksController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AccessTokenGuard)
   async updateLikesStatus(
-    @Param('id') commentId: string,
+    @Param('id', ObjectIdPipe) commentId: string,
     @CurrentUserInfo() userInfo: UserInfoType,
     @Body() inputStatus: InputLikeStatusModel,
   ) {
@@ -142,7 +142,7 @@ export class FeedbacksController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AccessTokenGuard)
   async deleteComment(
-    @Param('id') commentId: string,
+    @Param('id', ObjectIdPipe) commentId: string,
     @CurrentUserInfo() userInfo: UserInfoType,
   ) {
     const foundedCommentById =

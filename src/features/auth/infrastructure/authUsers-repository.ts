@@ -241,7 +241,7 @@ export class AuthUsersRepository {
 
   async findUserByRecoveryCode(
     recoveryCode: string,
-  ): Promise<(UserAccountType & OutputId) | null> {
+  ): Promise<UserAccountDocument | null> {
     try {
       const filter = {
         'passwordRecovery.recoveryCode': recoveryCode,
@@ -252,10 +252,7 @@ export class AuthUsersRepository {
 
       if (!foundUser) return null;
 
-      return {
-        id: foundUser._id.toString(),
-        ...foundUser,
-      };
+      return foundUser
     } catch (e) {
       console.error(
         `there were some problems during find user by confirmation code, ${e}`,

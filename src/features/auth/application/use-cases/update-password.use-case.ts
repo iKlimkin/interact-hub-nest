@@ -2,10 +2,10 @@ import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { v4 as uuidv4 } from 'uuid';
 import { BcryptAdapter } from '../../../../infra/adapters/bcrypt-adapter';
 import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
-import { InputRecoveryPassModel } from '../../api/models/auth-input.models.ts/input-recovery.model';
 import { AuthUsersRepository } from '../../infrastructure/authUsers-repository';
-import { UpdatePasswordCommand } from './commands/update-password.command';
 import { CreateUserCommand } from './commands/create-user.command';
+import { UpdatePasswordCommand } from './commands/update-password.command';
+import { UserAccountDocument } from '../../../admin/domain/entities/userAccount.schema';
 
 @CommandHandler(UpdatePasswordCommand)
 export class UpdatePasswordUseCase
@@ -34,14 +34,11 @@ export class UpdatePasswordUseCase
       await this.bcryptAdapter.createHash(newPassword);
 
     if (foundExistingUserAccount) {
+      const updatedUserPasswordFields = foundExistingUserAccount.updateHashAndSalt(passwordHash, passwordSalt)
       const updatedUserPasswords =
-        await this.authUsersRepository.updateUserPassword({
-          passwordHash,
-          passwordSalt,
-          recoveryCode,
-        });
+        await this.authUsersRepository.save(foundExistingUserAccount);
 
-      return updatedUserPasswords;
+      return !!updatedUserPasswords;
     }
 
     if (foundTemporaryUserAccount) {
@@ -53,7 +50,7 @@ export class UpdatePasswordUseCase
         password: newPassword,
       });
 
-      const createdUser = await this.commandBus.execute(createUserCommand);
+      const createdUser = await this.commandBus.execute<CreateUserCommand, UserAccountDocument | null>(createUserCommand);
 
       const deleteTempAccount =
         await this.authUsersRepository.deleteTemporaryUserAccount(recoveryCode);

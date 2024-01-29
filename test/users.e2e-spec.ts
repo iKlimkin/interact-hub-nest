@@ -2,18 +2,22 @@ import { HttpStatus, INestApplication } from '@nestjs/common';
 import { EmailManager } from '../src/infra/application/managers/email-manager';
 import { UsersTestManager } from './base/managers/UsersTestManager';
 import { EmailManagerMock } from './base/mock/email.manager.mock';
-import { userValidator } from './base/rest-models-helpers/user-models';
 import { dropDataBase } from './base/utils/dataBase-clean-up';
 import { initSettings } from './base/utils/init-settings';
 import { createErrorsMessages } from './base/utils/make-errors-messages';
+import { aDescribe } from './base/aDescribe';
+import { skipSettings } from './base/utils/tests-settings';
 
-describe('AuthController (e2e)', () => {
+aDescribe(skipSettings.for('appTests'))('AuthController (e2e)', () => {
   let app: INestApplication;
   let usersTestManager: UsersTestManager;
 
   beforeAll(async () => {
-    const result = await initSettings((moduleBuilder) =>
-      moduleBuilder.overrideProvider(EmailManager).useClass(EmailManagerMock),
+    const result = await initSettings(
+      (moduleBuilder) =>
+        moduleBuilder
+          .overrideProvider(EmailManager)
+          .useClass(EmailManagerMock),
     );
 
     usersTestManager = result.usersTestManager;

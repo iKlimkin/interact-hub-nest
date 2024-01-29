@@ -126,6 +126,7 @@ export class AuthController {
       newPassword,
       recoveryCode,
     });
+
     const updatedPassword = await this.commandBus.execute<
       UpdatePasswordCommand,
       boolean
@@ -189,12 +190,12 @@ export class AuthController {
       res.status(HttpStatus.BAD_REQUEST).send(errors!);
       return;
     }
+
     const command = new CreateUserCommand(inputModel);
 
-    const newUser = await this.commandBus.execute<
-      CreateUserCommand,
-      UserAccountDocument
-    >(command);
+    await this.commandBus.execute<CreateUserCommand, UserAccountDocument>(
+      command,
+    );
   }
 
   //@UseInterceptors(RateLimitInterceptor)
@@ -242,19 +243,14 @@ export class AuthController {
   @UseGuards(AccessTokenGuard)
   @Get('me')
   async getProfile(@CurrentUserInfo() userInfo: UserInfoType) {
-    const user = await this.usersQueryRepo.getUserById(userInfo.userId);
+    const user = await this.authQueryRepository.getUserById(userInfo.userId);
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
+    const { email, login, id } = user.accountData;
 
-    const userViewModel = {
-      email: user.email,
-      login: user.login,
-      id: user.id,
-    };
-
-    return userViewModel;
+    return { id, email, login };
   }
 
   @UseGuards(RefreshTokenGuard)

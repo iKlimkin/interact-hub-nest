@@ -13,10 +13,6 @@ import { deleteAllData } from './dataBase-clean-up';
 export const initSettings = async (
   addSettingsToModuleBuilder?: (moduleBuilder: TestingModuleBuilder) => void,
 ) => {
-  const configService = new ConfigService();
-  const config = configService.get<ConfigurationType>('ENV', { infer: true });
-  console.log('in tests ENV: ', {config}, {configService});
-
   const testingModuleBuilder: TestingModuleBuilder = Test.createTestingModule({
     imports: [AppModule],
   })
@@ -31,7 +27,14 @@ export const initSettings = async (
 
   const app = testingAppModule.createNestApplication();
 
+  const configService = app.get(ConfigService);
+  const port = configService.get('PORT', { infer: true });
+  const env = configService.get('getEnv', { infer: true });
+
+  console.log('in tests ENV: ', { port }, { env });
+
   applyAppSettings(app);
+
   await app.init();
 
   const usersTestManager = new UsersTestManager(app);

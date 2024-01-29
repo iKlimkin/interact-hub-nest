@@ -1,4 +1,4 @@
-export type UserViewModel = {
+export type SAViewModel = {
   /**
    * id of the existing user
    */

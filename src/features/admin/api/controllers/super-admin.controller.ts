@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -12,16 +11,17 @@ import {
   Post,
   Query,
   UseGuards,
+  UsePipes,
 } from '@nestjs/common';
+import { PaginationViewModel } from '../../../../domain/pagination-view.model';
+import { SortingQueryModel } from '../../../../domain/sorting-base-filter';
+import { CreateUserErrors } from '../../../../infra/utils/interlayer-error-handler.ts/user-errors';
+import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth.guard';
 import { AdminUserService } from '../../application/user.admins.service';
 import { InputUserModel } from '../models/create-user.model';
-import { UserViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
+import { SAViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
 import { UsersQueryRepository } from '../query-repositories/users.query.repo';
-import { SortingQueryModel } from '../../../../domain/sorting-base-filter';
-import { PaginationViewModel } from '../../../../domain/pagination-view.model';
-import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth.guard';
-import { CreateUserErrors } from '../../../../infra/utils/interlayer-error-handler.ts/user-errors';
-import { LayerNoticeInterceptor } from '../../../../infra/utils/error-layer-interceptor';
+import { ObjectIdPipe } from '../../../../infra/pipes/valid-objectId.pipe';
 
 @UseGuards(BasicSAAuthGuard)
 @Controller('users')
@@ -33,15 +33,27 @@ export class SuperAdminsController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  async getUsers(
+  async getUserAdmins(
     @Query() query: SortingQueryModel,
-  ): Promise<PaginationViewModel<UserViewModel>> {
-    return await this.usersQueryRepo.getAllUsers(query);
+  ): Promise<PaginationViewModel<SAViewModel>> {
+    return this.usersQueryRepo.getAllUsers(query);
+  }
+
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  async getUserAdmin(@Param('id', ObjectIdPipe) userId: string): Promise<SAViewModel | void> {
+    const userAdmin = await this.usersQueryRepo.getUserById(userId);
+
+    if (!userAdmin) {
+      throw new NotFoundException();
+    }
+
+    return userAdmin;
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async createUser(@Body() body: InputUserModel): Promise<UserViewModel> {
+  async createSA(@Body() body: InputUserModel): Promise<SAViewModel> {
     const { login, email, password } = body;
 
     const result = await this.usersService.createUser({
@@ -49,7 +61,6 @@ export class SuperAdminsController {
       email,
       password,
     });
-    console.log({ result });
 
     if (result.hasError()) {
       if (result.code === CreateUserErrors.DatabaseFail) {
@@ -64,9 +75,10 @@ export class SuperAdminsController {
     return foundNewestUser!;
   }
 
+  @UsePipes(ObjectIdPipe)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteuser(@Param('id') userId: string): Promise<void> {
+  async deleteSA(@Param('id') userId: string): Promise<void> {
     const deletedUser = await this.usersService.deleteUser(userId);
 
     if (!deletedUser) {
