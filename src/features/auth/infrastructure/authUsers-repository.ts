@@ -101,18 +101,16 @@ export class AuthUsersRepository {
     }
   }
 
-  async deleteTemporaryUserAccount(
-    recoveryCode: string,
-  ): Promise<TemporaryAccountDBType | null> {
+  async deleteTemporaryUserAccount(recoveryCode: string): Promise<boolean> {
     try {
-      return this.TempUserAccountModel.findOneAndDelete({
+      const tmpAccount = await this.TempUserAccountModel.deleteOne({
         recoveryCode,
-      }).lean();
+      });
+
+      return tmpAccount.deletedCount === 1;
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Database fails operate with deleting user',
-        error,
-      );
+      console.error('Database fails operate with deleting user', error);
+      return false;
     }
   }
 
@@ -252,7 +250,7 @@ export class AuthUsersRepository {
 
       if (!foundUser) return null;
 
-      return foundUser
+      return foundUser;
     } catch (e) {
       console.error(
         `there were some problems during find user by confirmation code, ${e}`,

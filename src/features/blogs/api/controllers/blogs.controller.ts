@@ -11,13 +11,14 @@ import {
   Put,
   Query,
   UseGuards,
-  UsePipes,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
-import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
-import { SetUserIdGuard } from '../../../../infra/guards/set-user-id.guard';
 import { OutputId } from '../../../../domain/likes.types';
 import { PaginationViewModel } from '../../../../domain/pagination-view.model';
+import { SortingQueryModel } from '../../../../domain/sorting-base-filter';
+import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
+import { SetUserIdGuard } from '../../../../infra/guards/set-user-id.guard';
+import { ObjectIdPipe } from '../../../../infra/pipes/valid-objectId.pipe';
 import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth.guard';
 import { InputPostModelByBlogId } from '../../../posts/api/models/input.posts.models/create.post.model';
 import { PostViewModel } from '../../../posts/api/models/post.view.models/PostViewModel';
@@ -29,10 +30,8 @@ import { UpdateBlogCommand } from '../../application/use-case/update-blod-use-ca
 import { BlogViewModel } from '../models/blog.view.models/blog.view.models';
 import { InputBlogModel } from '../models/input.blog.models/create.blog.model';
 import { BlogType } from '../models/output.blog.models/blog.models';
-import { BlogsQueryRepo } from '../query-repositories/blogs.query.repo';
-import { SortingQueryModel } from '../../../../domain/sorting-base-filter';
 import { BlogsQueryFilter } from '../models/output.blog.models/blogs-query.filter';
-import { ObjectIdPipe } from '../../../../infra/pipes/valid-objectId.pipe';
+import { BlogsQueryRepo } from '../query-repositories/blogs.query.repo';
 
 @Controller('blogs')
 export class BlogsController {

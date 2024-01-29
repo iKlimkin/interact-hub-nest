@@ -17,7 +17,7 @@ import { CreateUserUseCase } from '../../application/use-cases/create-user.use-c
 import { PasswordRecoveryUseCase } from '../../application/use-cases/recovery-password.use-case';
 import { SendRecoveryMsgUseCase } from '../../application/use-cases/send-recovery-msg.use-case';
 import { UpdateConfirmationCodeUseCase } from '../../application/use-cases/update-confirmation-code.use-case';
-import { UpdatePasswordUseCase } from '../../application/use-cases/update-password.use-case';
+import { UpdatePasswordForExistingAccountUseCase } from '../../application/use-cases/update-password-existing-account.use-case';
 import { AuthUsersRepository } from '../authUsers-repository';
 import { BasicSAStrategy } from '../guards/strategies/basic-strategy';
 import {
@@ -33,6 +33,7 @@ import { CreateUserSessionUseCase } from '../../application/use-cases/create-use
 import { UpdateIssuedTokenUseCase } from '../../../security/application/use-cases/update-issued-token.use-case';
 import { DeleteActiveSessionUseCase } from '../../../security/application/use-cases/delete-active-session.use-case';
 import { DeleteOtherUserSessionsUseCase } from '../../../security/application/use-cases/delete-other-user-sessions.use-case';
+import { UpdatePasswordForNonExistAccountUseCase } from '../../application/use-cases/update-password-non-exist-account.use-case';
 
 export const userAccountProviders: Provider[] = [
   AuthUsersRepository,
@@ -74,7 +75,8 @@ export const authUseCases: Provider[] = [
   CreateTempAccountUseCase,
   SendRecoveryMsgUseCase,
   PasswordRecoveryUseCase,
-  UpdatePasswordUseCase,
+  UpdatePasswordForExistingAccountUseCase,
+  UpdatePasswordForNonExistAccountUseCase,
   ConfirmEmailUseCase,
   UpdateConfirmationCodeUseCase,
   CreateUserSessionUseCase,

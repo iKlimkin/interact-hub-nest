@@ -8,7 +8,7 @@ import {
 } from '../../../admin/domain/entities/userAccount.schema';
 import { AuthUsersRepository } from '../../infrastructure/authUsers-repository';
 import { CreateUserCommand } from './commands/create-user.command';
-import { UserCreatedEvent } from './events/user-created-event';
+import { EmailNotificationEvent } from './events/user-created-event';
 import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
 import { LayerNoticeInterceptor } from '../../../../infra/utils/error-layer-interceptor';
 import { CreateUserErrors } from '../../../../infra/utils/interlayer-error-handler.ts/user-errors';
@@ -49,7 +49,7 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
 
       const user = await this.authUsersRepository.save(smartUserModel);
 
-      const event = new UserCreatedEvent(
+      const event = new EmailNotificationEvent(
         email,
         user.emailConfirmation.confirmationCode,
       );

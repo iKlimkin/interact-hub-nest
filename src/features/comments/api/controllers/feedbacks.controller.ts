@@ -100,7 +100,7 @@ export class FeedbacksController {
     }
     const command = new UpdateCommentCommand(commentId, content);
 
-    const updatedComment = await this.commandBus.execute(command);
+    await this.commandBus.execute(command);
   }
 
   @Put(':id/like-status')

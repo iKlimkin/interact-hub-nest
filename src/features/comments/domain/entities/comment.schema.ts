@@ -11,6 +11,7 @@ import {
   LikesCountType,
 } from '../../../../domain/likes.types';
 import { validateOrReject } from 'class-validator';
+import { BadRequestException } from '@nestjs/common';
 
 export type CommentDocument = HydratedDocument<Comment>;
 export type CommentModelType = Model<CommentDocument> & CommentModelStaticType;
@@ -64,9 +65,19 @@ export class Comment {
     comment.likesUserInfo = [];
     comment.likesCountInfo = { likesCount: 0, dislikesCount: 0 };
 
-    await validateOrReject(comment);
+    try {
+      await validateOrReject(comment);
+    } catch (error) {
+      throw new BadRequestException()
+    }
+    
     return comment;
   }
+
+  updateContent(content: string) {
+    this.content = content
+  }
+
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);
@@ -74,8 +85,9 @@ export const CommentSchema = SchemaFactory.createForClass(Comment);
 export const commentStatics = {
   makeInstance: Comment.makeInstance,
 };
+
 const commentMethods = {
-  someMethods: Comment.prototype,
+  someMetupdateContenthods: Comment.prototype.updateContent
 };
 
 type CommentMethodsType = typeof commentMethods;

@@ -1,13 +1,13 @@
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
-import { UserCreatedEvent } from '../user-created-event';
+import { EmailNotificationEvent } from '../user-created-event';
 import { EmailManager } from '../../../../../../infra/application/managers/email-manager';
 
-@EventsHandler(UserCreatedEvent)
+@EventsHandler(EmailNotificationEvent)
 export class UserCreatedEventHandler
-  implements IEventHandler<UserCreatedEvent>
+  implements IEventHandler<EmailNotificationEvent>
 {
   constructor(private emailManager: EmailManager) {}
-  handle(event: UserCreatedEvent) {
+  handle(event: EmailNotificationEvent) {
     this.emailManager.sendEmailConfirmationMessage(
       event.email,
       event.confirmationCode,

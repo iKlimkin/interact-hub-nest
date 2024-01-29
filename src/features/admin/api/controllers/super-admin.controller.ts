@@ -11,17 +11,16 @@ import {
   Post,
   Query,
   UseGuards,
-  UsePipes,
 } from '@nestjs/common';
 import { PaginationViewModel } from '../../../../domain/pagination-view.model';
 import { SortingQueryModel } from '../../../../domain/sorting-base-filter';
+import { ObjectIdPipe } from '../../../../infra/pipes/valid-objectId.pipe';
 import { CreateUserErrors } from '../../../../infra/utils/interlayer-error-handler.ts/user-errors';
 import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth.guard';
 import { AdminUserService } from '../../application/user.admins.service';
 import { InputUserModel } from '../models/create-user.model';
 import { SAViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
 import { UsersQueryRepository } from '../query-repositories/users.query.repo';
-import { ObjectIdPipe } from '../../../../infra/pipes/valid-objectId.pipe';
 
 @UseGuards(BasicSAAuthGuard)
 @Controller('users')
@@ -41,7 +40,9 @@ export class SuperAdminsController {
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  async getUserAdmin(@Param('id', ObjectIdPipe) userId: string): Promise<SAViewModel | void> {
+  async getUserAdmin(
+    @Param('id', ObjectIdPipe) userId: string,
+  ): Promise<SAViewModel | void> {
     const userAdmin = await this.usersQueryRepo.getUserById(userId);
 
     if (!userAdmin) {
@@ -75,10 +76,9 @@ export class SuperAdminsController {
     return foundNewestUser!;
   }
 
-  @UsePipes(ObjectIdPipe)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteSA(@Param('id') userId: string): Promise<void> {
+  async deleteSA(@Param('id', ObjectIdPipe) userId: string): Promise<void> {
     const deletedUser = await this.usersService.deleteUser(userId);
 
     if (!deletedUser) {

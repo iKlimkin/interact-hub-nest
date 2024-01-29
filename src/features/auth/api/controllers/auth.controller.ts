@@ -29,7 +29,7 @@ import { CreateTempAccountCommand } from '../../application/use-cases/commands/c
 import { CreateUserCommand } from '../../application/use-cases/commands/create-user.command';
 import { PasswordRecoveryCommand } from '../../application/use-cases/commands/recovery-password.command';
 import { UpdateConfirmationCodeCommand } from '../../application/use-cases/commands/update-confirmation-code.command';
-import { UpdatePasswordCommand } from '../../application/use-cases/commands/update-password.command';
+import { UpdatePasswordForExistingAccountCommand } from '../../application/use-cases/commands/update-password.command';
 import { GetClientInfo } from '../../infrastructure/decorators/client-ip.decorator';
 import { CurrentUserInfo } from '../../infrastructure/decorators/current-user-info.decorator';
 import { AccessTokenGuard } from '../../infrastructure/guards/accessToken.guard';
@@ -41,6 +41,7 @@ import { InputRegistrationCodeModel } from '../models/auth-input.models.ts/input
 import { InputRegistrationModel } from '../models/auth-input.models.ts/input-registration.model';
 import { UserInfoType } from '../models/user-models';
 import { AuthQueryRepository } from '../query-repositories/auth-query-repo';
+import { UpdatePasswordForNonExistAccountCommand } from '../../application/use-cases/commands/update-password-for-non-existing-account.command';
 
 type ClientInfo = {
   ip: string;
@@ -120,20 +121,28 @@ export class AuthController {
   @Post('new-password')
   @HttpCode(HttpStatus.NO_CONTENT)
   async newPassword(@Body() body: InputRecoveryPassModel) {
-    const { newPassword, recoveryCode } = body;
 
-    const command = new UpdatePasswordCommand({
-      newPassword,
-      recoveryCode,
-    });
+    const userAccount =
+      await this.authQueryRepository.findUserByRecoveryCode(body.recoveryCode);
+
+    if (userAccount) {
+      const command = new UpdatePasswordForExistingAccountCommand(body);
+
+      return this.commandBus.execute<
+        UpdatePasswordForExistingAccountCommand,
+        boolean
+      >(command);
+    }
+
+    const command = new UpdatePasswordForNonExistAccountCommand(body);
 
     const updatedPassword = await this.commandBus.execute<
-      UpdatePasswordCommand,
+    UpdatePasswordForNonExistAccountCommand,
       boolean
     >(command);
 
-    if (!updatedPassword) {
-      throw new NotFoundException('Account not found');
+    if (updatedPassword) {
+      throw new NotFoundException()
     }
   }
 
@@ -147,10 +156,9 @@ export class AuthController {
     if (!foundUserAccount) {
       const command = new CreateTempAccountCommand(inputEmailModel);
 
-      const codeForNonExistentUser = await this.commandBus.execute<
-        CreateTempAccountCommand,
-        OutputId
-      >(command);
+      await this.commandBus.execute<CreateTempAccountCommand, OutputId>(
+        command,
+      );
 
       return;
     }
