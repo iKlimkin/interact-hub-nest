@@ -6,9 +6,9 @@ import {
   TokensMeta,
   Payload,
   JwtTokens,
-} from '../../features/auth/api/models/jwt.types';
-import { jwtConstants } from '../../features/auth/infrastructure/guards/constants';
-import { UserInfoType } from '../../features/auth/api/models/user-models';
+} from '../api/models/jwt.types';
+import { jwtConstants } from '../infrastructure/guards/constants';
+import { UserInfoType } from '../api/models/user-models';
 
 @Injectable()
 export class AuthService {

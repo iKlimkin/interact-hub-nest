@@ -13,26 +13,24 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
-import { SortingQueryModel } from '../../../../infra/SortingQueryModel';
-
+import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
 import { SetUserIdGuard } from '../../../../infra/guards/set-user-id.guard';
-import { PaginationViewModel } from '../../../../infra/paginationViewModel';
+import { OutputId } from '../../../../domain/likes.types';
+import { PaginationViewModel } from '../../../../domain/pagination-view.model';
 import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth.guard';
-import { CreatePostModel } from '../../../posts/api/models/input.posts.models/create.post.model';
+import { InputPostModelByBlogId } from '../../../posts/api/models/input.posts.models/create.post.model';
 import { PostViewModel } from '../../../posts/api/models/post.view.models/PostViewModel';
 import { PostsQueryRepository } from '../../../posts/api/query-repositories/posts.query.repo';
 import { CreatePostCommand } from '../../../posts/application/use-cases/create-post-use-case';
 import { CreateBlogCommand } from '../../application/use-case/create-blog-use-case';
+import { DeletBlogCommand } from '../../application/use-case/delete-blog-use-case';
 import { UpdateBlogCommand } from '../../application/use-case/update-blod-use-case';
 import { BlogViewModel } from '../models/blog.view.models/blog.view.models';
 import { InputBlogModel } from '../models/input.blog.models/create.blog.model';
 import { BlogType } from '../models/output.blog.models/blog.models';
 import { BlogsQueryRepo } from '../query-repositories/blogs.query.repo';
-import { DeletBlogCommand } from '../../application/use-case/delete-blog-use-case';
-import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
-import { OutputId } from '../../../../infra/likes.types';
-import { ConfigService } from '@nestjs/config';
-import { ConfigurationType } from '../../../../config/configuration';
+import { SortingQueryModel } from '../../../../domain/sorting-base-filter';
+import { BlogsQueryFilter } from '../models/output.blog.models/blogs-query.filter';
 
 @Controller('blogs')
 export class BlogsController {
@@ -40,16 +38,14 @@ export class BlogsController {
     private readonly blogsQueryRepo: BlogsQueryRepo,
     private readonly postsQueryRepo: PostsQueryRepository,
     private readonly commandBus: CommandBus,
-    private readonly configService: ConfigService
   ) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)
   async getBlogs(
-    @Query() query: SortingQueryModel,
+    @Query() query: BlogsQueryFilter,
   ): Promise<PaginationViewModel<BlogType>> {
-    const receivedBlogs = await this.blogsQueryRepo.getBlogsByQuery(query);
-    return receivedBlogs;
+    return this.blogsQueryRepo.getBlogsByQuery(query);
   }
 
   @Get(':id')
@@ -115,11 +111,11 @@ export class BlogsController {
   @HttpCode(HttpStatus.CREATED)
   async createPostByBlogId(
     @Param('id') blogId: string,
-    @Body() body: CreatePostModel,
+    @Body() body: InputPostModelByBlogId,
   ): Promise<PostViewModel> {
-    const createdPost = await this.commandBus.execute(
-      new CreatePostCommand({ ...body, blogId }),
-    );
+    const command = new CreatePostCommand({ ...body, blogId });
+
+    const createdPost = await this.commandBus.execute(command);
 
     const newlyCreatedPost = await this.postsQueryRepo.getPostById(
       createdPost.id,

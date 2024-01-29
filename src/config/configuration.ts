@@ -1,4 +1,4 @@
-import { getDbConnection } from '../features/auth/config/configuration';
+import { getDbConnection, getEnv } from './extra-configuration';
 
 export const getEnvConfiguration = () => ({
   Port: parseInt(process.env.PORT ?? '5000'),
@@ -16,9 +16,18 @@ export const getEnvConfiguration = () => ({
     HTTP_BASIC_PASS: process.env.HTTP_BASIC_PASS,
   },
   dbConnection: getDbConnection(),
+  getEnv: getEnv(),
 });
 
 export type ConfigurationType = ReturnType<typeof getEnvConfiguration>;
+
+export type EnvironmentsTypes =
+  | 'DEVELOPMENT'
+  | 'STAGING'
+  | 'PRODUCTION'
+  | 'TESTING';
+
+export const Environments = ['DEVELOPMENT', 'STAGING', 'PRODUCTION', 'TESTING'];
 
 export type ConfigType = ConfigurationType & {
   MONGO_URI: string;

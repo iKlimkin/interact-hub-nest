@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectModel } from '@nestjs/mongoose';
-import { OutputId } from '../../../../infra/likes.types';
-import { validateOrRejectModel } from '../../../../infra/validators/validate-model.helper';
+import { OutputId } from '../../../../domain/likes.types';
+import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
 import {
   Security,
   SecurityModelType,

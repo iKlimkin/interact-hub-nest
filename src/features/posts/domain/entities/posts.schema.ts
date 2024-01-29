@@ -4,7 +4,7 @@ import { CreatePostModel } from '../../api/models/input.posts.models/create.post
 import {
   LikesUserInfoType,
   LikesCountType,
-} from '../../../../infra/likes.types';
+} from '../../../../domain/likes.types';
 
 export type PostDocument = HydratedDocument<Post>;
 export type PostModelType = Model<PostDocument> & PostModelStaticType;

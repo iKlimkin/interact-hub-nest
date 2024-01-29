@@ -56,7 +56,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         errorResponse.errorsMessages.push({ message });
       }
 
-      response.status(status).json(errorResponse);
+      response.status(status).send(errorResponse);
     } else {
       response.status(status).json({
         statusCode: status,

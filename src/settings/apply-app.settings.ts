@@ -41,7 +41,7 @@ const setAppPipes = (app: INestApplication) => {
       stopAtFirstError: true,
       exceptionFactory(errors: ValidationError[]) {
         const customErrors: CustomError[] = [];
-        
+
         errors.forEach((errors: ValidationError) => {
           const constraints = errors.constraints;
 

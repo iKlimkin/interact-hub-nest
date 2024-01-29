@@ -1,8 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { FeedbacksRepository } from '../../infrastructure/feedbacks.repository';
 import { UpdateUserReactionCommand } from './commands/update-user-reaction.command';
-import { getStatusCounting } from '../../../../infra/utils/statusCounter';
-import { LikeStatusType, ReactionType } from '../../../../infra/likes.types';
+import { getStatusCounting } from '../../../../infra/utils/status-counter';
+import { LikeStatusType, ReactionType } from '../../../../domain/likes.types';
 
 @CommandHandler(UpdateUserReactionCommand)
 export class UpdateUserReactionUseCase

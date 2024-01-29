@@ -10,7 +10,7 @@ import {
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
-import { ApiRequestCounterRepository } from '../../../../infra/repositories/api-request-counter.repository';
+import { ApiRequestCounterRepository } from '../../../../infra/logging/api-request-counter.repository';
 
 import { CurrentUserInfo } from '../../../auth/infrastructure/decorators/current-user-info.decorator';
 import { RefreshTokenGuard } from '../../../auth/infrastructure/guards/refreshToken.guard';

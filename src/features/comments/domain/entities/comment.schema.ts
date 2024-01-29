@@ -9,7 +9,7 @@ import {
   likesStatus,
   LikesUserInfoType,
   LikesCountType,
-} from '../../../../infra/likes.types';
+} from '../../../../domain/likes.types';
 import { validateOrReject } from 'class-validator';
 
 export type CommentDocument = HydratedDocument<Comment>;

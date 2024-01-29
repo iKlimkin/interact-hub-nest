@@ -1,5 +1,5 @@
 import { SortDirection } from 'mongodb';
-import { SortingQueryModel } from '../SortingQueryModel';
+import { SortingQueryModel } from '../../domain/sorting-base-filter';
 
 export type PaginationType = {
   sort: Record<string, SortDirection>;

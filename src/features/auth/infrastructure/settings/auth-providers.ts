@@ -1,8 +1,8 @@
 import { Provider } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { ApiRequestCounterService } from '../../../../infra/application/api-request-counter.service';
+import { ApiRequestCounterService } from '../../../../infra/logging/api-request-counter.service';
 import { RateLimitInterceptor } from '../../../../infra/interceptors/rate-limit.interceptor.ts';
-import { ApiRequestCounterRepository } from '../../../../infra/repositories/api-request-counter.repository';
+import { ApiRequestCounterRepository } from '../../../../infra/logging/api-request-counter.repository';
 import { UsersQueryRepository } from '../../../admin/api/query-repositories/users.query.repo';
 import { AdminUserService } from '../../../admin/application/user.admins.service';
 import { UsersRepository } from '../../../admin/infrastructure/users.repository';

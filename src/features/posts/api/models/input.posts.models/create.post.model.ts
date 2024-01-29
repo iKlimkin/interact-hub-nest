@@ -6,7 +6,7 @@ import {
   frequentLength,
   contentLength,
   blogIdLength,
-} from '../../../../../infra/validation.constants';
+} from '../../../../../domain/validation.constants';
 
 export type CreatePostByBlog = Omit<CreatePostModel, 'blogId'>;
 
@@ -59,9 +59,29 @@ export class InputPostModel {
   blogId: string;
 }
 
+export class InputPostModelByBlogId {
+  /**
+   *  post's title
+   */
+  @iSValidField(titleLength)
+  title: string;
+
+  /**
+   * shortDescription of the post
+   */
+  @iSValidField(frequentLength)
+  shortDescription: string;
+
+  /**
+   * content of existing post
+   */
+  @iSValidField(contentLength)
+  content: string;
+}
+
 export class UpdatePostModel {
-  inputPostDto: InputPostModel
+  inputPostDto: InputPostModel;
 
   @IsString()
-  postId: string
+  postId: string;
 }

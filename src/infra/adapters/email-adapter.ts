@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import nodemailer, { SentMessageInfo } from 'nodemailer';
-import { EmailSettingTypes } from '../application/managers/email-manager';
+import { EmailEnvSettingTypes } from '../application/managers/email-manager';
 
 type InputEmailData = {
   emailSettings: any;
@@ -41,7 +41,7 @@ export class EmailAdapter {
     });
   }
 
-  private createTransport(emailSettings: EmailSettingTypes) {
+  private createTransport(emailSettings: EmailEnvSettingTypes) {
     return nodemailer.createTransport({
       service: emailSettings.EMAIL_SERVICE,
       auth: {

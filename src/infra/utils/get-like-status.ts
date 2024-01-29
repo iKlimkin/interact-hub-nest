@@ -1,4 +1,8 @@
-import { LikeUserType, LikesUserInfoType, likesStatus } from '../likes.types';
+import {
+  LikeUserType,
+  LikesUserInfoType,
+  likesStatus,
+} from '../../domain/likes.types';
 
 export const getLikeStatus = (
   likesUserInfo: LikesUserInfoType[] | LikeUserType[],

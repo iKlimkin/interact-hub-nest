@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { ReactionType, likesStatus } from '../../../infra/likes.types';
+import { ReactionType, likesStatus } from '../../../domain/likes.types';
 import { getLikeStatus } from '../../../infra/utils/get-like-status';
 import {
   Comment,

@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Observable } from 'rxjs';
-import { ApiRequestCounterService } from '../application/api-request-counter.service';
+import { ApiRequestCounterService } from '../logging/api-request-counter.service';
 
 @Injectable()
 export class RateLimitInterceptor implements NestInterceptor {

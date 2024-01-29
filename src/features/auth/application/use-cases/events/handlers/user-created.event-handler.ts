@@ -8,7 +8,9 @@ export class UserCreatedEventHandler
 {
   constructor(private emailManager: EmailManager) {}
   handle(event: UserCreatedEvent) {
-    this.emailManager
-      .sendEmailConfirmationMessage(event.email, event.confirmationCode)
+    this.emailManager.sendEmailConfirmationMessage(
+      event.email,
+      event.confirmationCode,
+    );
   }
 }

@@ -16,6 +16,16 @@ export const getDbConnection = registerAs('dbConnection', () => ({
     process.env.DB_LOCAL ?? `mongodb://127.0.0.1:27017/nest-studying-project`,
 }));
 
+export const getEnv = registerAs('ENV', () => ({
+  env:
+    process.env.NODE_ENV ??
+    `DEVELOPMENT`,
+}));
+
+export type getEnvTestingType = {
+  getEnv: ReturnType<typeof getEnv>
+}
+
 export type dbConnectionConfigType = {
   dbConnection: ReturnType<typeof getDbConnection>;
 };

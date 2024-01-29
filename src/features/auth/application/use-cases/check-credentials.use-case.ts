@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BcryptAdapter } from '../../../../infra/adapters/bcrypt-adapter';
-import { validateOrRejectModel } from '../../../../infra/validators/validate-model.helper';
+import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
 import { UserIdType } from '../../../admin/api/models/outputSA.models.ts/user-models';
 import { AuthUsersRepository } from '../../infrastructure/authUsers-repository';
 import { CheckCredentialsCommand } from './commands/check-credentials.command';

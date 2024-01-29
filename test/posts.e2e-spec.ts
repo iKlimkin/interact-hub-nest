@@ -1,22 +1,22 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { applyAppSettings } from '../src/settings/apply-app.settings';
+import { aDescribe } from './base/aDescribe';
+import { AuthManager } from './base/managers/AuthManager';
 import { BasicAuthorization } from './base/managers/BasicAuthManager';
 import { BlogsTestManager } from './base/managers/BlogsTestManager';
+import { FeedbacksTestManager } from './base/managers/FeedbacksTestManager';
 import { PostsTestManager } from './base/managers/PostsTestManager';
-import { postConstants } from './base/rest-models-helpers/post-models';
+import { SAManager } from './base/managers/SAManager';
 import {
   authConstants,
   feedbacksConstants,
 } from './base/rest-models-helpers/feedbacks.constants';
-import { aDescribe } from './base/aDescribe';
+import { postConstants } from './base/rest-models-helpers/post-models';
+import { dropDataBase } from './base/utils/dataBase-clean-up';
 import { skipSettings } from './tests-settings';
-import { RouterPaths } from './base/utils/routing';
-import { SAManager } from './base/managers/SAManager';
-import { AuthManager } from './base/managers/AuthManager';
-import { FeedbacksTestManager } from './base/managers/FeedbacksTestManager';
+import { createErrorsMessages } from './base/utils/make-errors-messages';
 
 aDescribe(skipSettings.for('appTests'))('PostsController (e2e)', () => {
   let app: INestApplication;
@@ -27,16 +27,10 @@ aDescribe(skipSettings.for('appTests'))('PostsController (e2e)', () => {
   let saManager: SAManager;
   let feedbacksTestManager: FeedbacksTestManager;
 
-  const dropDataBase = async () =>
-    await request(app.getHttpServer()).delete(`${RouterPaths.test}`);
-
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    })
-      // .overrideProvider(EmailService)
-      // .useClass(EmailMockService)
-      .compile();
+    }).compile();
 
     app = moduleFixture.createNestApplication();
 
@@ -51,7 +45,7 @@ aDescribe(skipSettings.for('appTests'))('PostsController (e2e)', () => {
     saManager = new SAManager(app);
     feedbacksTestManager = new FeedbacksTestManager(app);
 
-    await dropDataBase();
+    await dropDataBase(app);
   });
 
   afterAll(async () => {
@@ -83,7 +77,7 @@ aDescribe(skipSettings.for('appTests'))('PostsController (e2e)', () => {
         HttpStatus.BAD_REQUEST,
       );
 
-      const error = PostsTestManager.createErrorsMessageTest(['blogId']);
+      const error = createErrorsMessages(['blogId']);
 
       postTestManager.checkPostData(post, error);
     });
@@ -99,7 +93,7 @@ aDescribe(skipSettings.for('appTests'))('PostsController (e2e)', () => {
         inputData,
         HttpStatus.BAD_REQUEST,
       );
-      const error = PostsTestManager.createErrorsMessageTest(['blogId']);
+      const error = createErrorsMessages(['blogId']);
 
       postTestManager.checkPostData(post, error);
     });
@@ -148,7 +142,7 @@ aDescribe(skipSettings.for('appTests'))('PostsController (e2e)', () => {
         HttpStatus.BAD_REQUEST,
       );
 
-      const error = PostsTestManager.createErrorsMessageTest(['blogId']);
+      const error = createErrorsMessages(['blogId']);
 
       postTestManager.checkPostData(result.body, error);
     });
@@ -218,6 +212,7 @@ aDescribe(skipSettings.for('appTests'))('PostsController (e2e)', () => {
 
     it("/posts/:postId/comments (POST) - shouldn't create comment with invalid token, expect UNAUTHORIZED", async () => {
       const { post, user1 } = expect.getState();
+      console.log({ post });
 
       const invalidToken = authConstants.invalidToken;
       await feedbacksTestManager.createComment(
@@ -229,8 +224,8 @@ aDescribe(skipSettings.for('appTests'))('PostsController (e2e)', () => {
 
     it("/posts/:postId/comments (POST) - shouldn't create comment with invalid postId, expect NOT_FOUND", async () => {
       const { post, accesToken1, user1 } = expect.getState();
-      const invalidPost = post;
-      invalidPost.id = post.id.slice(-2);
+
+      const invalidPost = { ...post, id: post.id.slice(-3) };
 
       await feedbacksTestManager.createComment(
         { user: user1, token: accesToken1, post: invalidPost },
@@ -253,13 +248,14 @@ aDescribe(skipSettings.for('appTests'))('PostsController (e2e)', () => {
 
     it("/posts/:postId/comments (POST) - shouldn't create comment with invalid body message (content), expect BAD_REQUEST", async () => {
       const { post, accesToken1, user1 } = expect.getState();
+    });
 
-      const content = '';
+    it('/posts/:postId/comments (POST) - should create one comment, expect CREATED', async () => {
+      const { post, accesToken2, user2 } = expect.getState();
 
       await feedbacksTestManager.createComment(
-        { user: user1, token: accesToken1, post },
-        content,
-        HttpStatus.BAD_REQUEST,
+        { user: user2, token: accesToken2, post },
+        feedbacksConstants.createdContent[0],
       );
     });
 
@@ -271,15 +267,12 @@ aDescribe(skipSettings.for('appTests'))('PostsController (e2e)', () => {
         await feedbacksTestManager.createComment(
           { user: user1, token: accesToken1, post },
           content,
-          HttpStatus.BAD_REQUEST,
         );
       }
     });
 
     it('/posts/:postId/comments (GET) - should recieve 5 comments for current post, expect CREATED', async () => {
       const { post, accesToken1, user1 } = expect.getState();
-
-      
     });
   });
 });

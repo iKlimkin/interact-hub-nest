@@ -1,7 +1,7 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AuthUserType } from '../../../src/features/auth/api/models/auth.output.models/auth.user.types';
-import { ErrorsMessages } from '../../../src/infra/utils/errorHandler';
+import { ErrorsMessages } from '../../../src/infra/utils/error-handler';
 import { RouterPaths } from '../utils/routing';
 
 export class AuthManager {
@@ -62,7 +62,7 @@ export class AuthManager {
     user?: AuthUserType | null,
     expectedStatus: number = HttpStatus.OK,
   ) {
-   const response = await request(this.application)
+    const response = await request(this.application)
       .post(`${RouterPaths.auth}/login`)
       .send({
         loginOrEmail: user?.login || user?.email || 'invalid',
@@ -70,7 +70,7 @@ export class AuthManager {
       })
       .expect(expectedStatus);
 
-      return response.body
+    return response.body;
   }
 
   async logout(

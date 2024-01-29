@@ -5,7 +5,7 @@ import {
   SecurityDocument,
   SecurityModelType,
 } from '../domain/entities/security.schema';
-import { OutputId } from '../../../infra/likes.types';
+import { OutputId } from '../../../domain/likes.types';
 
 @Injectable()
 export class SecurityRepository {

@@ -3,7 +3,7 @@ import {
   MatchApiLimitType,
   MatchApiType,
 } from '../interceptors/models/rate-limiter.models';
-import { ApiRequestCounterRepository } from '../repositories/api-request-counter.repository';
+import { ApiRequestCounterRepository } from './api-request-counter.repository';
 
 @Injectable()
 export class ApiRequestCounterService {

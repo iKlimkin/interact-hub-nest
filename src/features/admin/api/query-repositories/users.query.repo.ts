@@ -7,10 +7,10 @@ import {
 } from '../../domain/entities/userAccount.schema';
 import { getUserViewModel } from '../models/userAdmin.view.models/getUserAdmin.view.model';
 import { UserViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
-import { SortingQueryModel } from '../../../../infra/SortingQueryModel';
-import { PaginationViewModel } from '../../../../infra/paginationViewModel';
+import { SortingQueryModel } from '../../../../domain/sorting-base-filter';
+import { PaginationViewModel } from '../../../../domain/pagination-view.model';
 import { getPagination } from '../../../../infra/utils/pagination';
-import { getSearchTerm } from '../../../../infra/utils/searchTerm';
+import { getSearchTerm } from '../../../../infra/utils/search-term-finder';
 
 @Injectable()
 export class UsersQueryRepository {

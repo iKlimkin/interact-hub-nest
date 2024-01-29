@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ConfigurationType } from '../../../config/configuration';
 
-export type EmailSettingTypes = {
+export type EmailEnvSettingTypes = {
   EMAIL_PASSWORD: string;
   EMAIL_USER: string;
   EMAIL_SERVICE: string;
@@ -58,7 +58,7 @@ export class EmailManager {
     return this.emailAdapter.sendEmail(confirmationData);
   }
 
-  private getEmailSettings(): EmailSettingTypes {
+  private getEmailSettings(): EmailEnvSettingTypes {
     return this.configService.get('emailSetting', {
       infer: true,
     })!;

@@ -1,4 +1,4 @@
-import { likesStatus } from "../../../../../infra/likes.types";
+import { likesStatus } from '../../../../../domain/likes.types';
 
 export type PostStatusInfo = {
   addedAt: string;

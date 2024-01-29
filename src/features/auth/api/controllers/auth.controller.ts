@@ -11,13 +11,13 @@ import {
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { Response } from 'express';
-import { AuthService } from '../../../../infra/application/auth.service';
-import { OutputId } from '../../../../infra/likes.types';
-import { getDeviceInfo } from '../../../../infra/utils/deviceHandler';
+import { AuthService } from '../../application/auth.service';
+import { OutputId } from '../../../../domain/likes.types';
+import { getDeviceInfo } from '../../../../infra/utils/device-handler';
 import {
   ErrorType,
   makeErrorsMessages,
-} from '../../../../infra/utils/errorHandler';
+} from '../../../../infra/utils/error-handler';
 import { UsersQueryRepository } from '../../../admin/api/query-repositories/users.query.repo';
 import { UserAccountDocument } from '../../../admin/domain/entities/userAccount.schema';
 import { InputSessionDataValidator } from '../../../security/api/models/security-input.models/create-session.model';
@@ -251,7 +251,7 @@ export class AuthController {
     const userViewModel = {
       email: user.email,
       login: user.login,
-      id: userInfo.userId,
+      id: user.id,
     };
 
     return userViewModel;

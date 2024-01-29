@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectModel } from '@nestjs/mongoose';
-import { OutputId } from '../../../../infra/likes.types';
+import { OutputId } from '../../../../domain/likes.types';
 import { InputBlogModel } from '../../api/models/input.blog.models/create.blog.model';
 import { Blog, BlogModelType } from '../../domain/entities/blog.schema';
 import { BlogsRepository } from '../../infrastructure/blogs.repository';
-import { validateOrRejectModel } from '../../../../infra/validators/validate-model.helper';
+import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
 
 export class CreateBlogCommand {
   constructor(public createBlogDto: InputBlogModel) {}

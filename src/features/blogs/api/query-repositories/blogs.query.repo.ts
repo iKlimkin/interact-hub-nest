@@ -1,21 +1,21 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { BlogDBType, BlogType } from '../models/output.blog.models/blog.models';
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { PaginationViewModel } from '../../../../domain/pagination-view.model';
+import { BaseModel } from '../../../../infra/utils/base-query-pagination-model';
 import { getPagination } from '../../../../infra/utils/pagination';
+import { getSearchTerm } from '../../../../infra/utils/search-term-finder';
+import { Blog, BlogModelType } from '../../domain/entities/blog.schema';
 import { BlogViewModel } from '../models/blog.view.models/blog.view.models';
 import { getBlogViewModel } from '../models/blog.view.models/getBlogViewModel';
-import { InjectModel } from '@nestjs/mongoose';
-import { Blog, BlogModelType } from '../../domain/entities/blog.schema';
-import { BaseModel } from '../../../../infra/utils/BasePaginationModel';
-import { getSearchTerm } from '../../../../infra/utils/searchTerm';
-import { SortingQueryModel } from '../../../../infra/SortingQueryModel';
-import { PaginationViewModel } from '../../../../infra/paginationViewModel';
+import { BlogDBType, BlogType } from '../models/output.blog.models/blog.models';
+import { BlogsQueryFilter } from '../models/output.blog.models/blogs-query.filter';
 
 @Injectable()
 export class BlogsQueryRepo {
   constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType) {}
 
   async getAllBlogs(
-    inputData: SortingQueryModel,
+    inputData: BlogsQueryFilter,
   ): Promise<PaginationViewModel<BlogType>> {
     try {
       return await BaseModel.paginateAndTransform<BlogDBType, BlogViewModel>(
@@ -44,7 +44,7 @@ export class BlogsQueryRepo {
   }
 
   async getBlogsByQuery(
-    inputData: SortingQueryModel,
+    inputData: BlogsQueryFilter,
   ): Promise<PaginationViewModel<BlogType>> {
     const { searchNameTerm } = inputData;
     const { pageNumber, pageSize, sort, skip } = await getPagination(inputData);

@@ -7,7 +7,7 @@ import {
   BlogDocument,
   BlogModelType,
 } from '../domain/entities/blog.schema';
-import { OutputId } from '../../../infra/likes.types';
+import { OutputId } from '../../../domain/likes.types';
 
 export interface IBlogsRepository {
   save(smartBlogModel: BlogDocument): Promise<OutputId>;
@@ -20,7 +20,6 @@ export interface IBlogsRepository {
 
   deleteBlog(blogId: string): Promise<boolean>;
 }
-
 
 @Injectable()
 export class BlogsRepository implements IBlogsRepository {

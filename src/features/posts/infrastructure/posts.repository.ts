@@ -7,7 +7,7 @@ import {
   PostDocument,
   PostModelType,
 } from '../domain/entities/posts.schema';
-import { OutputId, likeUserInfo } from '../../../infra/likes.types';
+import { OutputId, likeUserInfo } from '../../../domain/likes.types';
 
 @Injectable()
 export class PostsRepository {

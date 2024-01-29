@@ -9,6 +9,12 @@ import {
 import { UsersRepository } from '../infrastructure/users.repository';
 import { BcryptAdapter } from '../../../infra/adapters/bcrypt-adapter';
 import { AuthUserType } from '../../auth/api/models/auth.output.models/auth.user.types';
+import { LayerNoticeInterceptor } from '../../../infra/utils/error-layer-interceptor';
+import { CreateUserErrors } from '../../../infra/utils/interlayer-error-handler.ts/user-errors';
+
+export type CreateUserResultData = {
+  userId: string;
+};
 
 @Injectable()
 export class AdminUserService {
@@ -19,7 +25,9 @@ export class AdminUserService {
     private usersRepository: UsersRepository,
   ) {}
 
-  async createUser(createUser: AuthUserType): Promise<UserAccountDocument> {
+  async createUser(
+    createUser: AuthUserType,
+  ): Promise<LayerNoticeInterceptor<CreateUserResultData>> {
     const { email, login, password } = createUser;
 
     const { passwordSalt, passwordHash } =
@@ -33,7 +41,20 @@ export class AdminUserService {
       isConfirmed: true,
     });
 
-    return this.usersRepository.save(userAdminModel);
+    const notice = new LayerNoticeInterceptor<CreateUserResultData>();
+    const user = await this.usersRepository.save(userAdminModel);
+
+    if (!user) {
+      notice.addError(
+        'Could not create user',
+        'db',
+        CreateUserErrors.DatabaseFail,
+      );
+    } else {
+      notice.addData({ userId: user._id.toString() });
+    }
+
+    return notice;
   }
 
   async deleteUser(searchId: string): Promise<boolean> {

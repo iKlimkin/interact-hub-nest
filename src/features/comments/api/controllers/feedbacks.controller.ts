@@ -13,10 +13,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 
-import { SortingQueryModel } from '../../../../infra/SortingQueryModel';
+import { SortingQueryModel } from '../../../../domain/sorting-base-filter';
 import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
 import { SetUserIdGuard } from '../../../../infra/guards/set-user-id.guard';
-import { PaginationViewModel } from '../../../../infra/paginationViewModel';
+import { PaginationViewModel } from '../../../../domain/pagination-view.model';
 import { CommentsViewModel } from '../models/comments.view.models/comments.view.model';
 
 import { CommandBus } from '@nestjs/cqrs';

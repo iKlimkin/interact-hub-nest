@@ -1,7 +1,7 @@
 import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { v4 as uuidv4 } from 'uuid';
 import { BcryptAdapter } from '../../../../infra/adapters/bcrypt-adapter';
-import { validateOrRejectModel } from '../../../../infra/validators/validate-model.helper';
+import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
 import { InputRecoveryPassModel } from '../../api/models/auth-input.models.ts/input-recovery.model';
 import { AuthUsersRepository } from '../../infrastructure/authUsers-repository';
 import { UpdatePasswordCommand } from './commands/update-password.command';

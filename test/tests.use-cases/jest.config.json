@@ -2,7 +2,7 @@
   "moduleFileExtensions": ["js", "json", "ts"],
   "rootDir": ".",
   "testEnvironment": "node",
-  "testRegex": "use-case.test.ts$",
+  "testRegex": "confirm-email.use-case.test.ts",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   },

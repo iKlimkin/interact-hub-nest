@@ -1,12 +1,11 @@
-import { Matches } from 'class-validator';
 import { iSValidField } from '../../../../infra/decorators/transform/is-valid-string';
 import {
-  loginMatch,
-  nameLength,
-  passwordLength,
   emailMatches,
   frequentLength,
-} from '../../../../infra/validation.constants';
+  loginLength,
+  loginMatch,
+  passwordLength,
+} from '../../../../domain/validation.constants';
 
 export type CreateUserDto = {
   login: string;
@@ -18,10 +17,9 @@ export type CreateUserDto = {
 
 export class InputUserModel {
   /**
-   * user's email
+   * user's login
    */
-  @Matches(loginMatch)
-  @iSValidField(nameLength)
+  @iSValidField(loginLength, loginMatch)
   login: string;
 
   /**
@@ -33,7 +31,6 @@ export class InputUserModel {
   /**
    * user's registration email
    */
-  @Matches(emailMatches)
-  @iSValidField(frequentLength)
+  @iSValidField(frequentLength, emailMatches)
   email: string;
 }

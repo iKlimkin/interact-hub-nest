@@ -53,13 +53,14 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     const errorResponse: any = {
       message: [],
     };
+
     for (const error of errors) {
       const constraints = Object.values(error.constraints || {});
 
       for (const constraint of constraints) {
         errorResponse.message.push({
           field: error.property,
-          message: constraint,
+          message: constraint.trim(),
         });
       }
     }

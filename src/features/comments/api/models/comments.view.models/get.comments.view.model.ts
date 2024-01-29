@@ -1,4 +1,4 @@
-import { likesStatus } from '../../../../../infra/likes.types';
+import { likesStatus } from '../../../../../domain/likes.types';
 import { getLikeStatus } from '../../../../../infra/utils/get-like-status';
 import { CommentType } from '../output.comment.models';
 import { CommentsViewModel } from './comments.view.model';

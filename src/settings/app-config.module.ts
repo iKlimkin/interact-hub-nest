@@ -1,12 +1,12 @@
 import { ConfigModule } from '@nestjs/config';
 import Joi from 'joi';
 import { getEnvConfiguration } from '../config/configuration';
-import { getDbConnection } from '../features/auth/config/configuration';
+import { getDbConnection, getEnv } from '../config/extra-configuration';
 
 export const configModule = ConfigModule.forRoot({
   // envFilePath: ['.env.local', '.env'] prioritize
   isGlobal: true,
-  load: [getEnvConfiguration, getDbConnection],
+  load: [getEnvConfiguration, getDbConnection, getEnv],
   // cache: true,
   // validationSchema: Joi.object({
   //   PORT: Joi.number().valid(5000),
@@ -15,4 +15,3 @@ export const configModule = ConfigModule.forRoot({
   // }),
   // expandVariables: true,
 });
-

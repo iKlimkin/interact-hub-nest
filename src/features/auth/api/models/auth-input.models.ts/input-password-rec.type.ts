@@ -1,5 +1,5 @@
 import { Matches } from 'class-validator';
-import { emailMatches } from '../../../../../infra/validation.constants';
+import { emailMatches } from '../../../../../domain/validation.constants';
 
 export type PasswordRecoveryType = {
   newPassword: string;

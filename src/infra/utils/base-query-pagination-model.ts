@@ -1,6 +1,6 @@
-import { SortingQueryModel } from '../SortingQueryModel';
+import { SortingQueryModel } from '../../domain/sorting-base-filter';
 import { getPagination } from './pagination';
-import { PaginationViewModel } from '../paginationViewModel';
+import { PaginationViewModel } from '../../domain/pagination-view.model';
 import { Model } from 'mongoose';
 
 export class BaseModel {

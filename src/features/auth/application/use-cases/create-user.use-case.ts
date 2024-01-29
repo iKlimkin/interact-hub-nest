@@ -9,7 +9,7 @@ import {
 import { AuthUsersRepository } from '../../infrastructure/authUsers-repository';
 import { CreateUserCommand } from './commands/create-user.command';
 import { UserCreatedEvent } from './events/user-created-event';
-import { validateOrRejectModel } from '../../../../infra/validators/validate-model.helper';
+import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
 
 @CommandHandler(CreateUserCommand)
 export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {

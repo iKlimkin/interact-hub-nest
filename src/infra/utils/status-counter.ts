@@ -1,4 +1,4 @@
-import { LikeStatusType } from '../likes.types';
+import { LikeStatusType } from '../../domain/likes.types';
 
 type StatusCounter = {
   likesCount: number;

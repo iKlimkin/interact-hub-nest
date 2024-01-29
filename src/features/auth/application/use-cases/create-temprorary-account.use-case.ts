@@ -1,5 +1,5 @@
 import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { OutputId } from '../../../../infra/likes.types';
+import { OutputId } from '../../../../domain/likes.types';
 import { UserRecoveryType } from '../../api/models/auth.output.models/auth.output.models';
 import { AuthUsersRepository } from '../../infrastructure/authUsers-repository';
 import { CreateTempAccountCommand } from './commands/create-temp-account.command';

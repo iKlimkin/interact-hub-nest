@@ -6,7 +6,7 @@ import {
   UserRecoveryType,
   UserType,
 } from '../../../auth/api/models/auth.output.models/auth.output.models';
-import { CreateUserDto } from '../../api/models/create.userAdmin.model';
+import { CreateUserDto } from '../../api/models/create-user.model';
 import { HydratedDocument, Model } from 'mongoose';
 
 export type UserAccountDocument = HydratedDocument<UserAccount>;

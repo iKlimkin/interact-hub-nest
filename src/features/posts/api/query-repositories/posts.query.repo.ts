@@ -1,11 +1,11 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { SortingQueryModel } from '../../../../infra/SortingQueryModel';
-import { likesStatus } from '../../../../infra/likes.types';
-import { PaginationViewModel } from '../../../../infra/paginationViewModel';
+import { SortingQueryModel } from '../../../../domain/sorting-base-filter';
+import { likesStatus } from '../../../../domain/likes.types';
+import { PaginationViewModel } from '../../../../domain/pagination-view.model';
 import { getLikeStatus } from '../../../../infra/utils/get-like-status';
 import { getPagination } from '../../../../infra/utils/pagination';
-import { getSearchTerm } from '../../../../infra/utils/searchTerm';
+import { getSearchTerm } from '../../../../infra/utils/search-term-finder';
 import { Post, PostModelType } from '../../domain/entities/posts.schema';
 import { PostViewModel } from '../models/post.view.models/PostViewModel';
 import { getPostViewModel } from '../models/post.view.models/getPostViewModel';
@@ -119,7 +119,6 @@ export class PostsQueryRepository {
     userId?: string,
   ): Promise<PostViewModel | null> {
     try {
-      
       const foundedPost = await this.PostModel.findById(postId);
 
       if (!foundedPost) return null;

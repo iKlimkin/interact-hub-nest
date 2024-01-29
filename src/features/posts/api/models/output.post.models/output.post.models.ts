@@ -1,4 +1,7 @@
-import { LikesUserInfoType, LikesCountType } from "../../../../../infra/likes.types";
+import {
+  LikesUserInfoType,
+  LikesCountType,
+} from '../../../../../domain/likes.types';
 
 export type PostType = {
   title: string;

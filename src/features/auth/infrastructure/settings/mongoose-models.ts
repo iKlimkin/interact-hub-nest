@@ -1,8 +1,19 @@
-import { RequestCounter, ApiRequestCounterShema } from "../../../../infra/repositories/api-request.schema";
-import { UserAccount, UserAccountSchema } from "../../../admin/domain/entities/userAccount.schema";
-import { Security, SecuritySchema } from "../../../security/domain/entities/security.schema";
-import { TempUserAccount, TempUserAccountSchema } from "../../domain/entities/temp-account.schema";
-
+import {
+  RequestCounter,
+  ApiRequestCounterShema,
+} from '../../../../infra/logging/api-request.schema';
+import {
+  UserAccount,
+  UserAccountSchema,
+} from '../../../admin/domain/entities/userAccount.schema';
+import {
+  Security,
+  SecuritySchema,
+} from '../../../security/domain/entities/security.schema';
+import {
+  TempUserAccount,
+  TempUserAccountSchema,
+} from '../../domain/entities/temp-account.schema';
 
 export const mongooseModels = [
   {

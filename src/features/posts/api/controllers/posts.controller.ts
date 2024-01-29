@@ -15,12 +15,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
-import { SortingQueryModel } from '../../../../infra/SortingQueryModel';
+import { SortingQueryModel } from '../../../../domain/sorting-base-filter';
 import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
 import { SetUserIdGuard } from '../../../../infra/guards/set-user-id.guard';
-import { OutputId, likesStatus } from '../../../../infra/likes.types';
-import { PaginationViewModel } from '../../../../infra/paginationViewModel';
-import { getStatusCounting } from '../../../../infra/utils/statusCounter';
+import { OutputId, likesStatus } from '../../../../domain/likes.types';
+import { PaginationViewModel } from '../../../../domain/pagination-view.model';
+import { getStatusCounting } from '../../../../infra/utils/status-counter';
 import { UsersQueryRepository } from '../../../admin/api/query-repositories/users.query.repo';
 import { CurrentUserInfo } from '../../../auth/infrastructure/decorators/current-user-info.decorator';
 import { AccessTokenGuard } from '../../../auth/infrastructure/guards/accessToken.guard';
@@ -145,8 +145,8 @@ export class PostsController {
   ): Promise<PaginationViewModel<CommentsViewModel>> {
     const { pageNumber, pageSize, sortBy, sortDirection, searchContentTerm } =
       query;
-    console.log({searchContentTerm});
-    
+    console.log({ searchContentTerm });
+
     const post = await this.postsQueryRepo.getPostById(postId);
 
     if (!post) {

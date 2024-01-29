@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { likeUserInfo } from '../../../infra/likes.types';
+import { likeUserInfo } from '../../../domain/likes.types';
 import { PostDBType } from '../api/models/post.view.models/getPostViewModel';
 import { PostsRepository } from '../infrastructure/posts.repository';
 

@@ -1,10 +1,16 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { WithId } from 'mongodb';
+import { OutputId } from '../../../domain/likes.types';
+import {
+  UserAccount,
+  UserAccountDocument,
+  UserAccountModelType,
+} from '../../admin/domain/entities/userAccount.schema';
 import { PasswordRecoveryType } from '../api/models/auth-input.models.ts/input-password-rec.type';
 import {
-  UserRecoveryType,
   UserAccountType,
+  UserRecoveryType,
 } from '../api/models/auth.output.models/auth.output.models';
 import { LoginOrEmailType } from '../api/models/auth.output.models/auth.user.types';
 import { TemporaryAccountDBType } from '../api/models/temp-account.models.ts/temp-account-models';
@@ -12,12 +18,6 @@ import {
   TempUserAccount,
   TempUserAccountModelType,
 } from '../domain/entities/temp-account.schema';
-import { OutputId } from '../../../infra/likes.types';
-import {
-  UserAccount,
-  UserAccountModelType,
-  UserAccountDocument,
-} from '../../admin/domain/entities/userAccount.schema';
 
 type PasswordsType = {
   passwordHash: string;

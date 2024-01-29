@@ -15,7 +15,7 @@ import { DeletePostUseCase } from '../features/posts/application/use-cases/delet
 import { UpdatePostUseCase } from '../features/posts/application/use-cases/update-post-use-case';
 import { PostsRepository } from '../features/posts/infrastructure/posts.repository';
 import { BlogIdExistConstraint } from '../infra/decorators/validate/valid-blogId';
-import { ApiRequestCounterRepository } from '../infra/repositories/api-request-counter.repository';
+import { ApiRequestCounterRepository } from '../infra/logging/api-request-counter.repository';
 import { TestDatabaseRepo } from '../data-testing/test.db';
 import { CreateCommentUseCase } from '../features/comments/application/use-cases/create-comment.use-case';
 import { UpdateCommentUseCase } from '../features/comments/application/use-cases/update-comment.use-case';

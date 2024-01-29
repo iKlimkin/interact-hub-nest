@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -13,12 +14,14 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AdminUserService } from '../../application/user.admins.service';
-import { InputUserModel } from '../models/create.userAdmin.model';
+import { InputUserModel } from '../models/create-user.model';
 import { UserViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
 import { UsersQueryRepository } from '../query-repositories/users.query.repo';
-import { SortingQueryModel } from '../../../../infra/SortingQueryModel';
-import { PaginationViewModel } from '../../../../infra/paginationViewModel';
+import { SortingQueryModel } from '../../../../domain/sorting-base-filter';
+import { PaginationViewModel } from '../../../../domain/pagination-view.model';
 import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth.guard';
+import { CreateUserErrors } from '../../../../infra/utils/interlayer-error-handler.ts/user-errors';
+import { LayerNoticeInterceptor } from '../../../../infra/utils/error-layer-interceptor';
 
 @UseGuards(BasicSAAuthGuard)
 @Controller('users')
@@ -33,25 +36,7 @@ export class SuperAdminsController {
   async getUsers(
     @Query() query: SortingQueryModel,
   ): Promise<PaginationViewModel<UserViewModel>> {
-    const {
-      pageNumber,
-      pageSize,
-      sortBy,
-      sortDirection,
-      searchLoginTerm,
-      searchEmailTerm,
-    } = query;
-
-    const user = await this.usersQueryRepo.getAllUsers({
-      pageNumber,
-      pageSize,
-      sortBy,
-      sortDirection,
-      searchLoginTerm,
-      searchEmailTerm,
-    });
-
-    return user;
+    return await this.usersQueryRepo.getAllUsers(query);
   }
 
   @Post()
@@ -59,19 +44,24 @@ export class SuperAdminsController {
   async createUser(@Body() body: InputUserModel): Promise<UserViewModel> {
     const { login, email, password } = body;
 
-    const user = await this.usersService.createUser({ login, email, password });
+    const result = await this.usersService.createUser({
+      login,
+      email,
+      password,
+    });
+    console.log({ result });
 
-    if (!user) {
-      throw new InternalServerErrorException('Database operation failed');
+    if (result.hasError()) {
+      if (result.code === CreateUserErrors.DatabaseFail) {
+        throw new InternalServerErrorException(result.extensions);
+      }
     }
 
-    const foundNewestUser = await this.usersQueryRepo.getUserById(user.id);
+    const foundNewestUser = await this.usersQueryRepo.getUserById(
+      result.data!.userId,
+    );
 
-    if (!foundNewestUser) {
-      throw new NotFoundException('User not found after create');
-    }
-
-    return foundNewestUser;
+    return foundNewestUser!;
   }
 
   @Delete(':id')

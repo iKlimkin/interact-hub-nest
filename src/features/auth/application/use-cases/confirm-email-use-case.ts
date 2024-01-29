@@ -16,13 +16,12 @@ export class ConfirmEmailUseCase
 
     const user =
       await this.authUsersRepository.findUserByConfirmationCode(code);
-    // throw new BadRequestException([{ message: 'confirmation code not found', field: 'code' }]);
+
     if (!user) return null;
 
     const { confirmationCode } = user.emailConfirmation;
 
-    //  throw new BadRequestException([{ message: 'user is already confirmed', field: 'code' }]);
-    if (user.canBeConfirmed(confirmationCode)) return null;
+    if (!user.canBeConfirmed(confirmationCode)) return null;
 
     user.confirm();
 
