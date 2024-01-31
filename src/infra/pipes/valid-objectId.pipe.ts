@@ -1,18 +1,18 @@
 import {
   ArgumentMetadata,
-  BadRequestException,
   Injectable,
   NotFoundException,
-  PipeTransform,
+  PipeTransform
 } from '@nestjs/common';
-import { ObjectId } from 'mongodb';
 import { Types } from 'mongoose';
 
 @Injectable()
 export class ObjectIdPipe implements PipeTransform {
   transform(value: string, metadata: ArgumentMetadata) {
     try {
-      return new Types.ObjectId(value)
+      const isValid = Types.ObjectId.isValid(value)
+      return value
+      // return new Types.ObjectId(value)
     } catch (error) {
       throw new NotFoundException({error, value})
     }   

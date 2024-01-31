@@ -14,24 +14,24 @@ import {
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { OutputId } from '../../../../domain/likes.types';
-import { PaginationViewModel } from '../../../../domain/pagination-view.model';
-import { SortingQueryModel } from '../../../../domain/sorting-base-filter';
+import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
 import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
 import { SetUserIdGuard } from '../../../../infra/guards/set-user-id.guard';
 import { ObjectIdPipe } from '../../../../infra/pipes/valid-objectId.pipe';
 import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth.guard';
 import { InputPostModelByBlogId } from '../../../posts/api/models/input.posts.models/create.post.model';
+import { PostsQueryFilter } from '../../../posts/api/models/output.post.models/posts-query.filter';
 import { PostViewModel } from '../../../posts/api/models/post.view.models/PostViewModel';
 import { PostsQueryRepository } from '../../../posts/api/query-repositories/posts.query.repo';
 import { CreatePostCommand } from '../../../posts/application/use-cases/create-post-use-case';
 import { CreateBlogCommand } from '../../application/use-case/create-blog-use-case';
-import { DeletBlogCommand } from '../../application/use-case/delete-blog-use-case';
-import { UpdateBlogCommand } from '../../application/use-case/update-blod-use-case';
+import { UpdateBlogCommand } from '../../application/use-case/update-blog-use-case';
 import { BlogViewModel } from '../models/blog.view.models/blog.view.models';
 import { InputBlogModel } from '../models/input.blog.models/create.blog.model';
 import { BlogType } from '../models/output.blog.models/blog.models';
 import { BlogsQueryFilter } from '../models/output.blog.models/blogs-query.filter';
 import { BlogsQueryRepo } from '../query-repositories/blogs.query.repo';
+import { DeleteBlogCommand } from '../../application/use-case/delete-blog-use-case';
 
 @Controller('blogs')
 export class BlogsController {
@@ -68,7 +68,7 @@ export class BlogsController {
   async getPostsByBlogId(
     @CurrentUserId() userId: string,
     @Param('id', ObjectIdPipe) blogId: string,
-    @Query() query: SortingQueryModel,
+    @Query() query: PostsQueryFilter,
   ): Promise<PaginationViewModel<PostViewModel>> {
     const blog = await this.blogsQueryRepo.getBlogById(blogId);
 
@@ -93,17 +93,14 @@ export class BlogsController {
   ): Promise<BlogViewModel> {
     const command = new CreateBlogCommand(createBlogDto);
 
-    const createdBlog = await this.commandBus.execute<
-      CreateBlogCommand,
-      OutputId
-    >(command);
-
-    const newlyCreatedBlog = await this.blogsQueryRepo.getBlogById(
-      createdBlog.id,
+    const blog = await this.commandBus.execute<CreateBlogCommand, OutputId>(
+      command,
     );
 
+    const newlyCreatedBlog = await this.blogsQueryRepo.getBlogById(blog.id);
+
     if (!newlyCreatedBlog) {
-      throw new NotFoundException('Newlest created blog not found');
+      throw new NotFoundException('Newest created blog not found');
     }
 
     return newlyCreatedBlog;
@@ -125,7 +122,7 @@ export class BlogsController {
     );
 
     if (!newlyCreatedPost) {
-      throw new NotFoundException('Newlest post not found');
+      throw new NotFoundException('Newest post not found');
     }
 
     return newlyCreatedPost;
@@ -152,7 +149,7 @@ export class BlogsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(@Param('id', ObjectIdPipe) blogId: string) {
     const deleteBlog = await this.commandBus.execute(
-      new DeletBlogCommand(blogId),
+      new DeleteBlogCommand(blogId),
     );
 
     if (!deleteBlog) {

@@ -78,7 +78,6 @@ let authUsersRepository: AuthUsersRepository
 
     const command = new ConfirmEmailCommand({ code });
     const result = await confirmEmailUseCase.execute(command);
-        console.log({result});
 
     const repoSpy = jest.spyOn(authUsersRepository, 'save')
         

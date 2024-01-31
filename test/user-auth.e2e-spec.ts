@@ -8,7 +8,7 @@ import { createErrorsMessages } from './base/utils/make-errors-messages';
 import { aDescribe } from './base/aDescribe';
 import { skipSettings } from './base/utils/tests-settings';
 
-aDescribe(skipSettings.for('appTests'))('AuthController (e2e)', () => {
+aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
   let app: INestApplication;
   let usersTestManager: UsersTestManager;
 
@@ -141,9 +141,78 @@ aDescribe(skipSettings.for('appTests'))('AuthController (e2e)', () => {
       
       await usersTestManager.getProfile(user, accessToken);
     });
+
+    it('/auth/login (POST) - should receive 429 for over 5 attempt', async () => {
+      const { user, accessToken } = expect.getState();
+      
+      await usersTestManager.getProfile(user, accessToken);
+    });
   });
 
-  describe('refreshToken', () => {});
+  describe('refreshToken, logout, me', () => {
+    afterAll(async () => {
+      await dropDataBase(app);
+    });
+
+    beforeAll(async () => {
+      const inputData = usersTestManager.createInputData({});
+      const user = await usersTestManager.createSA(inputData);
+
+      const accessToken = await usersTestManager.authLogin(user, null, HttpStatus.OK, !0);
+
+      const refreshToken = UsersTestManager.extractRefreshToken(accessToken)
+      
+      expect.setState({ user, oldAccessToken: accessToken, oldRefreshToken: refreshToken });
+    });
+
+
+    it(`/auth/refresh-token (POST) - should update tokens`, async () => {
+      const { oldRefreshToken } = expect.getState();
+
+      const newAccessToken = await usersTestManager.refreshToken(oldRefreshToken);
+
+      const newRefreshToken = UsersTestManager.extractRefreshToken(newAccessToken)
+
+      expect.setState({ newAccessToken, newRefreshToken });
+    });
+
+    it(`/auth/refresh-token (POST) - shouldn't received tokens with invalid refreshToken, 401`, async () => {
+      const { user, accessToken } = expect.getState();
+
+
+    });
+    
+    it(`/auth/refresh-token (POST) - shouldn't received tokens with former refreshToken, 401`, async () => {
+      const { user, accessToken } = expect.getState();
+
+
+    });
+
+    it(`/auth/me (GET) - shouldn't get profile info with former token, 401`, async () => {
+      const { user, accessToken } = expect.getState();
+
+
+    });
+
+    it(`/auth/logout (POST) - shouldn't , 401`, async () => {
+      const { user, accessToken } = expect.getState();
+
+
+    });
+
+    it(`/auth/logout (POST) - should , `, async () => {
+      const { user, accessToken } = expect.getState();
+
+
+    });
+
+    it(`/auth/logout (POST) - shouldn't received tokens with former refreshToken, 401`, async () => {
+      const { user, accessToken } = expect.getState();
+
+
+    });
+
+  });
   describe('registration', () => {
     it('', async () => {
       const correctInputData = usersTestManager.createInputData({});

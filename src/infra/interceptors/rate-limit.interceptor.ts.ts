@@ -42,6 +42,7 @@ export class RateLimitInterceptor implements NestInterceptor {
     });
     const requestLogger =
       await this.apiRequestCounterService.getClientRequstLogger();
+    console.log({ requestCount });
 
     if (requestCount <= 5) return next.handle();
 
@@ -53,7 +54,8 @@ export class RateLimitInterceptor implements NestInterceptor {
         },
       ],
     };
-    // response.status(HttpStatus.TOO_MANY_REQUESTS).send(result);
+
+    response.status(HttpStatus.TOO_MANY_REQUESTS).send(result);
     return new Observable();
   }
 }

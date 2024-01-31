@@ -12,8 +12,6 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { PaginationViewModel } from '../../../../domain/pagination-view.model';
-import { SortingQueryModel } from '../../../../domain/sorting-base-filter';
 import { ObjectIdPipe } from '../../../../infra/pipes/valid-objectId.pipe';
 import { CreateUserErrors } from '../../../../infra/utils/interlayer-error-handler.ts/user-errors';
 import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth.guard';
@@ -21,6 +19,8 @@ import { AdminUserService } from '../../application/user.admins.service';
 import { InputUserModel } from '../models/create-user.model';
 import { SAViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
 import { UsersQueryRepository } from '../query-repositories/users.query.repo';
+import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
+import { SAQueryFilter } from '../models/outputSA.models.ts/users-admin-query.filter';
 
 @UseGuards(BasicSAAuthGuard)
 @Controller('users')
@@ -33,7 +33,7 @@ export class SuperAdminsController {
   @Get()
   @HttpCode(HttpStatus.OK)
   async getUserAdmins(
-    @Query() query: SortingQueryModel,
+    @Query() query: SAQueryFilter,
   ): Promise<PaginationViewModel<SAViewModel>> {
     return this.usersQueryRepo.getAllUsers(query);
   }

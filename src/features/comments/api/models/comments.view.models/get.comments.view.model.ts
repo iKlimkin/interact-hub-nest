@@ -1,6 +1,6 @@
 import { likesStatus } from '../../../../../domain/likes.types';
 import { getLikeStatus } from '../../../../../infra/utils/get-like-status';
-import { CommentType } from '../output.comment.models';
+import { CommentType } from '../output.comment.models/output.comment.models';
 import { CommentsViewModel } from './comments.view.model';
 import { WithId } from 'mongodb';
 

@@ -12,12 +12,9 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { SortingQueryModel } from '../../../../domain/sorting-base-filter';
 import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
 import { SetUserIdGuard } from '../../../../infra/guards/set-user-id.guard';
-import { PaginationViewModel } from '../../../../domain/pagination-view.model';
 import { CommentsViewModel } from '../models/comments.view.models/comments.view.model';
-
 import { CommandBus } from '@nestjs/cqrs';
 import { UserInfoType } from '../../../auth/api/models/user-models';
 import { CurrentUserInfo } from '../../../auth/infrastructure/decorators/current-user-info.decorator';
@@ -29,6 +26,8 @@ import { UpdateUserReactionCommand } from '../../application/use-cases/commands/
 import { InputContentModel } from '../models/input.comment.models';
 import { FeedbacksQueryRepository } from '../query-repositories/feedbacks.query.repository';
 import { ObjectIdPipe } from '../../../../infra/pipes/valid-objectId.pipe';
+import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
+import { CommentsQueryFilter } from '../models/output.comment.models/comment-query.filter';
 
 @Controller('comments')
 export class FeedbacksController {
@@ -60,16 +59,12 @@ export class FeedbacksController {
   @HttpCode(HttpStatus.OK)
   async getUserComments(
     @Param('id', ObjectIdPipe) userId: string,
-    @Query() query: SortingQueryModel,
+    @Query() query: CommentsQueryFilter,
   ): Promise<PaginationViewModel<CommentsViewModel>> {
-    const { pageNumber, pageSize, sortBy, sortDirection } = query;
-
-    const comment = await this.feedbacksQueryRepo.getCommentsByUserId(userId, {
-      pageNumber,
-      pageSize,
-      sortBy,
-      sortDirection,
-    });
+    const comment = await this.feedbacksQueryRepo.getCommentsByUserId(
+      userId,
+      query,
+    );
 
     if (!comment) {
       throw new NotFoundException('Comment not found');
@@ -145,18 +140,18 @@ export class FeedbacksController {
     @Param('id', ObjectIdPipe) commentId: string,
     @CurrentUserInfo() userInfo: UserInfoType,
   ) {
-    const foundedCommentById =
+    const comment =
       await this.feedbacksQueryRepo.getCommentById(commentId);
-
-    if (!foundedCommentById) {
+    
+    if (!comment) {
       throw new NotFoundException('Comment not found');
     }
 
-    if (userInfo.userId !== foundedCommentById.commentatorInfo.userId) {
+    if (userInfo.userId !== comment.commentatorInfo.userId) {
       throw new ForbiddenException('Do not have permission');
     }
     const command = new DeleteCommentCommand(commentId);
 
-    const deletedComment = await this.commandBus.execute(command);
+    await this.commandBus.execute(command);
   }
 }

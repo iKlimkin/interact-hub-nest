@@ -1,13 +1,12 @@
-import { SortingQueryModel } from '../../domain/sorting-base-filter';
+import { BaseFilter, PaginationViewModel } from '../../domain/sorting-base-filter';
 import { getPagination } from './pagination';
-import { PaginationViewModel } from '../../domain/pagination-view.model';
 import { Model } from 'mongoose';
 
 export class BaseModel {
   static async paginateAndTransform<T, U>(
     query: Model<T>,
     getViewModel: any,
-    inputData: SortingQueryModel,
+    inputData: BaseFilter,
   ): Promise<PaginationViewModel<U>> {
     const { pageNumber, pageSize, sort, skip } = await getPagination(inputData);
 

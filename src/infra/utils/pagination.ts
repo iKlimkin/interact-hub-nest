@@ -1,5 +1,5 @@
 import { SortDirection } from 'mongodb';
-import { SortingQueryModel } from '../../domain/sorting-base-filter';
+import { BaseFilter } from '../../domain/sorting-base-filter';
 
 export type PaginationType = {
   sort: Record<string, SortDirection>;
@@ -9,17 +9,21 @@ export type PaginationType = {
 };
 
 export const getPagination = async (
-  inputData: SortingQueryModel,
+  inputData: BaseFilter,
   option?: boolean,
 ): Promise<PaginationType> => {
+
   const sortDirection: SortDirection =
     inputData.sortDirection === 'asc' ? 1 : -1;
+
   const pageNumber: number = inputData.pageNumber
     ? Math.min(+inputData.pageNumber, 50)
     : 1;
+
   const pageSize: number = inputData.pageSize
     ? Math.min(+inputData.pageSize, 50)
     : 10;
+
   const skip: number = (pageNumber - 1) * pageSize;
 
   const getDefaultSort = (sortBy: string): Record<string, SortDirection> => ({
@@ -54,3 +58,4 @@ export const getPagination = async (
     skip,
   };
 };
+

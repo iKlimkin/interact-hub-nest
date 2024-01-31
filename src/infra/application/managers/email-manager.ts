@@ -25,7 +25,7 @@ export class EmailManager {
 
     const passwordRecoveryData = {
       emailSettings,
-      from: `Social Hub👻 <${emailSettings?.EMAIL_USER}>`,
+      from: `Interact Hub👻`,
       subject: 'Password recovery',
       message: `,
       <p>To finish password recovery please follow the link below:

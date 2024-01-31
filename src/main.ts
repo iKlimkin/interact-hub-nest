@@ -9,7 +9,7 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT || 5000, () => {
     console.log('App starting listen port: ', process.env.PORT);
-    console.log('ENV: ', process.env.PORT);
+    console.log('ENV: ', process.env.NODE_ENV);
   });
 }
 bootstrap();

@@ -1,21 +1,23 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { SortingQueryModel } from '../../../../domain/sorting-base-filter';
 import { likesStatus } from '../../../../domain/likes.types';
-import { PaginationViewModel } from '../../../../domain/pagination-view.model';
 import { getLikeStatus } from '../../../../infra/utils/get-like-status';
 import { getPagination } from '../../../../infra/utils/pagination';
 import { getSearchTerm } from '../../../../infra/utils/search-term-finder';
 import { Post, PostModelType } from '../../domain/entities/posts.schema';
 import { PostViewModel } from '../models/post.view.models/PostViewModel';
 import { getPostViewModel } from '../models/post.view.models/getPostViewModel';
+import { PostsQueryFilter } from '../models/output.post.models/posts-query.filter';
+import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
+import { Types } from 'mongoose';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class PostsQueryRepository {
   constructor(@InjectModel(Post.name) private PostModel: PostModelType) {}
 
   async getAllPosts(
-    inputData: SortingQueryModel,
+    inputData: PostsQueryFilter,
     userId?: string,
   ): Promise<PaginationViewModel<PostViewModel>> {
     const { pageNumber, pageSize, sort, skip } = await getPagination(inputData);
@@ -50,7 +52,7 @@ export class PostsQueryRepository {
 
   async getPostsByBlogId(
     blogId: string,
-    inputData: SortingQueryModel,
+    inputData: PostsQueryFilter,
     userId?: string,
   ): Promise<PaginationViewModel<PostViewModel>> {
     const { pageNumber, pageSize, sort, skip } = await getPagination(inputData);
@@ -119,7 +121,7 @@ export class PostsQueryRepository {
     userId?: string,
   ): Promise<PostViewModel | null> {
     try {
-      const foundedPost = await this.PostModel.findById(postId);
+      const foundedPost = await this.PostModel.findById( new ObjectId(postId) );
 
       if (!foundedPost) return null;
 

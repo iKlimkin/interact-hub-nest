@@ -2,7 +2,7 @@ import { HttpStatus, INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AuthUserType } from '../../../src/features/auth/api/models/auth.output.models/auth.user.types';
 import { RouterPaths } from '../utils/routing';
-import { UserViewModel } from '../../../src/features/admin/api/models/userAdmin.view.models/userAdmin.view.model';
+import { SAViewModel } from '../../../src/features/admin/api/models/userAdmin.view.models/userAdmin.view.model';
 
 export class SAManager {
   constructor(protected readonly app: INestApplication) {}
@@ -27,7 +27,7 @@ export class SAManager {
   async createUser(
     inputData: AuthUserType,
     expectedStatus: number = HttpStatus.CREATED,
-  ): Promise<{ user: UserViewModel }> {
+  ): Promise<{ user: SAViewModel }> {
     const response = await request(this.application)
       .post(RouterPaths.users)
       .set('Authorization', 'Basic YWRtaW46cXdlcnR5')

@@ -1,10 +1,10 @@
 import { BaseFilter } from "../../../../../domain/sorting-base-filter";
 
-
-export class BlogsQueryFilter extends BaseFilter {
+export class SAQueryFilter extends BaseFilter {
     pageNumber: string;
     pageSize: string;
     sortBy: string;
     sortDirection: 'asc' | 'desc';
-    searchNameTerm: string;
+    searchEmailTerm: string;
+    searchLoginTerm: string;
 } 

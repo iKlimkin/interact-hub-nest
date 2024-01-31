@@ -18,7 +18,7 @@ import { dropDataBase } from './base/utils/dataBase-clean-up';
 import { skipSettings } from './base/utils/tests-settings';
 import { createErrorsMessages } from './base/utils/make-errors-messages';
 
-aDescribe(skipSettings.for('appTests'))('PostsController (e2e)', () => {
+aDescribe(skipSettings.for('posts'))('PostsController (e2e)', () => {
   let app: INestApplication;
   let postTestManager: PostsTestManager;
   let blogTestManager: BlogsTestManager;
@@ -60,10 +60,6 @@ aDescribe(skipSettings.for('appTests'))('PostsController (e2e)', () => {
 
       expect.setState({ blog });
     });
-
-    // afterAll(async () => {
-    //   await dropDataBase();
-    // });
 
     it('/posts (GET)', async () => {
       await postTestManager.getPosts();
@@ -212,7 +208,6 @@ aDescribe(skipSettings.for('appTests'))('PostsController (e2e)', () => {
 
     it("/posts/:postId/comments (POST) - shouldn't create comment with invalid token, expect UNAUTHORIZED", async () => {
       const { post, user1 } = expect.getState();
-      console.log({ post });
 
       const invalidToken = authConstants.invalidToken;
       await feedbacksTestManager.createComment(

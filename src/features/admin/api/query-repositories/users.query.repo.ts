@@ -1,14 +1,17 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { getPagination } from '../../../../infra/utils/pagination';
+import { getSearchTerm } from '../../../../infra/utils/search-term-finder';
 import {
   UserAccount,
   UserAccountModelType,
 } from '../../domain/entities/userAccount.schema';
+import { SAQueryFilter } from '../models/outputSA.models.ts/users-admin-query.filter';
 import { SAViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
-import { SortingQueryModel } from '../../../../domain/sorting-base-filter';
-import { PaginationViewModel } from '../../../../domain/pagination-view.model';
-import { getPagination } from '../../../../infra/utils/pagination';
-import { getSearchTerm } from '../../../../infra/utils/search-term-finder';
+import {
+  PaginationFilter,
+  PaginationViewModel,
+} from '../../../../domain/sorting-base-filter';
 
 @Injectable()
 export class UsersQueryRepository {
@@ -18,8 +21,16 @@ export class UsersQueryRepository {
   ) {}
 
   async getAllUsers(
-    inputData: SortingQueryModel,
+    inputData: SAQueryFilter,
   ): Promise<PaginationViewModel<SAViewModel>> {
+    const { searchEmailTerm, searchLoginTerm, ...sortProps } = inputData;
+
+    const queryProps = [searchEmailTerm, searchLoginTerm];
+
+    // const paginationFilter = new PaginationFilter(sortProps, queryProps);
+
+    // paginationFilter.sortDirection;
+    
     const filter = getSearchTerm(
       {
         searchEmailTerm: inputData.searchEmailTerm,
@@ -37,21 +48,20 @@ export class UsersQueryRepository {
       const users = await this.UserAccountModel.find(filter)
         .sort(sort)
         .skip(skip)
-        .limit(pageSize)
-        .lean();
+        .limit(pageSize);
 
       const totalCount = await this.UserAccountModel.countDocuments(filter);
-      const pagesCount = Math.ceil(totalCount / pageSize);
 
-      const userModel = new this.UserAccountModel();
+      const userSAModel = new this.UserAccountModel();
 
-      return {
-        pagesCount,
-        page: pageNumber,
+      const userSAViewModel = new PaginationViewModel(
+        users.map(userSAModel.getSAViewModel),
+        pageNumber,
         pageSize,
         totalCount,
-        items: users.map(userModel.getSAViewModel),
-      };
+      );
+
+      return userSAViewModel;
     } catch (error) {
       throw new InternalServerErrorException(
         'Database fails operate with find users by sorting model',

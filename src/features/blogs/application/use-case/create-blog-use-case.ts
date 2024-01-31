@@ -5,6 +5,7 @@ import { InputBlogModel } from '../../api/models/input.blog.models/create.blog.m
 import { Blog, BlogModelType } from '../../domain/entities/blog.schema';
 import { BlogsRepository } from '../../infrastructure/blogs.repository';
 import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
+import { BadRequestException } from '@nestjs/common';
 
 export class CreateBlogCommand {
   constructor(public createBlogDto: InputBlogModel) {}
@@ -18,11 +19,16 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
   ) {}
 
   async execute(command: CreateBlogCommand): Promise<OutputId> {
-    await validateOrRejectModel(command, CreateBlogCommand);
+    try {
+      await validateOrRejectModel(command, CreateBlogCommand);
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
 
     const smartBlogModel = await this.BlogModel.makeInstance(
       command.createBlogDto,
     );
+
     return this.blogsRepository.save(smartBlogModel);
   }
 }

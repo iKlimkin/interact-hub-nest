@@ -23,7 +23,7 @@ export class CheckCredentialsUseCase
 
     if (!user) return null;
 
-    const validPassword = this.bcryptAdapter.compareAsync(
+    const validPassword = await this.bcryptAdapter.compareAsync(
       command.inputData.password,
       user.accountData.passwordHash,
     );

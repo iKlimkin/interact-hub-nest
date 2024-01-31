@@ -3,7 +3,7 @@ import { AppService } from '../app.service';
 import { BlogsQueryRepo } from '../features/blogs/api/query-repositories/blogs.query.repo';
 import { CreateBlogUseCase } from '../features/blogs/application/use-case/create-blog-use-case';
 import { DeleteBlogUseCase } from '../features/blogs/application/use-case/delete-blog-use-case';
-import { UpdateBlogUseCase } from '../features/blogs/application/use-case/update-blod-use-case';
+import { UpdateBlogUseCase } from '../features/blogs/application/use-case/update-blog-use-case';
 import { BlogsRepository } from '../features/blogs/infrastructure/blogs.repository';
 import { FeedbacksQueryRepository } from '../features/comments/api/query-repositories/feedbacks.query.repository';
 import { FeedbacksService } from '../features/comments/application/feedbacks.service';
@@ -54,6 +54,7 @@ const useCases: Provider[] = [
 export const providers = [
   AppService,
   ApiRequestCounterRepository,
+
   ...useCases,
 
   ...blogsProviders,

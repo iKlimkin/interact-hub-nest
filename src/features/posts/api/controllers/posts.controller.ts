@@ -13,9 +13,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
-import { OutputId, likesStatus } from '../../../../domain/likes.types';
-import { PaginationViewModel } from '../../../../domain/pagination-view.model';
-import { SortingQueryModel } from '../../../../domain/sorting-base-filter';
+import {
+  OutputId,
+  OutputObjectId,
+  likesStatus,
+} from '../../../../domain/likes.types';
 import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
 import { SetUserIdGuard } from '../../../../infra/guards/set-user-id.guard';
 import { ObjectIdPipe } from '../../../../infra/pipes/valid-objectId.pipe';
@@ -41,6 +43,9 @@ import { InputPostModel } from '../models/input.posts.models/create.post.model';
 import { InputLikeStatusModel } from '../models/input.posts.models/input-post..model';
 import { PostViewModel } from '../models/post.view.models/PostViewModel';
 import { PostsQueryRepository } from '../query-repositories/posts.query.repo';
+import { PostsQueryFilter } from '../models/output.post.models/posts-query.filter';
+import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
+import { Types } from 'mongoose';
 
 @Controller('posts')
 export class PostsController {
@@ -56,22 +61,10 @@ export class PostsController {
   @UseGuards(SetUserIdGuard)
   @HttpCode(HttpStatus.OK)
   async getPosts(
-    @Query() query: SortingQueryModel,
+    @Query() query: PostsQueryFilter,
     @CurrentUserId() userId: string,
   ): Promise<PaginationViewModel<PostViewModel>> {
-    const { pageNumber, pageSize, sortBy, sortDirection, searchLoginTerm } =
-      query;
-
-    return this.postsQueryRepo.getAllPosts(
-      {
-        pageNumber,
-        pageSize,
-        sortBy,
-        sortDirection,
-        searchLoginTerm,
-      },
-      userId,
-    );
+    return this.postsQueryRepo.getAllPosts(query, userId);
   }
 
   @Get(':id')
@@ -137,11 +130,8 @@ export class PostsController {
   async getCommentsByPostId(
     @Param('id', ObjectIdPipe) postId: string,
     @CurrentUserId() userId: string,
-    @Query() query: SortingQueryModel,
+    @Query() query: PostsQueryFilter,
   ): Promise<PaginationViewModel<CommentsViewModel>> {
-    const { pageNumber, pageSize, sortBy, sortDirection, searchContentTerm } =
-      query;
-
     const post = await this.postsQueryRepo.getPostById(postId);
 
     if (!post) {
@@ -150,13 +140,7 @@ export class PostsController {
 
     const comments = await this.feedbacksQueryRepo.getCommentsByPostId(
       postId,
-      {
-        pageNumber,
-        pageSize,
-        sortBy,
-        sortDirection,
-        searchContentTerm,
-      },
+      query,
       userId,
     );
 
@@ -184,7 +168,7 @@ export class PostsController {
       throw new NotFoundException('Post not found');
     }
 
-    const createCommentData: InputCommentModel = {
+    const createCommentData = {
       content,
       userId,
       postId,

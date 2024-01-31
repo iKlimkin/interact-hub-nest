@@ -58,10 +58,10 @@ export const requestLoggerProviders: Provider[] = [
   ApiRequestCounterRepository,
 ];
 
-export const RequestLoggerInterseptor = {
-  provide: APP_INTERCEPTOR,
-  useClass: RateLimitInterceptor,
-};
+// export const RequestLoggerInterseptor = {
+//   provide: APP_INTERCEPTOR,
+//   useClass: RateLimitInterceptor,
+// };
 
 export const securitiesProviders: Provider[] = [
   SecurityService,

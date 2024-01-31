@@ -2,9 +2,9 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import {
   CommentType,
   CreateCommentType,
-} from '../../api/models/output.comment.models';
+} from '../../api/models/output.comment.models/output.comment.models';
 import { likesCountInfo } from '../../../posts/domain/entities/posts.schema';
-import { HydratedDocument, Model } from 'mongoose';
+import { HydratedDocument, Model, Types } from 'mongoose';
 import {
   likesStatus,
   LikesUserInfoType,
@@ -68,16 +68,15 @@ export class Comment {
     try {
       await validateOrReject(comment);
     } catch (error) {
-      throw new BadRequestException()
+      throw new BadRequestException();
     }
-    
+
     return comment;
   }
 
   updateContent(content: string) {
-    this.content = content
+    this.content = content;
   }
-
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);
@@ -87,7 +86,7 @@ export const commentStatics = {
 };
 
 const commentMethods = {
-  someMetupdateContenthods: Comment.prototype.updateContent
+  someMetupdateContenthods: Comment.prototype.updateContent,
 };
 
 type CommentMethodsType = typeof commentMethods;

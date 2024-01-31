@@ -8,27 +8,30 @@ import {
   Post,
   Res,
   UseGuards,
+  UseInterceptors,
+  UsePipes,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { Response } from 'express';
-import { AuthService } from '../../application/auth.service';
 import { OutputId } from '../../../../domain/likes.types';
+import { RateLimitInterceptor } from '../../../../infra/interceptors/rate-limit.interceptor.ts';
 import { getDeviceInfo } from '../../../../infra/utils/device-handler';
 import {
   ErrorType,
   makeErrorsMessages,
 } from '../../../../infra/utils/error-handler';
-import { UsersQueryRepository } from '../../../admin/api/query-repositories/users.query.repo';
 import { UserAccountDocument } from '../../../admin/domain/entities/userAccount.schema';
 import { InputSessionDataValidator } from '../../../security/api/models/security-input.models/create-session.model';
 import { DeleteActiveSessionCommand } from '../../../security/application/use-cases/commands/delete-active-session.command';
 import { UpdateIssuedTokenCommand } from '../../../security/application/use-cases/commands/update-Issued-token.command';
+import { AuthService } from '../../application/auth.service';
 import { ConfirmEmailCommand } from '../../application/use-cases/commands/confirm-email.command';
 import { CreateSessionCommand } from '../../application/use-cases/commands/create-session.command';
 import { CreateTempAccountCommand } from '../../application/use-cases/commands/create-temp-account.command';
 import { CreateUserCommand } from '../../application/use-cases/commands/create-user.command';
 import { PasswordRecoveryCommand } from '../../application/use-cases/commands/recovery-password.command';
 import { UpdateConfirmationCodeCommand } from '../../application/use-cases/commands/update-confirmation-code.command';
+import { UpdatePasswordForNonExistAccountCommand } from '../../application/use-cases/commands/update-password-for-non-existing-account.command';
 import { UpdatePasswordForExistingAccountCommand } from '../../application/use-cases/commands/update-password.command';
 import { GetClientInfo } from '../../infrastructure/decorators/client-ip.decorator';
 import { CurrentUserInfo } from '../../infrastructure/decorators/current-user-info.decorator';
@@ -41,7 +44,6 @@ import { InputRegistrationCodeModel } from '../models/auth-input.models.ts/input
 import { InputRegistrationModel } from '../models/auth-input.models.ts/input-registration.model';
 import { UserInfoType } from '../models/user-models';
 import { AuthQueryRepository } from '../query-repositories/auth-query-repo';
-import { UpdatePasswordForNonExistAccountCommand } from '../../application/use-cases/commands/update-password-for-non-existing-account.command';
 
 type ClientInfo = {
   ip: string;
@@ -52,12 +54,12 @@ type ClientInfo = {
 export class AuthController {
   constructor(
     private authQueryRepository: AuthQueryRepository,
-    private usersQueryRepo: UsersQueryRepository,
     private authService: AuthService,
     private commandBus: CommandBus,
   ) {}
 
   @UseGuards(LocalAuthGuard)
+  //@UseInterceptors(RateLimitInterceptor)
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(
@@ -121,9 +123,9 @@ export class AuthController {
   @Post('new-password')
   @HttpCode(HttpStatus.NO_CONTENT)
   async newPassword(@Body() body: InputRecoveryPassModel) {
-
-    const userAccount =
-      await this.authQueryRepository.findUserByRecoveryCode(body.recoveryCode);
+    const userAccount = await this.authQueryRepository.findUserByRecoveryCode(
+      body.recoveryCode,
+    );
 
     if (userAccount) {
       const command = new UpdatePasswordForExistingAccountCommand(body);
@@ -137,12 +139,12 @@ export class AuthController {
     const command = new UpdatePasswordForNonExistAccountCommand(body);
 
     const updatedPassword = await this.commandBus.execute<
-    UpdatePasswordForNonExistAccountCommand,
+      UpdatePasswordForNonExistAccountCommand,
       boolean
     >(command);
 
     if (updatedPassword) {
-      throw new NotFoundException()
+      throw new NotFoundException();
     }
   }
 
@@ -172,6 +174,7 @@ export class AuthController {
   }
 
   @Post('registration')
+  //@UseInterceptors(RateLimitInterceptor)
   @HttpCode(HttpStatus.NO_CONTENT)
   async registration(
     @Body() inputModel: InputRegistrationModel,
@@ -245,7 +248,7 @@ export class AuthController {
     }
     const command = new UpdateConfirmationCodeCommand(confirmedUser);
 
-    const updatedUserConfirmation = await this.commandBus.execute(command);
+    await this.commandBus.execute(command);
   }
 
   @UseGuards(AccessTokenGuard)

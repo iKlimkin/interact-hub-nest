@@ -1,4 +1,7 @@
+import { Types } from 'mongoose';
+
 export type OutputId = { id: string };
+export type OutputObjectId = { id: Types.ObjectId };
 
 export type LikeUserType = {
   userId?: string;

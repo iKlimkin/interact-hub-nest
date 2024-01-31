@@ -1,15 +1,19 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Model } from 'mongoose';
+import { HydratedDocument, Model, Types } from 'mongoose';
 import { CreateBlogModelType } from '../../api/models/input.blog.models/create.blog.model';
 import { validateOrReject } from 'class-validator';
+import { BadRequestException } from '@nestjs/common';
+import { BlogViewModel } from '../../api/models/blog.view.models/blog.view.models';
 
 export type BlogDocument = HydratedDocument<Blog>;
 export type BlogModelType = Model<BlogDocument> & StaticsType;
 export type BlogWholeModelTypes = BlogModelType & MethodsType;
 
-// @Schema({_id: false})
-@Schema()
+@Schema({ _id: false })
 export class Blog {
+  @Prop({ type: Types.ObjectId })
+  _id: Types.ObjectId;
+
   @Prop({ required: true, type: String })
   name: string;
 
@@ -27,14 +31,32 @@ export class Blog {
 
   static async makeInstance(dto: CreateBlogModelType): Promise<BlogDocument> {
     const blog = new this() as BlogDocument;
-    (blog.name = dto.name),
-      (blog.description = dto.description),
-      (blog.websiteUrl = dto.websiteUrl),
-      (blog.createdAt = new Date().toISOString()),
-      (blog.isMembership = false);
 
-    await validateOrReject(blog);
+    blog._id = new Types.ObjectId();
+    blog.name = dto.name;
+    blog.description = dto.description;
+    blog.websiteUrl = dto.websiteUrl;
+    blog.createdAt = new Date().toISOString();
+    blog.isMembership = false;
+
+    try {
+      await validateOrReject(blog);
+    } catch (error) {
+      throw new BadRequestException();
+    }
+
     return blog;
+  }
+
+  getBlogsViewModel(blogModel: BlogDocument): BlogViewModel {
+    return {
+      id: blogModel._id.toString(),
+      name: blogModel.name,
+      description: blogModel.description,
+      websiteUrl: blogModel.websiteUrl,
+      createdAt: blogModel.createdAt,
+      isMembership: blogModel.isMembership,
+    };
   }
 }
 
@@ -44,7 +66,7 @@ const blogStatics = {
   makeInstance: Blog.makeInstance,
 };
 const blogMethods = {
-  someMethods: Blog.prototype,
+  getBlogsViewModel: Blog.prototype.getBlogsViewModel,
 };
 
 type StaticsType = typeof blogStatics;

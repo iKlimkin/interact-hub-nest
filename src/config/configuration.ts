@@ -32,5 +32,5 @@ export const Environments = ['DEVELOPMENT', 'STAGING', 'PRODUCTION', 'TESTING'];
 export type ConfigType = ConfigurationType & {
   MONGO_URI: string;
   MONGO_URI2: string;
-  NODE_ENV: 'procudction' | 'development' | 'stage';
+  NODE_ENV: 'production' | 'development' | 'stage';
 };

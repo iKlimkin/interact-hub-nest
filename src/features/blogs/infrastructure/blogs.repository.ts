@@ -8,17 +8,15 @@ import {
   BlogModelType,
 } from '../domain/entities/blog.schema';
 import { OutputId } from '../../../domain/likes.types';
+import { ObjectId } from 'mongodb';
 
 export interface IBlogsRepository {
   save(smartBlogModel: BlogDocument): Promise<OutputId>;
   getBlogById(blogId: string): Promise<BlogDBType | null>;
 
-  updateBlog(
-    blogId: string,
-    updateData: UpdateBlogModel,
-  ): Promise<BlogModelType | null>;
+  updateBlog(blogId: string, updateData: UpdateBlogModel): Promise<boolean>;
 
-  deleteBlog(blogId: string): Promise<boolean>;
+  deleteBlog(blogId: string): Promise<BlogDBType>;
 }
 
 @Injectable()
@@ -33,15 +31,16 @@ export class BlogsRepository implements IBlogsRepository {
         id: blogDb._id.toString(),
       };
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Database fails operate during the creation blog',
-      );
+      console.error(`Database fails operate during the creation blog`, error);
+      throw new Error();
     }
   }
 
   async getBlogById(blogId: string): Promise<BlogDBType | null> {
     try {
-      const foundedBlog = await this.BlogModel.findById(blogId).lean();
+      const foundedBlog = await this.BlogModel.findById(
+        new ObjectId(blogId),
+      ).lean();
 
       if (!foundedBlog) return null;
 
@@ -58,25 +57,28 @@ export class BlogsRepository implements IBlogsRepository {
   async updateBlog(
     blogId: string,
     updateData: UpdateBlogModel,
-  ): Promise<BlogModelType | null> {
+  ): Promise<boolean> {
     try {
-      return this.BlogModel.findByIdAndUpdate(blogId, {
-        $set: {
-          name: updateData.name,
-          description: updateData.description,
-          websiteUrl: updateData.websiteUrl,
+      const result = await this.BlogModel.updateOne(
+        { _id: new ObjectId(blogId) },
+        {
+          $set: {
+            name: updateData.name,
+            description: updateData.description,
+            websiteUrl: updateData.websiteUrl,
+          },
         },
-      });
-    } catch (e) {
-      throw new InternalServerErrorException(
-        'Database fails operate during the upgrade blog',
       );
+      return result.matchedCount === 1;
+    } catch (e) {
+      console.error(`Database fails operate during the upgrade blog`, e);
+      return false;
     }
   }
 
-  async deleteBlog(blogId: string): Promise<boolean> {
+  async deleteBlog(blogId: string): Promise<BlogDBType> {
     try {
-      return this.BlogModel.findByIdAndDelete(blogId).lean();
+      return this.BlogModel.findByIdAndDelete(new ObjectId(blogId)).lean();
     } catch (error) {
       throw new InternalServerErrorException(
         'Database fails operate during removal operation',

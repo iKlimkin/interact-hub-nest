@@ -1,10 +1,12 @@
+import { IsOptional } from "class-validator";
 import { BaseFilter } from "../../../../../domain/sorting-base-filter";
 
 
-export class BlogsQueryFilter extends BaseFilter {
+export class PostsQueryFilter extends BaseFilter {
     pageNumber: string;
     pageSize: string;
     sortBy: string;
     sortDirection: 'asc' | 'desc';
-    searchNameTerm: string;
+    @IsOptional()
+    searchContentTerm: string;
 } 

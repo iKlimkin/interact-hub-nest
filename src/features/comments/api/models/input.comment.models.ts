@@ -1,7 +1,7 @@
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { iSValidField } from '../../../../infra/decorators/transform/is-valid-string';
 import { contentPostLength } from '../../../../domain/validation.constants';
-import { isValidObjectId } from 'mongoose';
+import { Types, isValidObjectId } from 'mongoose';
 import { likesStatus } from '../../../../domain/likes.types';
 
 export class InputContentModel {
@@ -27,7 +27,6 @@ export class InputCommentModel {
   userId: string;
 
   @IsNotEmpty()
-  @IsString()
   postId: string;
 }
 

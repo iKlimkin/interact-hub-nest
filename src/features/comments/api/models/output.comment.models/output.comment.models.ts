@@ -1,4 +1,8 @@
-import { LikeUserType, LikesCountType } from '../../../../domain/likes.types';
+import { Types } from 'mongoose';
+import {
+  LikeUserType,
+  LikesCountType,
+} from '../../../../../domain/likes.types';
 
 export type CreateCommentType = Omit<
   CommentType,

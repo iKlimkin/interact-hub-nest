@@ -3,7 +3,7 @@ import request from 'supertest';
 import { AuthUserType } from '../../../src/features/auth/api/models/auth.output.models/auth.user.types';
 import { RouterPaths } from '../utils/routing';
 import { ErrorsMessages } from '../../../src/infra/utils/error-handler';
-import { UserViewModel } from '../../../src/features/admin/api/models/userAdmin.view.models/userAdmin.view.model';
+import { SAViewModel } from '../../../src/features/admin/api/models/userAdmin.view.models/userAdmin.view.model';
 
 export class UsersTestManager {
   constructor(protected readonly app: INestApplication) {}
@@ -65,25 +65,44 @@ export class UsersTestManager {
 
   async authLogin(
     user: AuthUserType,
-    extra: boolean | null = false,
+    loginOrEmailOptions: boolean | null = false,
     expectedStatus: number = HttpStatus.OK,
+    isResponse: boolean = false
   ): Promise<any> {
     const res = await request(this.application)
       .post(`${RouterPaths.auth}/login`)
       .send({
-        loginOrEmail: extra ? user.login : user.email,
+        loginOrEmail: loginOrEmailOptions ? user.login : user.email,
         password: user.password || 'qwerty',
       })
       .expect(expectedStatus);
 
+    if (isResponse) {
+      return res
+    }
+    
     return res.body;
   }
 
+  async refreshToken (refreshToken: string, expectedStatus: number = HttpStatus.CREATED) {
+    const response = await request(this.application)
+      .post(`${RouterPaths.auth}/refresh-token`)
+      .set('Cookie', `${refreshToken}`)
+      .expect(expectedStatus)
+
+      if (expectedStatus === HttpStatus.CREATED) {
+        expect(response.body).toEqual({accessToken: expect.any(String)})
+        expect(response.headers['set-cookie']).toBeDefined()
+      }
+      
+      return response
+  }
+
   checkUserData(
-    responceModel: any | { errorsMessages: ErrorsMessages[] },
-    expectedResult: UserViewModel | { errorsMessages: ErrorsMessages[] },
+    responseModel: any | { errorsMessages: ErrorsMessages[] },
+    expectedResult: SAViewModel | { errorsMessages: ErrorsMessages[] },
   ) {
-    expect(responceModel).toEqual(expectedResult);
+    expect(responseModel).toEqual(expectedResult);
   }
 
   async getProfile(
@@ -102,5 +121,9 @@ export class UsersTestManager {
         login: user.login,
         id: expect.any(String),
       });
+  }
+
+  static extractRefreshToken(response: any) {
+    return response.headers['set-cookie'][0].split(';')[0]
   }
 }

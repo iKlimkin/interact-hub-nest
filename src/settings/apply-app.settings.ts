@@ -7,12 +7,15 @@ import { ValidationError, useContainer } from 'class-validator';
 import cookieParser from 'cookie-parser';
 import { AppModule } from '../app.module';
 import { HttpExceptionFilter } from '../infra/exception-filters/exception.filter';
+import { measureMemory } from 'vm';
 
 export const applyAppSettings = (app: INestApplication) => {
   app.use(cookieParser());
+
   // Для внедрения зависимостей в validator constraint
   // {fallbackOnErrors: true} требуется, поскольку Nest генерирует исключение,
   // когда DI не имеет необходимого класса.
+
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
   // Применение глобальных Interceptors

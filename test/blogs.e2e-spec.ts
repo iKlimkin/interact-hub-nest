@@ -10,8 +10,10 @@ import {
 } from './base/rest-models-helpers/blog-models';
 import { dropDataBase } from './base/utils/dataBase-clean-up';
 import { createErrorsMessages } from './base/utils/make-errors-messages';
+import { aDescribe } from './base/aDescribe';
+import { skipSettings } from './base/utils/tests-settings';
 
-describe('BlogsController (e2e)', () => {
+aDescribe(skipSettings.for('blogs'))('BlogsController (e2e)', () => {
   let app: INestApplication;
   let blogTestManager: BlogsTestManager;
   let basicAuthManager: BasicAuthorization;
@@ -39,10 +41,6 @@ describe('BlogsController (e2e)', () => {
   afterAll(async () => {
     await app.close();
   });
-
-  // afterEach(async () => {
-  //   await dropDataBase(app);
-  // });
 
   describe('createBlog', () => {
     afterAll(async () => {
@@ -221,7 +219,7 @@ describe('BlogsController (e2e)', () => {
 
     it(`/blogs/:blogId/posts (POST) - shouldn't create post with invalid description`, async () => {
       const { blogPost } = expect.getState();
-
+      
       const incorrectShortDescription = '01';
       const incorrectInputData = blogTestManager.createPostInputData({
         shortDescription: incorrectShortDescription,
@@ -232,9 +230,9 @@ describe('BlogsController (e2e)', () => {
         blogPost,
         HttpStatus.BAD_REQUEST,
       );
-
+        
       const error = createErrorsMessages(['shortDescription']);
-
+        
       blogTestManager.checkBlogData(result, error);
     });
 

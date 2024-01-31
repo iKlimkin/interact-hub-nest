@@ -1,17 +1,18 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { SortingQueryModel } from '../../../../domain/sorting-base-filter';
+import { ObjectId } from 'mongodb';
 import { likesStatus } from '../../../../domain/likes.types';
-import { PaginationViewModel } from '../../../../domain/pagination-view.model';
+import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
 import { getLikeStatus } from '../../../../infra/utils/get-like-status';
 import { getPagination } from '../../../../infra/utils/pagination';
 import { getSearchTerm } from '../../../../infra/utils/search-term-finder';
+import {
+  Comment,
+  CommentModelType,
+} from '../../domain/entities/comment.schema';
 import { CommentsViewModel } from '../models/comments.view.models/comments.view.model';
 import { getCommentsViewModel } from '../models/comments.view.models/get.comments.view.model';
-import {
-  CommentModelType,
-  Comment,
-} from '../../domain/entities/comment.schema';
+import { CommentsQueryFilter } from '../models/output.comment.models/comment-query.filter';
 
 @Injectable()
 export class FeedbacksQueryRepository {
@@ -21,7 +22,7 @@ export class FeedbacksQueryRepository {
 
   async getCommentsByPostId(
     postId: string,
-    inputData: SortingQueryModel,
+    inputData: CommentsQueryFilter,
     userId?: string,
   ): Promise<PaginationViewModel<CommentsViewModel> | null> {
     try {
@@ -66,7 +67,9 @@ export class FeedbacksQueryRepository {
     userId?: string,
   ): Promise<CommentsViewModel | null> {
     try {
-      const foundedComment = await this.CommentModel.findById(commentId);
+      const foundedComment = await this.CommentModel.findById(
+        new ObjectId(commentId),
+      );
 
       if (!foundedComment) return null;
 
@@ -109,7 +112,7 @@ export class FeedbacksQueryRepository {
 
   async getCommentsByUserId(
     userId: string,
-    inputData: SortingQueryModel,
+    inputData: CommentsQueryFilter,
   ): Promise<PaginationViewModel<CommentsViewModel>> {
     try {
       const { pageNumber, pageSize, sort, skip } =

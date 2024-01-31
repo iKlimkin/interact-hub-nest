@@ -22,6 +22,7 @@ export class BcryptAdapter implements BcryptInterface {
     };
   }
 
-  compareAsync = async (password: string, passwordHash: string) =>
-    await bcrypt.compare(password, passwordHash);
+  async compareAsync(password: string, passwordHash: string) {
+    return bcrypt.compare(password, passwordHash);
+  }
 }

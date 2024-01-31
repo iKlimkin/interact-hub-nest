@@ -35,6 +35,7 @@ export class EmailAdapter {
   ): Promise<SentMessageInfo> {
     return transporter.sendMail({
       from: inputData.from,
+      sender: `Testing`,
       to: inputData.email,
       subject: inputData.subject,
       html: inputData.message,

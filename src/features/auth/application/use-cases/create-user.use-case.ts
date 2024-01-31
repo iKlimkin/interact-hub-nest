@@ -28,13 +28,15 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
   ): Promise<UserAccountDocument | null> {
     const { email, login, password } = command.inputUserDto;
     try {
-      const notice = new LayerNoticeInterceptor()
+      const notice = new LayerNoticeInterceptor();
       try {
         await validateOrRejectModel(command, CreateUserCommand);
       } catch (error) {
-        notice.addError(`couldn't pass validation`,
-        'validation',
-        CreateUserErrors.Validation)
+        notice.addError(
+          `couldn't pass validation`,
+          'validation',
+          CreateUserErrors.Validation,
+        );
       }
 
       const { passwordSalt, passwordHash } =

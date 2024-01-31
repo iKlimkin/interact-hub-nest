@@ -16,13 +16,11 @@ type UpdateBlogCommandType = {
 @CommandHandler(UpdateBlogCommand)
 export class UpdateBlogUseCase implements ICommandHandler<UpdateBlogCommand> {
   constructor(private blogsRepository: BlogsRepository) {}
-  async execute(
-    updateBlogDto: UpdateBlogCommand,
-  ): Promise<BlogModelType | null> {
+  async execute(updateBlogDto: UpdateBlogCommand): Promise<boolean> {
     const { name, description, websiteUrl, blogId } =
       updateBlogDto.updateBlogDto;
 
-    return await this.blogsRepository.updateBlog(blogId, {
+    return this.blogsRepository.updateBlog(blogId, {
       name,
       description,
       websiteUrl,

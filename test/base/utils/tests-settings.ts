@@ -1,9 +1,12 @@
 export const skipSettings = {
   run_all_tests: false,
 
-  appTests: false,
+  userAuth: false,
+  posts: true,
+  appTests: true,
+  blogs: true,
 
-  for(testName: TestsNames): boolean {
+  for(testName: TestsName): boolean {
     if (this.run_all_tests) {
       return false;
     }
@@ -16,4 +19,11 @@ export const skipSettings = {
   },
 };
 
-export type TestsNames = 'appTests';
+enum TestsNames {
+  appTests = 'appTests',
+  userAuth = 'userAuth',
+  posts = 'posts',
+  blogs = 'blogs',
+}
+
+type TestsName = keyof typeof TestsNames
