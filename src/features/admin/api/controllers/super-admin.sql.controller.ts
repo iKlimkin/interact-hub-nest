@@ -12,18 +12,18 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { CommandBus } from '@nestjs/cqrs';
+import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
 import { ObjectIdPipe } from '../../../../infra/pipes/valid-objectId.pipe';
 import { CreateUserErrors } from '../../../../infra/utils/interlayer-error-handler.ts/user-errors';
 import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth.guard';
-import { AdminUserService } from '../../application/user.admins.service';
+import { CreateSACommand } from '../../application/use-cases/commands/create-sa.command';
+import { AdminUserService, CreateUserResultData } from '../../application/user.admins.service';
 import { InputUserModel } from '../models/create-user.model';
+import { SAQueryFilter } from '../models/outputSA.models.ts/users-admin-query.filter';
 import { SAViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
 import { UsersQueryRepository } from '../query-repositories/users.query.repo';
-import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
-import { SAQueryFilter } from '../models/outputSA.models.ts/users-admin-query.filter';
-import { CreateSACommand } from '../../application/use-cases/commands/create-sa.command';
-import { CommandBus } from '@nestjs/cqrs';
-import { compareAsc } from 'date-fns';
+import { LayerNoticeInterceptor } from '../../../../infra/utils/error-layer-interceptor';
 
 @UseGuards(BasicSAAuthGuard)
 @Controller('users')
@@ -31,7 +31,7 @@ export class SuperAdminsController {
   constructor(
     private usersQueryRepo: UsersQueryRepository,
     private usersService: AdminUserService,
-    private commandBus: CommandBus
+    private commandBus: CommandBus,
   ) {}
 
   @Get()
@@ -59,16 +59,9 @@ export class SuperAdminsController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async createSA(@Body() body: InputUserModel): Promise<SAViewModel> {
-    const { login, email, password } = body;
+    const command = new CreateSACommand(body);
 
-    const command = new CreateSACommand(body)
-    const sa = await this.commandBus.execute(command)
-
-    const result = await this.usersService.createUser({
-      login,
-      email,
-      password,
-    });
+    const result = await this.commandBus.execute<CreateSACommand, LayerNoticeInterceptor<CreateUserResultData>>(command);
 
     if (result.hasError()) {
       if (result.code === CreateUserErrors.DatabaseFail) {
