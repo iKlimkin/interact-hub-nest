@@ -9,7 +9,6 @@ import {
   Res,
   UseGuards,
   UseInterceptors,
-  UsePipes,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { Response } from 'express';
@@ -42,8 +41,8 @@ import { InputRecoveryEmailModel } from '../models/auth-input.models.ts/input-pa
 import { InputRecoveryPassModel } from '../models/auth-input.models.ts/input-recovery.model';
 import { InputRegistrationCodeModel } from '../models/auth-input.models.ts/input-registration-code.model';
 import { InputRegistrationModel } from '../models/auth-input.models.ts/input-registration.model';
-import { UserInfoType } from '../models/user-models';
 import { AuthQueryRepository } from '../query-repositories/auth-query-repo';
+import { UserInfoType } from '../models/user-models';
 
 type ClientInfo = {
   ip: string;
@@ -59,7 +58,7 @@ export class AuthController {
   ) {}
 
   @UseGuards(LocalAuthGuard)
-  //@UseInterceptors(RateLimitInterceptor)
+  @UseInterceptors(RateLimitInterceptor)
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(
@@ -119,7 +118,7 @@ export class AuthController {
     res.send({ accessToken });
   }
 
-  //@UseInterceptors(RateLimitInterceptor)
+  @UseInterceptors(RateLimitInterceptor)
   @Post('new-password')
   @HttpCode(HttpStatus.NO_CONTENT)
   async newPassword(@Body() body: InputRecoveryPassModel) {
@@ -148,12 +147,13 @@ export class AuthController {
     }
   }
 
-  //@UseInterceptors(RateLimitInterceptor)
+  @UseInterceptors(RateLimitInterceptor)
   @Post('password-recovery')
   @HttpCode(HttpStatus.NO_CONTENT)
   async passwordRecovery(@Body() inputEmailModel: InputRecoveryEmailModel) {
-    const foundUserAccount =
-      await this.authQueryRepository.findByLoginOrEmail(inputEmailModel);
+    const foundUserAccount = await this.authQueryRepository.findByLoginOrEmail(
+      inputEmailModel,
+    );
 
     if (!foundUserAccount) {
       const command = new CreateTempAccountCommand(inputEmailModel);
@@ -174,7 +174,7 @@ export class AuthController {
   }
 
   @Post('registration')
-  //@UseInterceptors(RateLimitInterceptor)
+  @UseInterceptors(RateLimitInterceptor)
   @HttpCode(HttpStatus.NO_CONTENT)
   async registration(
     @Body() inputModel: InputRegistrationModel,
@@ -209,7 +209,7 @@ export class AuthController {
     );
   }
 
-  //@UseInterceptors(RateLimitInterceptor)
+  @UseInterceptors(RateLimitInterceptor)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('registration-confirmation')
   async registrationConfirmation(
@@ -229,7 +229,7 @@ export class AuthController {
     }
   }
 
-  //@UseInterceptors(RateLimitInterceptor)
+  @UseInterceptors(RateLimitInterceptor)
   @Post('registration-email-resending')
   @HttpCode(HttpStatus.NO_CONTENT)
   async registrationEmailResending(
@@ -261,7 +261,7 @@ export class AuthController {
     }
     const { email, login, id } = user.accountData;
 
-    return { id, email, login };
+    return { email, login, userId: id };
   }
 
   @UseGuards(RefreshTokenGuard)

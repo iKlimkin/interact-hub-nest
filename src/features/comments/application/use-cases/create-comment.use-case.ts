@@ -24,7 +24,7 @@ export class CreateCommentUseCase
     const { userId, content, postId } = command.inputData;
 
     const user = await this.usersRepository.getUserById(userId);
-
+    
     const commentSmartModel = await this.CommentModel.makeInstance({
       commentatorInfo: {
         userId: userId,

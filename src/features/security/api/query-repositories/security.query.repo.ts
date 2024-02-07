@@ -34,11 +34,11 @@ export class SecurityQueryRepo {
     deviceId: string,
   ): Promise<SecurityViewDeviceModel | null> {
     try {
-      const findUserSesession = await this.SecurityModel.findOne({ deviceId });
+      const findUserSession = await this.SecurityModel.findOne({ deviceId });
 
-      if (!findUserSesession) return null;
+      if (!findUserSession) return null;
 
-      return getSecurityViewModel(findUserSesession);
+      return getSecurityViewModel(findUserSession);
     } catch (error) {
       throw new InternalServerErrorException(
         'Database fails operate with find user session',

@@ -4,8 +4,7 @@ import { DeleteActiveSessionCommand } from './commands/delete-active-session.com
 
 @CommandHandler(DeleteActiveSessionCommand)
 export class DeleteActiveSessionUseCase
-  implements ICommandHandler<DeleteActiveSessionCommand>
-{
+  implements ICommandHandler<DeleteActiveSessionCommand> {
   constructor(private securityRepository: SecurityRepository) {}
 
   async execute(command: DeleteActiveSessionCommand): Promise<boolean> {

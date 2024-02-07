@@ -4,6 +4,13 @@ import { UpdateUserReactionCommand } from './commands/update-user-reaction.comma
 import { getStatusCounting } from '../../../../infra/utils/status-counter';
 import { LikeStatusType, ReactionType } from '../../../../domain/likes.types';
 
+type ReactionDataType = {
+  commentId: string;
+  userId: string;
+  inputStatus: LikeStatusType;
+  currentStatus: LikeStatusType | null;
+};
+
 @CommandHandler(UpdateUserReactionCommand)
 export class UpdateUserReactionUseCase
   implements ICommandHandler<UpdateUserReactionCommand>
@@ -17,16 +24,18 @@ export class UpdateUserReactionUseCase
       userId,
       commentId,
     );
-
-    await this.handleReaction(commentId, userId, inputStatus, existingReaction);
+      
+    await this.handleReaction({
+      commentId,
+      userId,
+      inputStatus,
+      currentStatus: existingReaction,
+    });
   }
 
-  private async handleReaction(
-    commentId: string,
-    userId: string,
-    inputStatus: LikeStatusType,
-    currentStatus: LikeStatusType | null,
-  ) {
+  private async handleReaction(reactionDto: ReactionDataType) {
+    const { commentId, currentStatus, inputStatus, userId } = reactionDto;
+
     const { likesCount, dislikesCount } = getStatusCounting(
       inputStatus,
       currentStatus || 'None',

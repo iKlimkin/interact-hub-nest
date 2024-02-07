@@ -93,6 +93,7 @@ export class FeedbacksController {
     if (userInfo.userId !== foundedCommentById.commentatorInfo.userId) {
       throw new ForbiddenException('Do not have permission');
     }
+
     const command = new UpdateCommentCommand(commentId, content);
 
     await this.commandBus.execute(command);
@@ -140,9 +141,8 @@ export class FeedbacksController {
     @Param('id', ObjectIdPipe) commentId: string,
     @CurrentUserInfo() userInfo: UserInfoType,
   ) {
-    const comment =
-      await this.feedbacksQueryRepo.getCommentById(commentId);
-    
+    const comment = await this.feedbacksQueryRepo.getCommentById(commentId);
+
     if (!comment) {
       throw new NotFoundException('Comment not found');
     }

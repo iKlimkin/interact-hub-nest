@@ -4,7 +4,7 @@ import { ConfigurationType } from '../config/configuration';
 export const createAsyncMongoConnection = async (
   configService: ConfigService,
 ) => {
-  const config = configService.get<ConfigurationType>('dbConnection', {
+  const config = configService.get<ConfigurationType>('mongoConnection', {
     infer: true,
   });
 

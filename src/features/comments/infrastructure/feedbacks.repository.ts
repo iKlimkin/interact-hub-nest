@@ -7,6 +7,7 @@ import {
   CommentDocument,
   CommentModelType,
 } from '../domain/entities/comment.schema';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class FeedbacksRepository {
@@ -56,7 +57,7 @@ export class FeedbacksRepository {
   async createLikeStatus(inputReactionData: ReactionType): Promise<boolean> {
     try {
       const createdLikeStatus = await this.CommentModel.findByIdAndUpdate(
-        inputReactionData.commentId,
+        new ObjectId(inputReactionData.commentId),
         {
           $addToSet: {
             likesUserInfo: {
@@ -85,7 +86,7 @@ export class FeedbacksRepository {
     try {
       const updatedLike = await this.CommentModel.findOneAndUpdate(
         {
-          _id: inputReactionData.commentId,
+          _id: new ObjectId(inputReactionData.commentId),
           likesUserInfo: { $elemMatch: { userId: inputReactionData.userId } },
         },
         {
@@ -98,7 +99,6 @@ export class FeedbacksRepository {
             'likesCountInfo.dislikesCount': inputReactionData.dislikesCount,
           },
         },
-
         { new: true },
       );
 
@@ -116,15 +116,17 @@ export class FeedbacksRepository {
     commentId: string,
   ): Promise<likesStatus | null> {
     try {
-      const foundedUserReaction = await this.CommentModel.findOne({
-        _id: commentId,
-        likesUserInfo: {
-          $elemMatch: {
-            userId,
-            status: { $exists: true },
+      const foundedUserReaction = await this.CommentModel.findById(
+        new ObjectId(commentId),
+        {
+          likesUserInfo: {
+            $elemMatch: {
+              userId,
+              status: { $exists: true },
+            },
           },
         },
-      });
+      );
 
       if (!foundedUserReaction) return null;
 

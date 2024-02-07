@@ -1,4 +1,7 @@
 {
   "editor.fontSize": 16,
-  "cSpell.ignoreWords": ["YWRtaW46cXdlcnR5"]
+  "cSpell.ignoreWords": ["YWRtaW46cXdlcnR5"],
+  "cSpell.enableFiletypes": ["typescript"],
+  "javascript.preferences.importModuleSpecifier": "relative",
+  "typescript.preferences.importModuleSpecifier": "relative"
 }

@@ -4,5 +4,17 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
   "typescript.preferences.importModuleSpecifier": "relative",
-  "cSpell.words": ["interlayer"]
+  "cSpell.words": ["interlayer", "uuidv"],
+  "files.trimTrailingWhitespace": true,
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "database": "InteractHubNest",
+      "username": "NodeJS",
+      "name": "NodeJS"
+    }
+  ]
 }

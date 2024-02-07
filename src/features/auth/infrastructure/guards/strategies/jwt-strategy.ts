@@ -7,7 +7,7 @@ import { SecurityQueryRepo } from '../../../../security/api/query-repositories/s
 
 @Injectable()
 export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor() {
+  constructor(private securityQueryRepo: SecurityQueryRepo) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -16,6 +16,11 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: any) {
+    const userSession = await this.securityQueryRepo.getUserSession(
+      payload.deviceId,
+    );
+
+    if (!userSession) return false;
     return payload;
   }
 }
@@ -40,7 +45,7 @@ export class RefreshTokenStrategy extends PassportStrategy(
     const tokenIssuedAt = new Date(iat * 1000).toISOString();
 
     const userSession = await this.securityQueryRepo.getUserSession(deviceId);
-    debugger;
+
     if (!userSession || tokenIssuedAt !== userSession.lastActiveDate) {
       throw new UnauthorizedException('Invalid refresh token');
     }

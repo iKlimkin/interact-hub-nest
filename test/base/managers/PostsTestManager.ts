@@ -94,7 +94,7 @@ export class PostsTestManager {
   }
 
   checkPostData(
-    responceModel:
+    responseModel:
       | PostViewModel
       | { errorsMessages: ErrorsMessages[] }
       | string,
@@ -103,7 +103,7 @@ export class PostsTestManager {
       | { errorsMessages: ErrorsMessages[] }
       | string,
   ) {
-    expect(responceModel).toEqual(expectedResult);
+    expect(responseModel).toEqual(expectedResult);
   }
 
   async checkLength(totalCount: number) {

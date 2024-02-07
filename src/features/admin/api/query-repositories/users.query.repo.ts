@@ -30,7 +30,7 @@ export class UsersQueryRepository {
     // const paginationFilter = new PaginationFilter(sortProps, queryProps);
 
     // paginationFilter.sortDirection;
-    
+
     const filter = getSearchTerm(
       {
         searchEmailTerm: inputData.searchEmailTerm,
@@ -73,7 +73,7 @@ export class UsersQueryRepository {
   async getUserById(userId: string): Promise<SAViewModel | null> {
     try {
       const user = await this.UserAccountModel.findById(userId);
-
+      
       if (!user) return null;
 
       return user.getSAViewModel(user);

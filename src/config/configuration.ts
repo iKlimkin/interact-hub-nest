@@ -1,4 +1,4 @@
-import { getDbConnection, getEnv } from './extra-configuration';
+import { getMongoConnection, getEnv } from './env-configurations';
 
 export const getEnvConfiguration = () => ({
   Port: parseInt(process.env.PORT ?? '5000'),
@@ -15,7 +15,7 @@ export const getEnvConfiguration = () => ({
     HTTP_BASIC_USER: process.env.HTTP_BASIC_USER,
     HTTP_BASIC_PASS: process.env.HTTP_BASIC_PASS,
   },
-  dbConnection: getDbConnection(),
+  dbConnection: getMongoConnection(),
   getEnv: getEnv(),
 });
 

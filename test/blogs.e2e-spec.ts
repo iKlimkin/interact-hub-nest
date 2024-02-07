@@ -76,10 +76,10 @@ aDescribe(skipSettings.for('blogs'))('BlogsController (e2e)', () => {
       const newBlog = await blogTestManager.createBlog(correctInputData);
 
       blogTestManager.checkBlogData(newBlog, blogEqualTo);
-      const exptectLength = 1;
+      const expectLength = 1;
 
       await blogTestManager.checkStatusOptionId(newBlog.id);
-      await blogTestManager.expectLength(exptectLength);
+      await blogTestManager.expectLength(expectLength);
     });
   });
 
@@ -126,12 +126,12 @@ aDescribe(skipSettings.for('blogs'))('BlogsController (e2e)', () => {
       const beforeUpdate = await blogTestManager.getBlogById(blog.id);
       blogTestManager.checkBlogData(beforeUpdate.blog.name, 'Marcus Aurelius');
 
-      const createOtheValidInputData = blogTestManager.createInputData({
+      const createOtherValidInputData = blogTestManager.createInputData({
         name: 'Zeno',
       });
 
-      const reposone = await blogTestManager.updateBlog(
-        createOtheValidInputData,
+      const response = await blogTestManager.updateBlog(
+        createOtherValidInputData,
         blog.id,
       );
 
@@ -255,7 +255,7 @@ aDescribe(skipSettings.for('blogs'))('BlogsController (e2e)', () => {
       blogTestManager.checkBlogData(result, error);
     });
 
-    it(`/blogs/:blogId/posts (POST) - shouldn't create post with all incorrect fields, testint error's messages`, async () => {
+    it(`/blogs/:blogId/posts (POST) - shouldn't create post with all incorrect fields, testing error's messages`, async () => {
       const { blogPost } = expect.getState();
 
       const incorrectInputData = blogTestManager.createPostInputData();
@@ -280,7 +280,7 @@ aDescribe(skipSettings.for('blogs'))('BlogsController (e2e)', () => {
 
       const inputCreatePostData = blogTestManager.createPostInputData({});
 
-      const postbyBlogId = await blogTestManager.createPost(
+      const postByBlogId = await blogTestManager.createPost(
         inputCreatePostData,
         blogPost,
       );

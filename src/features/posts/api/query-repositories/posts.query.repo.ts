@@ -1,16 +1,14 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { ObjectId } from 'mongodb';
 import { likesStatus } from '../../../../domain/likes.types';
-import { getLikeStatus } from '../../../../infra/utils/get-like-status';
+import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
 import { getPagination } from '../../../../infra/utils/pagination';
 import { getSearchTerm } from '../../../../infra/utils/search-term-finder';
 import { Post, PostModelType } from '../../domain/entities/posts.schema';
+import { PostsQueryFilter } from '../models/output.post.models/posts-query.filter';
 import { PostViewModel } from '../models/post.view.models/PostViewModel';
 import { getPostViewModel } from '../models/post.view.models/getPostViewModel';
-import { PostsQueryFilter } from '../models/output.post.models/posts-query.filter';
-import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
-import { Types } from 'mongoose';
-import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class PostsQueryRepository {
@@ -94,25 +92,24 @@ export class PostsQueryRepository {
     postId: string,
   ): Promise<likesStatus | null> {
     try {
-      const foundedUserReaction = await this.PostModel.findOne({
-        _id: postId,
-        likesUserInfo: {
-          $elemMatch: {
-            userId,
-            status: { $exists: true },
+      const foundedUserReaction = await this.PostModel.findById(
+        new ObjectId(postId),
+        {
+          likesUserInfo: {
+            $elemMatch: {
+              userId,
+              status: { $exists: true },
+            },
           },
         },
-      });
+      );
 
       if (!foundedUserReaction) return null;
 
-      const [status] = getLikeStatus(foundedUserReaction.likesUserInfo, userId);
-
-      return status;
+      return foundedUserReaction.likesUserInfo[0].status;
     } catch (error) {
-      throw new InternalServerErrorException(
-        "Database fails operate with find user's reactions",
-      );
+      console.error(`Database fails operate with find user's reactions`);
+      return null;
     }
   }
 
@@ -121,7 +118,7 @@ export class PostsQueryRepository {
     userId?: string,
   ): Promise<PostViewModel | null> {
     try {
-      const foundedPost = await this.PostModel.findById( new ObjectId(postId) );
+      const foundedPost = await this.PostModel.findById(new ObjectId(postId));
 
       if (!foundedPost) return null;
 

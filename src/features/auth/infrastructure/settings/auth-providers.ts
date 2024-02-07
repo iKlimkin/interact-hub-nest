@@ -1,23 +1,30 @@
 import { Provider } from '@nestjs/common';
-import { APP_INTERCEPTOR } from '@nestjs/core';
-import { ApiRequestCounterService } from '../../../../infra/logging/api-request-counter.service';
-import { RateLimitInterceptor } from '../../../../infra/interceptors/rate-limit.interceptor.ts';
+import { BcryptAdapter } from '../../../../infra/adapters/bcrypt-adapter';
+import { EmailAdapter } from '../../../../infra/adapters/email-adapter';
+import { EmailManager } from '../../../../infra/application/managers/email-manager';
 import { ApiRequestCounterRepository } from '../../../../infra/logging/api-request-counter.repository';
+import { ApiRequestCounterService } from '../../../../infra/logging/api-request-counter.service';
 import { UsersQueryRepository } from '../../../admin/api/query-repositories/users.query.repo';
 import { AdminUserService } from '../../../admin/application/user.admins.service';
 import { UsersRepository } from '../../../admin/infrastructure/users.repository';
 import { SecurityQueryRepo } from '../../../security/api/query-repositories/security.query.repo';
 import { SecurityService } from '../../../security/application/security.service';
+import { DeleteActiveSessionUseCase } from '../../../security/application/use-cases/delete-active-session.use-case';
+import { DeleteOtherUserSessionsUseCase } from '../../../security/application/use-cases/delete-other-user-sessions.use-case';
+import { UpdateIssuedTokenUseCase } from '../../../security/application/use-cases/update-issued-token.use-case';
 import { SecurityRepository } from '../../../security/infrastructure/security.repository';
 import { AuthQueryRepository } from '../../api/query-repositories/auth-query-repo';
 import { CheckCredentialsUseCase } from '../../application/use-cases/check-credentials.use-case';
 import { ConfirmEmailUseCase } from '../../application/use-cases/confirm-email-use-case';
-import { CreateTempAccountUseCase } from '../../application/use-cases/create-temprorary-account.use-case';
+import { CreateTempAccountUseCase } from '../../application/use-cases/create-temporary-account.use-case';
+import { CreateUserSessionUseCase } from '../../application/use-cases/create-user-session.use-case';
 import { CreateUserUseCase } from '../../application/use-cases/create-user.use-case';
+import { UserCreatedEventHandler } from '../../application/use-cases/events/handlers/user-created.event-handler';
 import { PasswordRecoveryUseCase } from '../../application/use-cases/recovery-password.use-case';
 import { SendRecoveryMsgUseCase } from '../../application/use-cases/send-recovery-msg.use-case';
 import { UpdateConfirmationCodeUseCase } from '../../application/use-cases/update-confirmation-code.use-case';
 import { UpdatePasswordForExistingAccountUseCase } from '../../application/use-cases/update-password-existing-account.use-case';
+import { UpdatePasswordForNonExistAccountUseCase } from '../../application/use-cases/update-password-non-exist-account.use-case';
 import { AuthUsersRepository } from '../authUsers-repository';
 import { BasicSAStrategy } from '../guards/strategies/basic-strategy';
 import {
@@ -25,15 +32,7 @@ import {
   RefreshTokenStrategy,
 } from '../guards/strategies/jwt-strategy';
 import { LocalStrategy } from '../guards/strategies/local-strategy';
-import { UserCreatedEventHandler } from '../../application/use-cases/events/handlers/user-created.event-handler';
-import { EmailAdapter } from '../../../../infra/adapters/email-adapter';
-import { EmailManager } from '../../../../infra/application/managers/email-manager';
-import { BcryptAdapter } from '../../../../infra/adapters/bcrypt-adapter';
-import { CreateUserSessionUseCase } from '../../application/use-cases/create-user-session.use-case';
-import { UpdateIssuedTokenUseCase } from '../../../security/application/use-cases/update-issued-token.use-case';
-import { DeleteActiveSessionUseCase } from '../../../security/application/use-cases/delete-active-session.use-case';
-import { DeleteOtherUserSessionsUseCase } from '../../../security/application/use-cases/delete-other-user-sessions.use-case';
-import { UpdatePasswordForNonExistAccountUseCase } from '../../application/use-cases/update-password-non-exist-account.use-case';
+import { UsersSQLRepository } from '../../../admin/infrastructure/users.sql-repository';
 
 export const userAccountProviders: Provider[] = [
   AuthUsersRepository,
@@ -44,6 +43,7 @@ export const usersProviders: Provider[] = [
   AdminUserService,
   UsersQueryRepository,
   UsersRepository,
+  UsersSQLRepository,
 ];
 
 export const Strategies: Provider[] = [
@@ -57,11 +57,6 @@ export const requestLoggerProviders: Provider[] = [
   ApiRequestCounterService,
   ApiRequestCounterRepository,
 ];
-
-// export const RequestLoggerInterseptor = {
-//   provide: APP_INTERCEPTOR,
-//   useClass: RateLimitInterceptor,
-// };
 
 export const securitiesProviders: Provider[] = [
   SecurityService,

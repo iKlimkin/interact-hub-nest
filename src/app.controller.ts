@@ -2,7 +2,7 @@ import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ConfigService } from '@nestjs/config';
 import { ConfigType } from './config/configuration';
-import { AuthConfigurationType } from './config/extra-configuration';
+import { AuthConfigurationType } from './config/env-configurations';
 
 @Controller()
 export class AppController {

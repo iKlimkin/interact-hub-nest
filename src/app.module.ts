@@ -8,6 +8,8 @@ import { controllers } from './settings/app-controllers';
 import { providers } from './settings/app-providers';
 import { createAsyncMongoConnection } from './settings/app.settings';
 import { mongooseSchemas } from './settings/mongoose-schemas';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmOptions } from './settings/postgres-options';
 
 @Module({
   imports: [
@@ -18,8 +20,12 @@ import { mongooseSchemas } from './settings/mongoose-schemas';
       inject: [ConfigService],
     }),
     MongooseModule.forFeature(mongooseSchemas),
+    TypeOrmModule.forRootAsync({
+      useClass: TypeOrmOptions,
+    }),
     AuthModule,
   ],
+  exports: [TypeOrmModule],
   controllers,
   providers,
 })

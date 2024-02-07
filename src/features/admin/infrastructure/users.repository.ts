@@ -1,11 +1,11 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { UserAccountDBType } from '../../auth/api/models/auth.output.models/auth.output.models';
 import {
   UserAccount,
   UserAccountDocument,
   UserAccountModelType,
 } from '../domain/entities/userAccount.schema';
-import { UserAccountDBType } from '../../auth/api/models/auth.output.models/auth.output.models';
 
 @Injectable()
 export class UsersRepository {
@@ -30,14 +30,14 @@ export class UsersRepository {
 
   async getUserById(userId: string): Promise<UserAccountDBType | null> {
     try {
-      const foundUser = await this.UserAccountModel.findOne({ _id: userId});
+      const foundUser = await this.UserAccountModel.findById(userId);
 
       if (!foundUser) return null;
 
-      return foundUser
+      return foundUser;
     } catch (error) {
       throw new InternalServerErrorException(
-        'Database fails operate with fiind user',
+        'Database fails operate with find user',
         error,
       );
     }

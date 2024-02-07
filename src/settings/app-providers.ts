@@ -21,6 +21,7 @@ import { CreateCommentUseCase } from '../features/comments/application/use-cases
 import { UpdateCommentUseCase } from '../features/comments/application/use-cases/update-comment.use-case';
 import { DeleteCommentUseCase } from '../features/comments/application/use-cases/delete-comment.use-case';
 import { UpdateUserReactionUseCase } from '../features/comments/application/use-cases/update-user-reaction.use-case';
+import { CreateSAUseCase } from '../features/admin/application/use-cases/create-sa.use.case';
 
 const blogsProviders: Provider[] = [BlogsQueryRepo, BlogsRepository];
 
@@ -49,6 +50,8 @@ const useCases: Provider[] = [
   CreateCommentUseCase,
   DeleteCommentUseCase,
   UpdateUserReactionUseCase,
+
+  CreateSAUseCase,
 ];
 
 export const providers = [

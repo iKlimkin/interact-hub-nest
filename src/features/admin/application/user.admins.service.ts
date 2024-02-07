@@ -1,16 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-
+import { BcryptAdapter } from '../../../infra/adapters/bcrypt-adapter';
+import { LayerNoticeInterceptor } from '../../../infra/utils/error-layer-interceptor';
+import { CreateUserErrors } from '../../../infra/utils/interlayer-error-handler.ts/user-errors';
+import { AuthUserType } from '../../auth/api/models/auth.output.models/auth.user.types';
 import {
   UserAccount,
   UserAccountModelType,
-  UserAccountDocument,
 } from '../domain/entities/userAccount.schema';
 import { UsersRepository } from '../infrastructure/users.repository';
-import { BcryptAdapter } from '../../../infra/adapters/bcrypt-adapter';
-import { AuthUserType } from '../../auth/api/models/auth.output.models/auth.user.types';
-import { LayerNoticeInterceptor } from '../../../infra/utils/error-layer-interceptor';
-import { CreateUserErrors } from '../../../infra/utils/interlayer-error-handler.ts/user-errors';
 
 export type CreateUserResultData = {
   userId: string;
@@ -30,8 +28,9 @@ export class AdminUserService {
   ): Promise<LayerNoticeInterceptor<CreateUserResultData>> {
     const { email, login, password } = createUser;
 
-    const { passwordSalt, passwordHash } =
-      await this.bcryptAdapter.createHash(password);
+    const { passwordSalt, passwordHash } = await this.bcryptAdapter.createHash(
+      password,
+    );
 
     const userAdminModel = this.UserAccountModel.makeInstance({
       login,
@@ -57,7 +56,7 @@ export class AdminUserService {
     return notice;
   }
 
-  async deleteUser(searchId: string): Promise<boolean> {
-    return this.usersRepository.deleteUser(searchId);
+  async deleteUser(userId: string): Promise<boolean> {
+    return this.usersRepository.deleteUser(userId);
   }
 }

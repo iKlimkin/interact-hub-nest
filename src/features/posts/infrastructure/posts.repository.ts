@@ -8,6 +8,7 @@ import {
   PostModelType,
 } from '../domain/entities/posts.schema';
 import { OutputId, likeUserInfo } from '../../../domain/likes.types';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class PostsRepository {
@@ -17,10 +18,10 @@ export class PostsRepository {
 
   async save(postSmartModel: PostDocument): Promise<OutputId> {
     try {
-      const retainedPost = await postSmartModel.save();
+      const post = await postSmartModel.save();
 
       return {
-        id: retainedPost._id.toString(),
+        id: post._id.toString(),
       };
     } catch (error) {
       throw new InternalServerErrorException(
@@ -36,7 +37,10 @@ export class PostsRepository {
     try {
       const post = await this.PostModel.updateOne(
         {
-          $and: [{ _id: postId }, { blogId: updateData.blogId }],
+          $and: [
+            { _id: this.getObjectId(postId) },
+            { blogId: updateData.blogId },
+          ],
         },
         {
           $set: {
@@ -56,10 +60,14 @@ export class PostsRepository {
     }
   }
 
+  private getObjectId(id: string) {
+    return new ObjectId(id);
+  }
+
   async createLikeStatus(likeInfo: likeUserInfo): Promise<boolean> {
     try {
       const createdLikeStatus = await this.PostModel.findByIdAndUpdate(
-        likeInfo.postId,
+        new ObjectId(likeInfo.postId),
         {
           $addToSet: {
             likesUserInfo: {
@@ -114,7 +122,7 @@ export class PostsRepository {
 
   async deletePost(searchId: string): Promise<boolean> {
     try {
-      return this.PostModel.findByIdAndDelete(searchId).lean();
+      return this.PostModel.findByIdAndDelete(new ObjectId(searchId)).lean();
     } catch (error) {
       throw new InternalServerErrorException(
         'Database fails during delete operate',

@@ -1,11 +1,11 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { OutputId } from '../../../domain/likes.types';
 import {
   Security,
   SecurityDocument,
   SecurityModelType,
 } from '../domain/entities/security.schema';
-import { OutputId } from '../../../domain/likes.types';
 
 @Injectable()
 export class SecurityRepository {
@@ -38,7 +38,7 @@ export class SecurityRepository {
         { deviceId },
         { $set: { issuedAt } },
       );
-
+        
       return updatedSession.modifiedCount === 1;
     } catch (error) {
       throw new InternalServerErrorException(
@@ -50,18 +50,14 @@ export class SecurityRepository {
 
   async deleteSpecificSession(deviceId: string): Promise<boolean> {
     try {
-      const userSession = await this.SecurityModel.findOneAndDelete({
-        deviceId,
-      });
+      const session = await this.SecurityModel.deleteOne({ deviceId });
 
-      // const test = await this.SecurityModel.deleteOne({ _id: deviceId })
-
-      return !!userSession;
+      return session.deletedCount === 1;
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Database fails operate with delete specific session',
-        error,
+      console.error(
+        `Database fails operate with delete specific session ${error}`,
       );
+      return false;
     }
   }
 

@@ -1,23 +1,22 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { EmailManager } from '../src/infra/application/managers/email-manager';
+import { aDescribe } from './base/aDescribe';
 import { UsersTestManager } from './base/managers/UsersTestManager';
 import { EmailManagerMock } from './base/mock/email.manager.mock';
+import { authConstants } from './base/rest-models-helpers/feedbacks.constants';
 import { dropDataBase } from './base/utils/dataBase-clean-up';
 import { initSettings } from './base/utils/init-settings';
 import { createErrorsMessages } from './base/utils/make-errors-messages';
-import { aDescribe } from './base/aDescribe';
 import { skipSettings } from './base/utils/tests-settings';
+import { wait } from './base/utils/wait'
 
 aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
   let app: INestApplication;
   let usersTestManager: UsersTestManager;
 
   beforeAll(async () => {
-    const result = await initSettings(
-      (moduleBuilder) =>
-        moduleBuilder
-          .overrideProvider(EmailManager)
-          .useClass(EmailManagerMock),
+    const result = await initSettings((moduleBuilder) =>
+      moduleBuilder.overrideProvider(EmailManager).useClass(EmailManagerMock),
     );
 
     usersTestManager = result.usersTestManager;
@@ -40,14 +39,14 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
     beforeAll(async () => {
       const inputData = usersTestManager.createInputData({});
       const user = await usersTestManager.createSA(inputData);
-      
-      expect.setState({ user });
+
+      expect.setState({ user, userInputData: inputData });
     });
     it(`/auth/login (POST) - shouldn't pass login with does'nt exist user's info, expect 401`, async () => {
       const newLogin = 'log';
       const inputData = usersTestManager.createInputData({ login: newLogin });
 
-      const result = await usersTestManager.authLogin(
+      await usersTestManager.authLogin(
         inputData,
         !!newLogin,
         HttpStatus.UNAUTHORIZED,
@@ -57,7 +56,7 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
     it(`/auth/login (POST) - shouldn't pass login with invalid registration login, expect 400`, async () => {
       const invalidLogin = 'lo';
       const inputData = usersTestManager.createInputData({
-        login: invalidLogin,
+        login: authConstants.registrationData.length02,
       });
 
       const result = await usersTestManager.authLogin(
@@ -69,11 +68,24 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
       const error = createErrorsMessages(['loginOrEmail']);
       usersTestManager.checkUserData(result, error);
     });
+    it(`/auth/login (POST) - shouldn't pass login with invalid registration login, expect 400`, async () => {
+      const inputData = usersTestManager.createInputData({
+        login: authConstants.registrationData.length101,
+      });
+
+      const result = await usersTestManager.authLogin(
+        inputData,
+        !0,
+        HttpStatus.BAD_REQUEST,
+      );
+
+      const error = createErrorsMessages(['loginOrEmail']);
+      usersTestManager.checkUserData(result, error);
+    });
 
     it(`/auth/login (POST) - shouldn't pass login with invalid user's email, expect 400`, async () => {
-      const invalidEmail = 'no';
       const inputData = usersTestManager.createInputData({
-        email: invalidEmail,
+        email: authConstants.registrationData.length02,
       });
 
       const result = await usersTestManager.authLogin(
@@ -86,10 +98,39 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
       usersTestManager.checkUserData(result, error);
     });
 
-    it(`/auth/login (POST) - shouldn't pass login with invalid user's password, expect 400`, async () => {
-      const shortPassword = '12345';
+    it(`/auth/login (POST) - shouldn't pass login with invalid user's email, expect 400`, async () => {
       const inputData = usersTestManager.createInputData({
-        password: shortPassword,
+        email: authConstants.registrationData.length101,
+      });
+
+      const result = await usersTestManager.authLogin(
+        inputData,
+        null,
+        HttpStatus.BAD_REQUEST,
+      );
+
+      const error = createErrorsMessages(['loginOrEmail']);
+      usersTestManager.checkUserData(result, error);
+    });
+
+    it(`/auth/login (POST) - shouldn't pass login with short user's password, expect 400`, async () => {
+      const inputData = usersTestManager.createInputData({
+        password: authConstants.registrationData.length05,
+      });
+
+      const result = await usersTestManager.authLogin(
+        inputData,
+        null,
+        HttpStatus.BAD_REQUEST,
+      );
+
+      const error = createErrorsMessages(['password']);
+      usersTestManager.checkUserData(result, error);
+    });
+
+    it(`/auth/login (POST) - shouldn't pass login with long user's password, expect 400`, async () => {
+      const inputData = usersTestManager.createInputData({
+        password: authConstants.registrationData.length21,
       });
 
       const result = await usersTestManager.authLogin(
@@ -104,26 +145,23 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
 
     it(`/auth/login (POST) - shouldn't pass login with invalid user's info, both invalid fields, expect 400 and errors format`, async () => {
       const inputData = usersTestManager.createInputData();
-      
+
       const result = await usersTestManager.authLogin(
         inputData,
         null,
         HttpStatus.BAD_REQUEST,
       );
-      const errors = createErrorsMessages(['loginOrEmail','password']);
 
-      usersTestManager.checkUserData(
-        result,
-        errors
-      );
+      const errors = createErrorsMessages(['loginOrEmail', 'password']);
+      usersTestManager.checkUserData(result, errors);
     });
 
     it('/auth/login (POST) - should be logged in', async () => {
-      const { user } = expect.getState();
+      const { userInputData } = expect.getState();
 
-      const token = await usersTestManager.authLogin(user);
-      
-      expect.setState({ accessToken: token.accessToken });
+      const { accessToken } = await usersTestManager.authLogin(userInputData);
+
+      expect.setState({ accessToken });
     });
 
     it("/auth/me (GET) - shouldn't get user's data, incorrectToken, 401", async () => {
@@ -138,13 +176,13 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
 
     it('/auth/me (GET) - should get user info', async () => {
       const { user, accessToken } = expect.getState();
-      
+
       await usersTestManager.getProfile(user, accessToken);
     });
 
     it('/auth/login (POST) - should receive 429 for over 5 attempt', async () => {
       const { user, accessToken } = expect.getState();
-      
+
       await usersTestManager.getProfile(user, accessToken);
     });
   });
@@ -158,60 +196,79 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
       const inputData = usersTestManager.createInputData({});
       const user = await usersTestManager.createSA(inputData);
 
-      const accessToken = await usersTestManager.authLogin(user, null, HttpStatus.OK, !0);
+      const { accessToken, refreshToken } = await usersTestManager.authLogin(
+        inputData,
+        null,
+        HttpStatus.OK,
+      );
 
-      const refreshToken = UsersTestManager.extractRefreshToken(accessToken)
-      
-      expect.setState({ user, oldAccessToken: accessToken, oldRefreshToken: refreshToken });
+      expect.setState({
+        user,
+        oldAccessToken: accessToken,
+        oldRefreshToken: refreshToken,
+      });
     });
-
 
     it(`/auth/refresh-token (POST) - should update tokens`, async () => {
       const { oldRefreshToken } = expect.getState();
 
-      const newAccessToken = await usersTestManager.refreshToken(oldRefreshToken);
+      await wait(1)
 
-      const newRefreshToken = UsersTestManager.extractRefreshToken(newAccessToken)
-
-      expect.setState({ newAccessToken, newRefreshToken });
+      const { accessToken, refreshToken } =
+        await usersTestManager.refreshToken(oldRefreshToken);
+      
+      expect.setState({
+        newAccessToken: accessToken,
+        newRefreshToken: refreshToken,
+      });
     });
 
-    it(`/auth/refresh-token (POST) - shouldn't received tokens with invalid refreshToken, 401`, async () => {
-      const { user, accessToken } = expect.getState();
-
-
-    });
-    
     it(`/auth/refresh-token (POST) - shouldn't received tokens with former refreshToken, 401`, async () => {
-      const { user, accessToken } = expect.getState();
+      const { oldRefreshToken } = expect.getState();
 
-
+      await usersTestManager.refreshToken(
+        oldRefreshToken,
+        HttpStatus.UNAUTHORIZED,
+      );
     });
 
     it(`/auth/me (GET) - shouldn't get profile info with former token, 401`, async () => {
-      const { user, accessToken } = expect.getState();
+      const { oldAccessToken, user } = expect.getState();
 
-
+      await usersTestManager.getProfile(
+        oldAccessToken,
+        user,
+        HttpStatus.UNAUTHORIZED,
+      );
     });
 
-    it(`/auth/logout (POST) - shouldn't , 401`, async () => {
-      const { user, accessToken } = expect.getState();
+    it(`/auth/logout (POST) - shouldn't operate with former rt, 401`, async () => {
+      const { oldRefreshToken } = expect.getState();
 
-
+      await usersTestManager.logout(oldRefreshToken, HttpStatus.UNAUTHORIZED)
     });
 
-    it(`/auth/logout (POST) - should , `, async () => {
-      const { user, accessToken } = expect.getState();
+    it(`/auth/logout (POST) - should to leave the account, `, async () => {
+      const { newRefreshToken } = expect.getState();
 
-
+      await usersTestManager.logout(newRefreshToken)
     });
 
-    it(`/auth/logout (POST) - shouldn't received tokens with former refreshToken, 401`, async () => {
-      const { user, accessToken } = expect.getState();
+    it(`/auth/logout (POST) - shouldn't received tokens after logout, 401`, async () => {
+      const { newRefreshToken } = expect.getState();
 
-
+      await usersTestManager.refreshToken(newRefreshToken, HttpStatus.UNAUTHORIZED)
     });
 
+    it(`/auth/me (GET) - shouldn't get profile info after logout, 401`, async () => {
+      const { newRefreshToken } = expect.getState();
+
+      await usersTestManager.getProfile(
+        null,
+        newRefreshToken,
+        HttpStatus.UNAUTHORIZED,
+      );
+    });
   });
   describe('registration', () => {
     it('', async () => {

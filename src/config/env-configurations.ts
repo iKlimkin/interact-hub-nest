@@ -8,7 +8,13 @@ export type AuthConfigurationType = {
   auth: ReturnType<typeof getAuthConfiguration>;
 };
 
-export const getDbConnection = registerAs('dbConnection', () => ({
+export const getMongoConnection = registerAs('mongoConnection', () => ({
+  mongo_url: process.env.MONGO_URL,
+  db_local:
+    process.env.DB_LOCAL ?? `mongodb://127.0.0.1:27017/nest-studying-project`,
+}));
+
+export const getPostgresConnection = registerAs('mongoConnection', () => ({
   mongo_url: process.env.MONGO_URL,
   db_local:
     process.env.DB_LOCAL ?? `mongodb://127.0.0.1:27017/nest-studying-project`,
@@ -23,5 +29,5 @@ export type getEnvTestingType = {
 };
 
 export type dbConnectionConfigType = {
-  dbConnection: ReturnType<typeof getDbConnection>;
+  dbConnection: ReturnType<typeof getMongoConnection>;
 };

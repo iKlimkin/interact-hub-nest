@@ -12,12 +12,12 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { CommandBus } from '@nestjs/cqrs';
+
 import {
   OutputId,
-  OutputObjectId,
-  likesStatus,
+  likesStatus
 } from '../../../../domain/likes.types';
+import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
 import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
 import { SetUserIdGuard } from '../../../../infra/guards/set-user-id.guard';
 import { ObjectIdPipe } from '../../../../infra/pipes/valid-objectId.pipe';
@@ -29,8 +29,7 @@ import { AccessTokenGuard } from '../../../auth/infrastructure/guards/accessToke
 import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth.guard';
 import { CommentsViewModel } from '../../../comments/api/models/comments.view.models/comments.view.model';
 import {
-  InputCommentModel,
-  InputContentModel,
+  InputContentModel
 } from '../../../comments/api/models/input.comment.models';
 import { FeedbacksQueryRepository } from '../../../comments/api/query-repositories/feedbacks.query.repository';
 import { CreateCommentCommand } from '../../../comments/application/use-cases/commands/create-comment.command';
@@ -41,11 +40,10 @@ import { DeletePostCommand } from '../../application/use-cases/delete-post-use-c
 import { UpdatePostCommand } from '../../application/use-cases/update-post-use-case';
 import { InputPostModel } from '../models/input.posts.models/create.post.model';
 import { InputLikeStatusModel } from '../models/input.posts.models/input-post..model';
+import { PostsQueryFilter } from '../models/output.post.models/posts-query.filter';
 import { PostViewModel } from '../models/post.view.models/PostViewModel';
 import { PostsQueryRepository } from '../query-repositories/posts.query.repo';
-import { PostsQueryFilter } from '../models/output.post.models/posts-query.filter';
-import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
-import { Types } from 'mongoose';
+import { CommandBus } from '@nestjs/cqrs';
 
 @Controller('posts')
 export class PostsController {
@@ -117,11 +115,15 @@ export class PostsController {
       dislikesCount,
     };
 
-    // into service and make up in one use-case
-    if (!foundPost.extendedLikesInfo.myStatus) {
-      const createdLikeStatus = await this.postsService.createLike(likeData);
-      return;
+    const userReactions = await this.postsQueryRepo.getUserReactions(
+      userId,
+      postId,
+    );
+
+    if (!userReactions) {
+      return this.postsService.createLike(likeData);
     }
+
     await this.postsService.updateLike(likeData);
   }
 

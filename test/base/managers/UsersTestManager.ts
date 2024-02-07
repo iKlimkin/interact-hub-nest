@@ -1,9 +1,10 @@
-import { HttpStatus, INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AuthUserType } from '../../../src/features/auth/api/models/auth.output.models/auth.user.types';
 import { RouterPaths } from '../utils/routing';
 import { ErrorsMessages } from '../../../src/infra/utils/error-handler';
 import { SAViewModel } from '../../../src/features/admin/api/models/userAdmin.view.models/userAdmin.view.model';
+import { JwtTokens } from '../../../src/features/auth/api/models/jwt.types';
+import { INestApplication, HttpStatus } from '@nestjs/common';
 
 export class UsersTestManager {
   constructor(protected readonly app: INestApplication) {}
@@ -20,7 +21,7 @@ export class UsersTestManager {
       return {
         login: field.login || 'login',
         password: field.password || 'password',
-        email: field.email || 'iklimkin50@gmail.com',
+        email: field.email || 'kr4mboy@gmail.com',
       };
     }
   }
@@ -60,15 +61,14 @@ export class UsersTestManager {
         type: 'bearer',
       })
       .send(updateModel)
-      .expect(204);
+      .expect(HttpStatus.NO_CONTENT);
   }
 
   async authLogin(
     user: AuthUserType,
     loginOrEmailOptions: boolean | null = false,
     expectedStatus: number = HttpStatus.OK,
-    isResponse: boolean = false
-  ): Promise<any> {
+  ): Promise<JwtTokens | any> {
     const res = await request(this.application)
       .post(`${RouterPaths.auth}/login`)
       .send({
@@ -77,25 +77,35 @@ export class UsersTestManager {
       })
       .expect(expectedStatus);
 
-    if (isResponse) {
-      return res
+    if (res.status === HttpStatus.OK) {
+      const token = res.body;
+      const refreshToken = this.extractRefreshToken(res);
+      return { refreshToken, accessToken: token.accessToken };
     }
-    
+
     return res.body;
   }
 
-  async refreshToken (refreshToken: string, expectedStatus: number = HttpStatus.CREATED) {
+  async refreshToken(
+    refreshToken: string,
+    expectedStatus: number = HttpStatus.CREATED,
+  ): Promise<JwtTokens | any> {
     const response = await request(this.application)
       .post(`${RouterPaths.auth}/refresh-token`)
       .set('Cookie', `${refreshToken}`)
-      .expect(expectedStatus)
-
-      if (expectedStatus === HttpStatus.CREATED) {
-        expect(response.body).toEqual({accessToken: expect.any(String)})
-        expect(response.headers['set-cookie']).toBeDefined()
-      }
+      .expect(expectedStatus);
       
-      return response
+    if (expectedStatus === HttpStatus.CREATED) {
+      expect(response.body).toEqual({ accessToken: expect.any(String) });
+      expect(response.headers['set-cookie']).toBeDefined();
+
+      const { accessToken } = response.body;
+      const rt = this.extractRefreshToken(response);
+
+      return { accessToken, refreshToken: rt };
+    }
+
+    return response.body;
   }
 
   checkUserData(
@@ -115,15 +125,25 @@ export class UsersTestManager {
       .auth(token, { type: 'bearer' })
       .expect(expectedStatus);
 
-    if (user)
+    if (user && expectedStatus === HttpStatus.OK)
       expect(res.body).toEqual({
         email: user.email,
         login: user.login,
-        id: expect.any(String),
+        userId: expect.any(String),
       });
   }
 
-  static extractRefreshToken(response: any) {
-    return response.headers['set-cookie'][0].split(';')[0]
+  async logout(
+    refreshToken: string,
+    expectedStatus: number = HttpStatus.NO_CONTENT,
+  ) {
+    await request(this.application)
+      .post(`${RouterPaths.auth}/logout`)
+      .set('Cookie', `${refreshToken}`)
+      .expect(expectedStatus);
+  }
+
+  private extractRefreshToken(response: any) {
+    return response.headers['set-cookie'][0].split(';')[0];
   }
 }

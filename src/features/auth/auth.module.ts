@@ -12,13 +12,13 @@ import { SecurityQueryRepo } from '../security/api/query-repositories/security.q
 import { SecurityService } from '../security/application/security.service';
 import { AuthController } from './api/controllers/auth.controller';
 import {
-  // RequestLoggerInterseptor,
   Strategies,
   adapters,
   authEventHandlers,
   authUseCases,
   requestLoggerProviders,
   securitiesProviders,
+  securityUseCases,
   userAccountProviders,
   usersProviders,
 } from './infrastructure/settings/auth-providers';
@@ -36,8 +36,6 @@ import { mongooseModels } from './infrastructure/settings/mongoose-models';
     ...Strategies,
     ...authEventHandlers,
 
-    // RequestLoggerInterseptor,
-    
     ...authUseCases,
     ...requestLoggerProviders,
 
@@ -46,7 +44,7 @@ import { mongooseModels } from './infrastructure/settings/mongoose-models';
     AuthService,
 
     ...securitiesProviders,
-
+    ...securityUseCases,
     ...userAccountProviders,
     ...usersProviders,
   ],

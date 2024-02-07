@@ -32,3 +32,19 @@ export type UserConfirmationType = {
   expirationDate: string;
   isConfirmed: boolean;
 };
+
+export interface UserAdminSQLDto
+  extends Omit<UserAdminResponseDto, 'id' | 'created_at'> {}
+
+export interface UserAdminResponseDto {
+  id: string;
+  login: string;
+  email: string;
+  passwordSalt: string;
+  passwordHash: string;
+  created_at: Date;
+  confirmationCode: string;
+  expirationDate: Date;
+  isConfirmed: boolean;
+  recoveryCode?: string;
+}
