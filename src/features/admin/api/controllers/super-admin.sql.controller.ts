@@ -18,12 +18,16 @@ import { ObjectIdPipe } from '../../../../infra/pipes/valid-objectId.pipe';
 import { CreateUserErrors } from '../../../../infra/utils/interlayer-error-handler.ts/user-errors';
 import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth.guard';
 import { CreateSACommand } from '../../application/use-cases/commands/create-sa.command';
-import { AdminUserService, CreateUserResultData } from '../../application/user.admins.service';
+import {
+  AdminUserService,
+  CreateUserResultData,
+} from '../../application/user.admins.service';
 import { InputUserModel } from '../models/create-user.model';
 import { SAQueryFilter } from '../models/outputSA.models.ts/users-admin-query.filter';
 import { SAViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
 import { UsersQueryRepository } from '../query-repositories/users.query.repo';
 import { LayerNoticeInterceptor } from '../../../../infra/utils/error-layer-interceptor';
+import { DeleteSACommand } from '../../application/use-cases/commands/delete-sa.command';
 
 @UseGuards(BasicSAAuthGuard)
 @Controller('users')
@@ -61,7 +65,10 @@ export class SuperAdminsController {
   async createSA(@Body() body: InputUserModel): Promise<SAViewModel> {
     const command = new CreateSACommand(body);
 
-    const result = await this.commandBus.execute<CreateSACommand, LayerNoticeInterceptor<CreateUserResultData>>(command);
+    const result = await this.commandBus.execute<
+      CreateSACommand,
+      LayerNoticeInterceptor<CreateUserResultData>
+    >(command);
 
     if (result.hasError()) {
       if (result.code === CreateUserErrors.DatabaseFail) {
@@ -79,9 +86,12 @@ export class SuperAdminsController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteSA(@Param('id', ObjectIdPipe) userId: string): Promise<void> {
-    const deletedUser = await this.usersService.deleteUser(userId);
+    const command = new DeleteSACommand(userId);
+    const result = await this.commandBus.execute<DeleteSACommand, boolean>(
+      command,
+    );
 
-    if (!deletedUser) {
+    if (!result) {
       throw new NotFoundException('User not found');
     }
   }
