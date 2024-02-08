@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UserAccountDocument } from '../../../admin/domain/entities/userAccount.schema';
-import { AuthUsersRepository } from '../../infrastructure/authUsers-repository';
+import { AuthUsersRepository } from '../../infrastructure/auth-users.repository';
 import { ConfirmEmailCommand } from './commands/confirm-email.command';
 
 @CommandHandler(ConfirmEmailCommand)
@@ -14,8 +14,9 @@ export class ConfirmEmailUseCase
   ): Promise<UserAccountDocument | null> {
     const { code } = command.inputModel;
 
-    const user =
-      await this.authUsersRepository.findUserByConfirmationCode(code);
+    const user = await this.authUsersRepository.findUserByConfirmationCode(
+      code,
+    );
 
     if (!user) return null;
 

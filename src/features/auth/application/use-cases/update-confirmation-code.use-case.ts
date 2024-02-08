@@ -1,7 +1,7 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { v4 as uuidv4 } from 'uuid';
-import { AuthUsersRepository } from '../../infrastructure/authUsers-repository';
+import { AuthUsersRepository } from '../../infrastructure/auth-users.repository';
 import { UpdateConfirmationCodeCommand } from './commands/update-confirmation-code.command';
 import { EmailNotificationEvent } from './events/user-created-event';
 

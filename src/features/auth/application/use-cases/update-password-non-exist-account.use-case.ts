@@ -3,7 +3,7 @@ import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { v4 as uuidv4 } from 'uuid';
 import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
 import { UserAccountDocument } from '../../../admin/domain/entities/userAccount.schema';
-import { AuthUsersRepository } from '../../infrastructure/authUsers-repository';
+import { AuthUsersRepository } from '../../infrastructure/auth-users.repository';
 import { CreateUserCommand } from './commands/create-user.command';
 import { UpdatePasswordForNonExistAccountCommand } from './commands/update-password-for-non-existing-account.command';
 

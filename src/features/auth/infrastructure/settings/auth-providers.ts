@@ -25,7 +25,7 @@ import { SendRecoveryMsgUseCase } from '../../application/use-cases/send-recover
 import { UpdateConfirmationCodeUseCase } from '../../application/use-cases/update-confirmation-code.use-case';
 import { UpdatePasswordForExistingAccountUseCase } from '../../application/use-cases/update-password-existing-account.use-case';
 import { UpdatePasswordForNonExistAccountUseCase } from '../../application/use-cases/update-password-non-exist-account.use-case';
-import { AuthUsersRepository } from '../authUsers-repository';
+import { AuthUsersRepository } from '../auth-users.repository';
 import { BasicSAStrategy } from '../guards/strategies/basic-strategy';
 import {
   AccessTokenStrategy,
@@ -36,6 +36,7 @@ import { UsersSQLRepository } from '../../../admin/infrastructure/users.sql-repo
 import { DeleteSAUseCase } from '../../../admin/application/use-cases/delete-sa.use.case';
 import { CreateSAUseCase } from '../../../admin/application/use-cases/create-sa.use.case';
 import { UsersSQLQueryRepository } from '../../../admin/api/query-repositories/users.sql-query.repo';
+import { CreateUserSQLUseCase } from '../../application/use-cases/create-user-sql.use-case';
 
 export const userAccountProviders: Provider[] = [
   AuthUsersRepository,
@@ -80,9 +81,13 @@ export const authUseCases: Provider[] = [
   UpdateConfirmationCodeUseCase,
   CreateUserSessionUseCase,
   UpdateIssuedTokenUseCase,
+];
+
+export const authSQLUseCases: Provider[] = [
+  CreateUserSQLUseCase,
   CreateSAUseCase,
   DeleteSAUseCase,
-];
+]
 
 export const securityUseCases: Provider[] = [
   DeleteActiveSessionUseCase,

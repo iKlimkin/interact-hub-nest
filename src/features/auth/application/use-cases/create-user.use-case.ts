@@ -6,7 +6,7 @@ import {
   UserAccountDocument,
   UserAccountModelType,
 } from '../../../admin/domain/entities/userAccount.schema';
-import { AuthUsersRepository } from '../../infrastructure/authUsers-repository';
+import { AuthUsersRepository } from '../../infrastructure/auth-users.repository';
 import { CreateUserCommand } from './commands/create-user.command';
 import { EmailNotificationEvent } from './events/user-created-event';
 import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';

@@ -43,6 +43,7 @@ import { InputRegistrationCodeModel } from '../models/auth-input.models.ts/input
 import { InputRegistrationModel } from '../models/auth-input.models.ts/input-registration.model';
 import { AuthQueryRepository } from '../query-repositories/auth-query-repo';
 import { UserInfoType } from '../models/user-models';
+import { CreateUserSQLCommand } from '../../application/use-cases/commands/create-user-sql.command copy';
 
 type ClientInfo = {
   ip: string;
@@ -181,6 +182,7 @@ export class AuthSQLController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { login, email } = inputModel;
+console.log({inputModel});
 
     const foundUser = await this.authQueryRepository.findByLoginOrEmail({
       login,
@@ -202,11 +204,9 @@ export class AuthSQLController {
       return;
     }
 
-    const command = new CreateUserCommand(inputModel);
+    const command = new CreateUserSQLCommand(inputModel);
 
-    await this.commandBus.execute<CreateUserCommand, UserAccountDocument>(
-      command,
-    );
+    await this.commandBus.execute(command);
   }
 
   @UseInterceptors(RateLimitInterceptor)

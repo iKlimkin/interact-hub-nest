@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CreateUserUseCase } from '../../../src/features/auth/application/use-cases/create-user.use-case';
 import { CqrsModule, EventBus } from '@nestjs/cqrs';
 import { UserAccountDocument } from '../../../src/features/admin/domain/entities/userAccount.schema';
-import { AuthUsersRepository } from '../../../src/features/auth/infrastructure/authUsers-repository';
+import { AuthUsersRepository } from '../../../src/features/auth/infrastructure/auth-users.repository';
 import { BcryptAdapter } from '../../../src/infra/adapters/bcrypt-adapter';
 import request from 'supertest';
 import { INestApplication } from '@nestjs/common';

@@ -15,6 +15,7 @@ import {
   Strategies,
   adapters,
   authEventHandlers,
+  authSQLUseCases,
   authUseCases,
   requestLoggerProviders,
   securitiesProviders,
@@ -25,9 +26,10 @@ import {
 import { mongooseModels } from './infrastructure/settings/mongoose-models';
 import { UsersSQLRepository } from '../admin/infrastructure/users.sql-repository';
 import { SuperAdminsSQLController } from '../admin/api/controllers/super-admin.sql.controller';
-import { AuthSQLController } from './api/controllers/auth.controller.sql';
+import { AuthSQLController } from './api/controllers/auth-sql.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmOptions } from '../../settings/postgres-options';
+import { authSQLControllers } from './infrastructure/settings/auth-controllers';
 
 @Module({
   imports: [
@@ -52,13 +54,10 @@ import { TypeOrmOptions } from '../../settings/postgres-options';
     ...securityUseCases,
     ...userAccountProviders,
     ...usersProviders,
+
+    ...authSQLUseCases,
   ],
-  controllers: [
-    // AuthController,
-    // SuperAdminsController,
-    // AuthSQLController,
-    SuperAdminsSQLController
-  ],
+  controllers: authSQLControllers,
   exports: [
     JwtModule,
     BcryptAdapter,

@@ -1,6 +1,6 @@
 import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UserRecoveryType } from '../../api/models/auth.output.models/auth.output.models';
-import { AuthUsersRepository } from '../../infrastructure/authUsers-repository';
+import { AuthUsersRepository } from '../../infrastructure/auth-users.repository';
 import { PasswordRecoveryCommand } from './commands/recovery-password.command';
 import { createRecoveryCode } from './helpers/create-recovery-message.helper';
 import { SendRecoveryMsgCommand } from './commands/send-recovery-msg.command';

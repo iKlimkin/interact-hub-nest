@@ -6,12 +6,12 @@ import { addMinutes } from 'date-fns';
 import { ObjectId } from 'mongodb';
 import { AppModule } from '../../../src/app.module';
 import {
-    UserAccount,
-    UserAccountModelType
+  UserAccount,
+  UserAccountModelType,
 } from '../../../src/features/admin/domain/entities/userAccount.schema';
 import { ConfirmEmailCommand } from '../../../src/features/auth/application/use-cases/commands/confirm-email.command';
 import { ConfirmEmailUseCase } from '../../../src/features/auth/application/use-cases/confirm-email-use-case';
-import { AuthUsersRepository } from '../../../src/features/auth/infrastructure/authUsers-repository';
+import { AuthUsersRepository } from '../../../src/features/auth/infrastructure/auth-users.repository';
 import { applyAppSettings } from '../../../src/settings/apply-app.settings';
 import { dropDataBase } from '../../base/utils/database-clean-up';
 
@@ -35,7 +35,7 @@ describe('CreateUserUseCase', () => {
   let app: INestApplication;
   let moduleFixture: TestingModule;
   let UserAccountModel: UserAccountModelType;
-let authUsersRepository: AuthUsersRepository
+  let authUsersRepository: AuthUsersRepository;
   beforeAll(async () => {
     moduleFixture = await Test.createTestingModule({
       imports: [AppModule, CqrsModule],
@@ -45,15 +45,13 @@ let authUsersRepository: AuthUsersRepository
           useValue: UserAccountModel,
         },
       ],
-    })
-      .compile();
+    }).compile();
 
     app = moduleFixture.createNestApplication();
 
     applyAppSettings(app);
 
     confirmEmailUseCase =
-
       moduleFixture.get<ConfirmEmailUseCase>(ConfirmEmailUseCase);
     authUsersRepository =
       moduleFixture.get<AuthUsersRepository>(AuthUsersRepository);
@@ -79,10 +77,10 @@ let authUsersRepository: AuthUsersRepository
     const command = new ConfirmEmailCommand({ code });
     const result = await confirmEmailUseCase.execute(command);
 
-    const repoSpy = jest.spyOn(authUsersRepository, 'save')
-        
+    const repoSpy = jest.spyOn(authUsersRepository, 'save');
+
     expect(result?.emailConfirmation.isConfirmed).toBeTruthy();
-    expect(repoSpy).toHaveBeenCalled()
+    expect(repoSpy).toHaveBeenCalled();
   });
 
   it(`shouldn't pass validation`, async () => {

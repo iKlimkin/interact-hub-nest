@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import {
-  UserAdminResponseDto,
-  UserAdminSQLDto,
+  UsersResponseDto,
+  UsersSQLDto,
 } from '../../auth/api/models/auth.output.models/auth.output.models';
+import { CreateUserResultData } from '../application/user.admins.service';
 
 @Injectable()
 export class UsersSQLRepository {
@@ -13,18 +14,8 @@ export class UsersSQLRepository {
     private dataSource: DataSource,
   ) {}
 
-  async save(userAdminDto: UserAdminSQLDto): Promise<string | null> {
+  async save(userDto: UsersSQLDto): Promise<CreateUserResultData | null> {
     try {
-      const {
-        login,
-        email,
-        passwordSalt,
-        passwordHash,
-        confirmationCode,
-        expirationDate,
-        isConfirmed,
-      } = userAdminDto;
-
       const query = `
             INSERT INTO "user_accounts"
             ("login", "email", "password_salt", "password_hash",
@@ -33,24 +24,19 @@ export class UsersSQLRepository {
             RETURNING "id"
             `;
 
-      const userAdminId = await this.dataSource.query(query, [
-        login,
-        email,
-        passwordSalt,
-        passwordHash,
-        confirmationCode,
-        expirationDate,
-        isConfirmed,
-      ]);
+      const userAdminId = await this.dataSource.query(
+        query,
+        Object.values(userDto),
+      );
 
-      return userAdminId[0].id;
+      return { userId: userAdminId[0].id };
     } catch (error) {
       console.error(`Database fails operate with create user${error}`);
       return null;
     }
   }
 
-  async getUserById(userId: string): Promise<UserAdminResponseDto | null> {
+  async getUserById(userId: string): Promise<UsersResponseDto | null> {
     try {
       const query = `
           SELECT *
@@ -58,7 +44,7 @@ export class UsersSQLRepository {
           WHERE "id" = $1
         `;
 
-      const user = await this.dataSource.query<UserAdminResponseDto[]>(query, [
+      const user = await this.dataSource.query<UsersResponseDto[]>(query, [
         userId,
       ]);
 

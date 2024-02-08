@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { BcryptAdapter } from '../../../../infra/adapters/bcrypt-adapter';
 import { LayerNoticeInterceptor } from '../../../../infra/utils/error-layer-interceptor';
 import { CreateUserErrors } from '../../../../infra/utils/interlayer-error-handler.ts/user-errors';
-import { UserAdminSQLDto } from '../../../auth/api/models/auth.output.models/auth.output.models';
+import { UsersSQLDto } from '../../../auth/api/models/auth.output.models/auth.output.models';
 import { UsersSQLRepository } from '../../infrastructure/users.sql-repository';
 import { CreateUserResultData } from '../user.admins.service';
 import { CreateSACommand } from './commands/create-sa.command';
@@ -30,7 +30,7 @@ export class CreateSAUseCase implements ICommandHandler<CreateSACommand> {
       password,
     );
 
-    const userAdminSQLDto: UserAdminSQLDto = {
+    const userAdminSQLDto: UsersSQLDto = {
       login,
       email,
       passwordSalt,
@@ -44,12 +44,12 @@ export class CreateSAUseCase implements ICommandHandler<CreateSACommand> {
 
     if (!userAdminId) {
       notice.addError(
-        'Could not create user',
+        'Could not create sa',
         'db',
         CreateUserErrors.DatabaseFail,
       );
     } else {
-      notice.addData({ userId: userAdminId });
+      notice.addData({ userId: userAdminId.userId });
     }
 
     return notice;

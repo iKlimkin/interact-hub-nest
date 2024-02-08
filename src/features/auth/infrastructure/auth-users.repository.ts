@@ -35,7 +35,7 @@ export class AuthUsersRepository {
 
   async save(smartUser: UserAccountDocument): Promise<UserAccountDocument> {
     try {
-      return await smartUser.save();
+      return smartUser.save();
     } catch (error) {
       throw new InternalServerErrorException(
         'Database fails operate with create user',

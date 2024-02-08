@@ -1,7 +1,7 @@
 import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { OutputId } from '../../../../domain/likes.types';
 import { UserRecoveryType } from '../../api/models/auth.output.models/auth.output.models';
-import { AuthUsersRepository } from '../../infrastructure/authUsers-repository';
+import { AuthUsersRepository } from '../../infrastructure/auth-users.repository';
 import { CreateTempAccountCommand } from './commands/create-temp-account.command';
 import { SendRecoveryMsgCommand } from './commands/send-recovery-msg.command';
 import { createRecoveryCode } from './helpers/create-recovery-message.helper';

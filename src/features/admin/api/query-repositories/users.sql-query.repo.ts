@@ -1,9 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import {
-  PaginationViewModel
-} from '../../../../domain/sorting-base-filter';
+import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
 import { getPagination } from '../../../../infra/utils/pagination';
 import { SAQueryFilter } from '../models/outputSA.models.ts/users-admin-query.filter';
 import { getSAViewSQLModel } from '../models/userAdmin.view.models/saView.model';
@@ -28,7 +26,6 @@ export class UsersSQLQueryRepository {
       `%${searchLoginTerm ? searchLoginTerm : ''}%`,
       `%${searchEmailTerm ? searchEmailTerm : ''}%`,
     ];
-    console.log({ searchTerms });
 
     const query = `
     SELECT *
@@ -43,7 +40,6 @@ export class UsersSQLQueryRepository {
       pageSize,
       skip,
     ]);
-    console.log({ result });
 
     const [countResult] = await this.dataSource.query(
       `

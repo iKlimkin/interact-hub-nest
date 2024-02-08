@@ -33,10 +33,10 @@ export type UserConfirmationType = {
   isConfirmed: boolean;
 };
 
-export interface UserAdminSQLDto
-  extends Omit<UserAdminResponseDto, 'id' | 'created_at'> {}
+export interface UsersSQLDto
+  extends Omit<UsersResponseDto, 'id' | 'created_at'> {}
 
-export interface UserAdminResponseDto {
+export interface UsersResponseDto {
   id: string;
   login: string;
   email: string;
