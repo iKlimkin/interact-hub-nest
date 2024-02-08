@@ -24,7 +24,7 @@ import {
 } from '../features/security/domain/entities/security.schema';
 import {
   RequestCounter,
-  ApiRequestCounterShema,
+  ApiRequestCounterSchema,
 } from '../infra/logging/api-request.schema';
 
 export const mongooseSchemas = [
@@ -54,6 +54,6 @@ export const mongooseSchemas = [
   },
   {
     name: RequestCounter.name,
-    schema: ApiRequestCounterShema,
+    schema: ApiRequestCounterSchema,
   },
 ];

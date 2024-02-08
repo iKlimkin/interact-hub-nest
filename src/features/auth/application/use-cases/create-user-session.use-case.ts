@@ -19,7 +19,7 @@ export class CreateUserSessionUseCase
   ) {}
 
   async execute(command: CreateSessionCommand): Promise<OutputId> {
-    validateOrRejectModel(command, CreateSessionCommand);
+    await validateOrRejectModel(command, CreateSessionCommand);
 
     const sessionModel = this.SecurityModel.makeInstance(command.inputData);
 

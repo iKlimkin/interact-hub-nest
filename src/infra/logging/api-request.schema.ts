@@ -13,7 +13,7 @@ export class RequestCounter extends Document {
   timestamp: Date;
 }
 
-export const ApiRequestCounterShema =
+export const ApiRequestCounterSchema =
   SchemaFactory.createForClass(RequestCounter);
 
 export type ApiRequestDocument = HydratedDocument<RequestCounter>;

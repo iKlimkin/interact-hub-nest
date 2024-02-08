@@ -1,7 +1,6 @@
 import { configModule } from './settings/app-config.module';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { CqrsModule } from '@nestjs/cqrs';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './features/auth/auth.module';
 import { controllers } from './settings/app-controllers';
@@ -13,7 +12,6 @@ import { TypeOrmOptions } from './settings/postgres-options';
 
 @Module({
   imports: [
-    CqrsModule,
     configModule,
     MongooseModule.forRootAsync({
       useFactory: createAsyncMongoConnection,
@@ -25,7 +23,6 @@ import { TypeOrmOptions } from './settings/postgres-options';
     }),
     AuthModule,
   ],
-  exports: [TypeOrmModule],
   controllers,
   providers,
 })

@@ -17,5 +17,5 @@ export type SAViewModel = {
   /**
    * user creation date
    */
-  createdAt: string;
+  createdAt: string | Date
 };

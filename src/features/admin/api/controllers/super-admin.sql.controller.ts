@@ -25,16 +25,15 @@ import {
 import { InputUserModel } from '../models/create-user.model';
 import { SAQueryFilter } from '../models/outputSA.models.ts/users-admin-query.filter';
 import { SAViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
-import { UsersQueryRepository } from '../query-repositories/users.query.repo';
 import { LayerNoticeInterceptor } from '../../../../infra/utils/error-layer-interceptor';
 import { DeleteSACommand } from '../../application/use-cases/commands/delete-sa.command';
+import { UsersSQLQueryRepository } from '../query-repositories/users.sql-query.repo';
 
 @UseGuards(BasicSAAuthGuard)
 @Controller('users')
-export class SuperAdminsController {
+export class SuperAdminsSQLController {
   constructor(
-    private usersQueryRepo: UsersQueryRepository,
-    private usersService: AdminUserService,
+    private usersSQLQueryRepository: UsersSQLQueryRepository,
     private commandBus: CommandBus,
   ) {}
 
@@ -42,8 +41,8 @@ export class SuperAdminsController {
   @HttpCode(HttpStatus.OK)
   async getUserAdmins(
     @Query() query: SAQueryFilter,
-  ): Promise<PaginationViewModel<SAViewModel>> {
-    return this.usersQueryRepo.getAllUsers(query);
+  ): Promise<PaginationViewModel<SAViewModel> | any> {
+    return this.usersSQLQueryRepository.getAllUsers(query);
   }
 
   @Get(':id')
@@ -51,7 +50,7 @@ export class SuperAdminsController {
   async getUserAdmin(
     @Param('id', ObjectIdPipe) userId: string,
   ): Promise<SAViewModel | void> {
-    const userAdmin = await this.usersQueryRepo.getUserById(userId);
+    const userAdmin = await this.usersSQLQueryRepository.getUserById(userId);
 
     if (!userAdmin) {
       throw new NotFoundException();
@@ -76,7 +75,7 @@ export class SuperAdminsController {
       }
     }
 
-    const foundNewestUser = await this.usersQueryRepo.getUserById(
+    const foundNewestUser = await this.usersSQLQueryRepository.getUserById(
       result.data!.userId,
     );
 
@@ -86,6 +85,8 @@ export class SuperAdminsController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteSA(@Param('id', ObjectIdPipe) userId: string): Promise<void> {
+    console.log({ userId });
+
     const command = new DeleteSACommand(userId);
     const result = await this.commandBus.execute<DeleteSACommand, boolean>(
       command,

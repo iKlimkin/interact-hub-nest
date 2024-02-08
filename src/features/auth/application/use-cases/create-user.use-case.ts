@@ -29,15 +29,8 @@ export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {
     const { email, login, password } = command.inputUserDto;
     try {
       const notice = new LayerNoticeInterceptor();
-      try {
-        await validateOrRejectModel(command, CreateUserCommand);
-      } catch (error) {
-        notice.addError(
-          `couldn't pass validation`,
-          'validation',
-          CreateUserErrors.Validation,
-        );
-      }
+
+      await validateOrRejectModel(command, CreateUserCommand);
 
       const { passwordSalt, passwordHash } =
         await this.bcryptAdapter.createHash(password);

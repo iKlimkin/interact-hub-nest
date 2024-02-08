@@ -23,13 +23,18 @@ import {
   usersProviders,
 } from './infrastructure/settings/auth-providers';
 import { mongooseModels } from './infrastructure/settings/mongoose-models';
+import { UsersSQLRepository } from '../admin/infrastructure/users.sql-repository';
+import { SuperAdminsSQLController } from '../admin/api/controllers/super-admin.sql.controller';
+import { AuthSQLController } from './api/controllers/auth.controller.sql';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmOptions } from '../../settings/postgres-options';
 
 @Module({
   imports: [
-    CqrsModule,
     JwtModule.register({}),
     PassportModule,
     MongooseModule.forFeature(mongooseModels),
+    CqrsModule,
   ],
 
   providers: [
@@ -48,7 +53,12 @@ import { mongooseModels } from './infrastructure/settings/mongoose-models';
     ...userAccountProviders,
     ...usersProviders,
   ],
-  controllers: [AuthController, SuperAdminsController],
+  controllers: [
+    // AuthController,
+    // SuperAdminsController,
+    // AuthSQLController,
+    SuperAdminsSQLController
+  ],
   exports: [
     JwtModule,
     BcryptAdapter,
@@ -56,6 +66,7 @@ import { mongooseModels } from './infrastructure/settings/mongoose-models';
     UsersQueryRepository,
     SecurityService,
     SecurityQueryRepo,
+    CqrsModule,
   ],
 })
 export class AuthModule {}

@@ -16,7 +16,7 @@ import { UpdatePostUseCase } from '../features/posts/application/use-cases/updat
 import { PostsRepository } from '../features/posts/infrastructure/posts.repository';
 import { BlogIdExistConstraint } from '../infra/decorators/validate/valid-blogId';
 import { ApiRequestCounterRepository } from '../infra/logging/api-request-counter.repository';
-import { TestDatabaseRepo } from '../data-testing/test.db';
+import { TestDatabaseRepo } from '../data-testing/test.db.repo';
 import { CreateCommentUseCase } from '../features/comments/application/use-cases/create-comment.use-case';
 import { UpdateCommentUseCase } from '../features/comments/application/use-cases/update-comment.use-case';
 import { DeleteCommentUseCase } from '../features/comments/application/use-cases/delete-comment.use-case';
@@ -51,9 +51,6 @@ const useCases: Provider[] = [
   CreateCommentUseCase,
   DeleteCommentUseCase,
   UpdateUserReactionUseCase,
-
-  CreateSAUseCase,
-  DeleteSAUseCase,
 ];
 
 export const providers = [

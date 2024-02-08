@@ -8,7 +8,7 @@ import { PaginationViewModel } from '../../../src/domain/sorting-base-filter';
 import { SAViewModel } from '../../../src/features/admin/api/models/userAdmin.view.models/userAdmin.view.model';
 
 
-type InputCommentsAndPginationType = {
+type InputCommentsAndPaginationType = {
   searchNameTerm: string;
   sortBy: string;
   sortDirection: string;
@@ -22,7 +22,7 @@ export class FeedbacksTestManager {
 
   async getCommentsForTheCurrentPost(
     postId: string,
-    inputData?: InputCommentsAndPginationType,
+    inputData?: InputCommentsAndPaginationType,
     expectStatus: number = HttpStatus.CREATED,
   ): Promise<{ comments: CommentsViewModel } | void> {
     if (inputData) {

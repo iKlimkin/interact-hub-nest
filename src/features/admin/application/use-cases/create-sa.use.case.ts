@@ -20,19 +20,11 @@ export class CreateSAUseCase implements ICommandHandler<CreateSACommand> {
   async execute(
     command: CreateSACommand,
   ): Promise<LayerNoticeInterceptor<CreateUserResultData>> {
+    await validateOrRejectModel(command, CreateSACommand);
+
     const { email, login, password } = command.saDTO;
 
     let notice = new LayerNoticeInterceptor<CreateUserResultData>();
-
-    try {
-      await validateOrRejectModel(command, CreateSACommand);
-    } catch (error) {
-      notice.addError(
-        `couldn't pass validation`,
-        'validation',
-        CreateUserErrors.Validation,
-      );
-    }
 
     const { passwordSalt, passwordHash } = await this.bcryptAdapter.createHash(
       password,

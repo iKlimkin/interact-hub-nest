@@ -6,15 +6,20 @@ export type PaginationType = {
   pageNumber: number;
   pageSize: number;
   skip: number;
+  sortBySQL: string;
+  sortSQLDirection: string;
 };
 
 export const getPagination = async (
   inputData: BaseFilter,
   option?: boolean,
 ): Promise<PaginationType> => {
-
   const sortDirection: SortDirection =
     inputData.sortDirection === 'asc' ? 1 : -1;
+
+  const sortSQLDirection: SortDirection =
+    inputData.sortDirection === 'asc' ? 'asc' : 'desc';
+
 
   const pageNumber: number = inputData.pageNumber
     ? Math.min(+inputData.pageNumber, 50)
@@ -47,6 +52,8 @@ export const getPagination = async (
 
   const sortBy: string = inputData.sortBy || 'createdAt';
 
+  const sortBySQL: string = inputData.sortBy || 'created_at';
+
   const sort: Record<string, SortDirection> = option
     ? getUserAccountSort(sortBy)
     : getDefaultSort(sortBy);
@@ -56,6 +63,7 @@ export const getPagination = async (
     pageNumber,
     pageSize,
     skip,
+    sortBySQL,
+    sortSQLDirection,
   };
 };
-

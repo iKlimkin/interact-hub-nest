@@ -1,5 +1,5 @@
 import { Controller, Delete, HttpCode, HttpStatus } from '@nestjs/common';
-import { TestDatabaseRepo } from './test.db';
+import { TestDatabaseRepo } from './test.db.repo';
 
 @Controller('testing/all-data')
 export class TestDatabaseController {

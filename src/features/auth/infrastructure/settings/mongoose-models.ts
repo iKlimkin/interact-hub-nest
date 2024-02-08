@@ -1,6 +1,6 @@
 import {
   RequestCounter,
-  ApiRequestCounterShema,
+  ApiRequestCounterSchema,
 } from '../../../../infra/logging/api-request.schema';
 import {
   UserAccount,
@@ -30,6 +30,6 @@ export const mongooseModels = [
   },
   {
     name: RequestCounter.name,
-    schema: ApiRequestCounterShema,
+    schema: ApiRequestCounterSchema,
   },
 ];

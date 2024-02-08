@@ -33,6 +33,9 @@ import {
 } from '../guards/strategies/jwt-strategy';
 import { LocalStrategy } from '../guards/strategies/local-strategy';
 import { UsersSQLRepository } from '../../../admin/infrastructure/users.sql-repository';
+import { DeleteSAUseCase } from '../../../admin/application/use-cases/delete-sa.use.case';
+import { CreateSAUseCase } from '../../../admin/application/use-cases/create-sa.use.case';
+import { UsersSQLQueryRepository } from '../../../admin/api/query-repositories/users.sql-query.repo';
 
 export const userAccountProviders: Provider[] = [
   AuthUsersRepository,
@@ -44,6 +47,7 @@ export const usersProviders: Provider[] = [
   UsersQueryRepository,
   UsersRepository,
   UsersSQLRepository,
+  UsersSQLQueryRepository,
 ];
 
 export const Strategies: Provider[] = [
@@ -76,6 +80,8 @@ export const authUseCases: Provider[] = [
   UpdateConfirmationCodeUseCase,
   CreateUserSessionUseCase,
   UpdateIssuedTokenUseCase,
+  CreateSAUseCase,
+  DeleteSAUseCase,
 ];
 
 export const securityUseCases: Provider[] = [

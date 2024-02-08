@@ -65,8 +65,8 @@ export class PaginationViewModel<P> {
     this.pagesCount = Math.ceil(totalCount / pageSize);
     this.page = page;
     this.pageSize = pageSize;
-    this.totalCount = totalCount;
-    
+    this.totalCount = totalCount ? +totalCount : 0;
+
     this.items = items;
   }
 }

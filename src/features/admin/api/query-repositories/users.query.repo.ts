@@ -73,7 +73,14 @@ export class UsersQueryRepository {
   async getUserById(userId: string): Promise<SAViewModel | null> {
     try {
       const user = await this.UserAccountModel.findById(userId);
-      
+
+      // const result = await this.dataSource.query(`
+      //   SELECT *
+      //   FROM user_accounts
+      //   WHERE "id" = $1
+      // `, [userId])
+
+
       if (!user) return null;
 
       return user.getSAViewModel(user);
