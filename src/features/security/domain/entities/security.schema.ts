@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, HydratedDocument, Model } from 'mongoose';
-import { SecurityDeviceType } from '../../api/models/security.view.models/security.view.types';
+import { HydratedDocument, Model } from 'mongoose';
 import { InputSessionData } from '../../api/models/security-input.models/create.session.type';
+import { SecurityDeviceType } from '../../api/models/security.view.models/security.view.types';
 
 @Schema()
-export class Security extends Document implements SecurityDeviceType {
+export class Security implements SecurityDeviceType {
   @Prop({ required: true })
   ip: string;
 

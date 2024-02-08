@@ -19,15 +19,15 @@ import {
   ErrorType,
   makeErrorsMessages,
 } from '../../../../infra/utils/error-handler';
-import { UserAccountDocument } from '../../../admin/domain/entities/userAccount.schema';
 import { InputSessionDataValidator } from '../../../security/api/models/security-input.models/create-session.model';
+import { CreateSessionSQLCommand } from '../../../security/application/use-cases/commands/create-session.sql-command';
 import { DeleteActiveSessionCommand } from '../../../security/application/use-cases/commands/delete-active-session.command';
 import { UpdateIssuedTokenCommand } from '../../../security/application/use-cases/commands/update-Issued-token.command';
 import { AuthService } from '../../application/auth.service';
 import { ConfirmEmailCommand } from '../../application/use-cases/commands/confirm-email.command';
 import { CreateSessionCommand } from '../../application/use-cases/commands/create-session.command';
 import { CreateTempAccountCommand } from '../../application/use-cases/commands/create-temp-account.command';
-import { CreateUserCommand } from '../../application/use-cases/commands/create-user.command';
+import { CreateUserSQLCommand } from '../../application/use-cases/commands/create-user-sql.command copy';
 import { PasswordRecoveryCommand } from '../../application/use-cases/commands/recovery-password.command';
 import { UpdateConfirmationCodeCommand } from '../../application/use-cases/commands/update-confirmation-code.command';
 import { UpdatePasswordForNonExistAccountCommand } from '../../application/use-cases/commands/update-password-for-non-existing-account.command';
@@ -41,9 +41,8 @@ import { InputRecoveryEmailModel } from '../models/auth-input.models.ts/input-pa
 import { InputRecoveryPassModel } from '../models/auth-input.models.ts/input-recovery.model';
 import { InputRegistrationCodeModel } from '../models/auth-input.models.ts/input-registration-code.model';
 import { InputRegistrationModel } from '../models/auth-input.models.ts/input-registration.model';
-import { AuthQueryRepository } from '../query-repositories/auth-query-repo';
 import { UserInfoType } from '../models/user-models';
-import { CreateUserSQLCommand } from '../../application/use-cases/commands/create-user-sql.command copy';
+import { AuthQueryRepository } from '../query-repositories/auth-query-repo';
 
 type ClientInfo = {
   ip: string;
@@ -86,9 +85,9 @@ export class AuthSQLController {
       refreshToken,
     };
 
-    const command = new CreateSessionCommand(createSessionData);
-
-    await this.commandBus.execute<CreateSessionCommand, OutputId>(command);
+    const command = new CreateSessionSQLCommand(createSessionData);
+    
+    await this.commandBus.execute<CreateSessionSQLCommand, OutputId>(command);
 
     res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
 
@@ -182,7 +181,7 @@ export class AuthSQLController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { login, email } = inputModel;
-console.log({inputModel});
+    console.log({ inputModel });
 
     const foundUser = await this.authQueryRepository.findByLoginOrEmail({
       login,

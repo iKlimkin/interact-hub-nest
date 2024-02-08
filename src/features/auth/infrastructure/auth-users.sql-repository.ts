@@ -11,6 +11,7 @@ import { PasswordRecoveryType } from '../api/models/auth-input.models.ts/input-p
 import {
   UserAccountType,
   UserRecoveryType,
+  UsersResponseDto,
   UsersSQLDto,
 } from '../api/models/auth.output.models/auth.output.models';
 import { LoginOrEmailType } from '../api/models/auth.output.models/auth.user.types';
@@ -28,7 +29,7 @@ type PasswordsType = {
 };
 
 @Injectable()
-export class AuthUsersRepository {
+export class AuthUsersSQLRepository {
   constructor(
     @InjectDataSource()
     private dataSource: DataSource,
@@ -125,32 +126,29 @@ export class AuthUsersRepository {
   //   }
   // }
 
-  // async findByLoginOrEmail(
-  //   inputData: LoginOrEmailType,
-  // ): Promise<WithId<UserAccountType> | null> {
-  //   try {
-  //     const foundUser = await this.UserAccountModel.findOne({
-  //       $or: [
-  //         { 'accountData.email': inputData.email || inputData.loginOrEmail },
-  //         { 'accountData.login': inputData.login || inputData.loginOrEmail },
-  //       ],
-  //     });
+  async findByLoginOrEmail(
+    inputData: LoginOrEmailType,
+  ): Promise<UsersResponseDto | null> {
+    try {
+      const { email, login, loginOrEmail } = inputData
 
-  //     if (!foundUser) return null;
+      const query = `
+        SELECT *
+        FROM user_accounts
+        WHERE email LIKE $1 OR email LIKE $3 OR login LIKE $2 OR login LIKE $3
+      `
+      const result = await this.dataSource.query<UsersResponseDto>(query, [email, login, loginOrEmail])
 
-  //     return {
-  //       _id: foundUser._id,
-  //       accountData: foundUser.accountData,
-  //       emailConfirmation: foundUser.emailConfirmation,
-  //       passwordRecovery: foundUser.passwordRecovery,
-  //     };
-  //   } catch (e) {
-  //     console.error(
-  //       `there were some problems during find user by login or email, ${e}`,
-  //     );
-  //     return null;
-  //   }
-  // }
+      if (!result) return null;
+
+      return result[0]
+    } catch (e) {
+      console.error(
+        `there were some problems during find user by login or email, ${e}`,
+      );
+      return null;
+    }
+  }
 
   // async findByEmail(email: string): Promise<UserAccountType | null> {
   //   try {

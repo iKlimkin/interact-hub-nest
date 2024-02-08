@@ -37,10 +37,15 @@ import { DeleteSAUseCase } from '../../../admin/application/use-cases/delete-sa.
 import { CreateSAUseCase } from '../../../admin/application/use-cases/create-sa.use.case';
 import { UsersSQLQueryRepository } from '../../../admin/api/query-repositories/users.sql-query.repo';
 import { CreateUserSQLUseCase } from '../../application/use-cases/create-user-sql.use-case';
+import { CreateUserSessionSQLUseCase } from '../../../security/application/use-cases/create-user-session-sql.use-case';
+import { SecuritySQLRepository } from '../../../security/infrastructure/security.sql-repository';
+import { CheckCredentialsSQLUseCase } from '../../application/use-cases/check-credentials-sql.use-case';
+import { AuthUsersSQLRepository } from '../auth-users.sql-repository';
 
 export const userAccountProviders: Provider[] = [
   AuthUsersRepository,
   AuthQueryRepository,
+  AuthUsersSQLRepository
 ];
 
 export const usersProviders: Provider[] = [
@@ -67,6 +72,7 @@ export const securitiesProviders: Provider[] = [
   SecurityService,
   SecurityRepository,
   SecurityQueryRepo,
+  SecuritySQLRepository,
 ];
 
 export const authUseCases: Provider[] = [
@@ -85,9 +91,12 @@ export const authUseCases: Provider[] = [
 
 export const authSQLUseCases: Provider[] = [
   CreateUserSQLUseCase,
+  CheckCredentialsSQLUseCase,
   CreateSAUseCase,
   DeleteSAUseCase,
-]
+];
+
+export const securitySQLUseCases: Provider[] = [CreateUserSessionSQLUseCase];
 
 export const securityUseCases: Provider[] = [
   DeleteActiveSessionUseCase,

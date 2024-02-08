@@ -20,3 +20,17 @@ export type SecurityDeviceType = {
   issuedAt: string;
   expirationDate: string;
 };
+
+export interface UserSQLSession {
+  id: string;
+  ip: string;
+  title: string;
+  userId: string;
+  deviceId: string;
+  refresh_token: string;
+  rt_issued_at: Date;
+  rt_expiration_date: Date;
+  created_at: Date;
+}
+
+export interface UserSQLSessionDTO extends Omit<UserSQLSession, 'created_at' | 'id'> {}

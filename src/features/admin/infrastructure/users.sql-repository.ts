@@ -24,12 +24,12 @@ export class UsersSQLRepository {
             RETURNING "id"
             `;
 
-      const userAdminId = await this.dataSource.query(
+      const result = await this.dataSource.query<UsersResponseDto>(
         query,
         Object.values(userDto),
       );
 
-      return { userId: userAdminId[0].id };
+      return { userId: result[0].id };
     } catch (error) {
       console.error(`Database fails operate with create user${error}`);
       return null;

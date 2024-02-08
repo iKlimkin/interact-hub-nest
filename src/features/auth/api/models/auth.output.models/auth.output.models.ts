@@ -40,8 +40,8 @@ export interface UsersResponseDto {
   id: string;
   login: string;
   email: string;
-  passwordSalt: string;
-  passwordHash: string;
+  password_salt: string;
+  password_hash: string;
   created_at: Date;
   confirmationCode: string;
   expirationDate: Date;

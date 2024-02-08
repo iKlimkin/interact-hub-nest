@@ -10,6 +10,7 @@ import { Strategy } from 'passport-local';
 import { UserIdType } from '../../../../admin/api/models/outputSA.models.ts/user-models';
 import { InputCredentialsModel } from '../../../api/models/auth-input.models.ts/input-credentials.model';
 import { CheckCredentialsCommand } from '../../../application/use-cases/commands/check-credentials.command';
+import { CheckCredentialsSQLCommand } from '../../../application/use-cases/commands/check-credentials-sql.command';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -27,13 +28,19 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
       password,
     });
 
-    const userId = await this.commandBus.execute(command);
+    const sqlCommand = new CheckCredentialsSQLCommand({
+      loginOrEmail,
+      password,
+    });
 
-    if (!userId) {
+    const userId = await this.commandBus.execute(command);
+    const sqlUserAccount = await this.commandBus.execute(sqlCommand);
+
+    if (!userId && !sqlUserAccount) {
       throw new UnauthorizedException();
     }
 
-    return userId;
+    return userId ? userId : sqlUserAccount;
   }
 
   private async validateInputModel(loginOrEmail: string, password: string) {

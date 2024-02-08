@@ -33,8 +33,8 @@ export class CreateSAUseCase implements ICommandHandler<CreateSACommand> {
     const userAdminSQLDto: UsersSQLDto = {
       login,
       email,
-      passwordSalt,
-      passwordHash,
+      password_salt: passwordSalt,
+      password_hash: passwordHash,
       confirmationCode: uuidv4(),
       expirationDate: add(new Date(), { hours: 1, minutes: 15 }),
       isConfirmed: true,

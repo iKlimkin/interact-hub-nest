@@ -36,8 +36,8 @@ export class CreateUserSQLUseCase
       const userDto: UsersSQLDto = {
         login,
         email,
-        passwordSalt,
-        passwordHash,
+        password_salt: passwordSalt,
+        password_hash: passwordHash,
         confirmationCode: uuidv4(),
         expirationDate: add(new Date(), { hours: 1, minutes: 15 }),
         isConfirmed: false,
