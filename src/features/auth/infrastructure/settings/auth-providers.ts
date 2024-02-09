@@ -44,6 +44,8 @@ import {
 } from '../guards/strategies/jwt-strategy';
 import { LocalStrategy } from '../guards/strategies/local-strategy';
 import { AuthQuerySqlRepository } from '../../api/query-repositories/auth-query.sql-repo';
+import { DeleteActiveSessionSqlUseCase } from '../../../security/application/use-cases/delete-active-session-sql.use-case';
+import { UpdateIssuedTokenSqlUseCase } from '../../../security/application/use-cases/update-issued-token-sql.use-case';
 
 export const userAccountProviders: Provider[] = [
   AuthUsersRepository,
@@ -97,7 +99,9 @@ export const authUseCases: Provider[] = [
 
 export const authSQLUseCases: Provider[] = [
   CreateUserSQLUseCase,
+  UpdateIssuedTokenSqlUseCase,
   CheckCredentialsSQLUseCase,
+  DeleteActiveSessionSqlUseCase,
   CreateSAUseCase,
   DeleteSAUseCase,
 ];

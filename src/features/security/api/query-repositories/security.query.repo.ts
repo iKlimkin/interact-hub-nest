@@ -40,10 +40,8 @@ export class SecurityQueryRepo {
 
       return getSecurityViewModel(findUserSession);
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Database fails operate with find user session',
-        error,
-      );
+      console.error(`Database fails operate with find user session ${error}`);
+      return null;
     }
   }
 }

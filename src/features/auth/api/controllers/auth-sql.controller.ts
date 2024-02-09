@@ -43,6 +43,8 @@ import { InputRegistrationModel } from '../models/auth-input.models.ts/input-reg
 import { UserInfoType } from '../models/user-models';
 import { AuthQuerySqlRepository } from '../query-repositories/auth-query.sql-repo';
 import { AuthQueryRepository } from '../query-repositories/auth-query-repo';
+import { DeleteActiveSessionSqlCommand } from '../../../security/application/use-cases/commands/delete-active-session-sql.command';
+import { UpdateIssuedTokenSqlCommand } from '../../../security/application/use-cases/commands/update-Issued-token-sql.command';
 
 type ClientInfo = {
   ip: string;
@@ -67,7 +69,6 @@ export class AuthSQLController {
     @GetClientInfo() clientInfo: ClientInfo,
     @Res({ passthrough: true }) res: Response,
   ) {
-
     const { accessToken, refreshToken } = await this.authService.getTokens(
       userInfo.userId,
     );
@@ -113,7 +114,7 @@ export class AuthSQLController {
 
     const issuedAt = new Date(userInfoAfterRefresh!.iat * 1000).toISOString();
 
-    const command = new UpdateIssuedTokenCommand(deviceId, issuedAt);
+    const command = new UpdateIssuedTokenSqlCommand(deviceId, issuedAt);
 
     await this.commandBus.execute(command);
 
@@ -269,7 +270,7 @@ export class AuthSQLController {
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
   async logout(@CurrentUserInfo() userInfo: UserInfoType) {
-    const command = new DeleteActiveSessionCommand(userInfo.deviceId);
+    const command = new DeleteActiveSessionSqlCommand(userInfo.deviceId);
     await this.commandBus.execute(command);
   }
 }

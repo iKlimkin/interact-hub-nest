@@ -14,7 +14,6 @@ export class SecuritySqlRepository {
     sessionDto: Readonly<UserSQLSessionDTO>,
   ): Promise<OutputId | null> {
     try {
-
       const query = `
       INSERT INTO "user_sessions"
       ("ip", "title", "user_id", "device_id",
@@ -71,7 +70,8 @@ export class SecuritySqlRepository {
       `;
 
       const result = await this.dataSource.query(deleteQuery, [deviceId]);
-
+      console.log({result});
+      
       return result[1] > 0;
     } catch (error) {
       console.error(

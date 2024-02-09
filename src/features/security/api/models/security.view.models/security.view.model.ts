@@ -21,6 +21,6 @@ export const getSqlSessionViewModel = (
 ): SecurityViewDeviceModel => ({
   ip: session.ip,
   title: session.title,
-  lastActiveDate: session.rt_issued_at.toString(),
+  lastActiveDate: session.rt_issued_at.toISOString(),
   deviceId: session.device_id,
 });

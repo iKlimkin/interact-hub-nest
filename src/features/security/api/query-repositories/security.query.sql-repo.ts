@@ -1,8 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import {
-  getSqlSessionViewModel
-} from '../models/security.view.models/security.view.model';
+import { getSqlSessionViewModel } from '../models/security.view.models/security.view.model';
 import {
   SecurityViewDeviceModel,
   UserSQLSession,
@@ -41,9 +39,9 @@ export class SecuritySqlQueryRepo {
   ): Promise<SecurityViewDeviceModel | null> {
     try {
       const findQuery = `
-      SELECT *
-      FROM user_sessions
-      WHERE device_id = $1
+        SELECT *
+        FROM user_sessions
+        WHERE device_id = $1
       `;
 
       const result = await this.dataSource.query<UserSQLSession>(findQuery, [
@@ -54,10 +52,8 @@ export class SecuritySqlQueryRepo {
 
       return getSqlSessionViewModel(result[0]);
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Database fails operate with find user session',
-        error,
-      );
+      console.error(`Database fails operate with find user session ${error}`);
+      return null;
     }
   }
 }
