@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import {
-  MatchApiLimitType,
-  MatchApiType,
-} from '../interceptors/models/rate-limiter.models';
+import { MatchApiLimitType, MatchApiType } from './models/rate-limiter.models';
 import { ApiRequestCounterRepository } from './api-request-counter.repository';
+import { ApiRequestCounterSQLRepository } from './api-request-counter.sql-repository';
 
 @Injectable()
 export class ApiRequestCounterService {
   constructor(
     private apiRequestCounterRepository: ApiRequestCounterRepository,
+    private apiRequestCounterSQLRepository: ApiRequestCounterSQLRepository,
   ) {}
   async addClientRequest(inputData: MatchApiType): Promise<boolean> {
     return this.apiRequestCounterRepository.addClientRequest(inputData);
@@ -18,7 +17,19 @@ export class ApiRequestCounterService {
     return this.apiRequestCounterRepository.apiClientCounter(inputData);
   }
 
-  async getClientRequstLogger(): Promise<MatchApiType[]> {
+  async getClientRequestLogger(): Promise<MatchApiType[]> {
     return this.apiRequestCounterRepository.getClientRequestsCollection();
+  }
+
+  async addApiRequestSql(inputData: MatchApiType): Promise<boolean> {
+    return this.apiRequestCounterSQLRepository.addApiRequestSql(inputData);
+  }
+
+  async apiRequestCounterSql(inputData: MatchApiLimitType): Promise<{ count: number }> {
+    return this.apiRequestCounterSQLRepository.apiRequestCounterSql(inputData);
+  }
+
+  async getApiRequestLoggerSql(): Promise<MatchApiType[]> {
+    return this.apiRequestCounterSQLRepository.getApiRequestLoggerSql();
   }
 }

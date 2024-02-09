@@ -19,7 +19,9 @@ export class SecuritySQLRepository {
     @InjectModel(Security.name) private SecurityModel: SecurityModelType,
     @InjectDataSource() private dataSource: DataSource,
   ) {}
-  async save(sessionDto: Readonly<UserSQLSessionDTO>): Promise<OutputId | null> {
+  async save(
+    sessionDto: Readonly<UserSQLSessionDTO>,
+  ): Promise<OutputId | null> {
     try {
       const query = `
       INSERT INTO "user_sessions"
@@ -28,7 +30,7 @@ export class SecuritySQLRepository {
       VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING "id"
       `;
-      
+
       const result = await this.dataSource.query<UserSQLSession>(
         query,
         Object.values(sessionDto),
@@ -39,10 +41,9 @@ export class SecuritySQLRepository {
       };
     } catch (error) {
       console.error(`
-      Database fails operate with create session ${error}`)
-      return null
+      Database fails operate with create session ${error}`);
+      return null;
     }
-
   }
 
   async updateIssuedToken(

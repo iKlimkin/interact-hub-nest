@@ -86,7 +86,7 @@ export class AuthSQLController {
     };
 
     const command = new CreateSessionSQLCommand(createSessionData);
-    
+
     await this.commandBus.execute<CreateSessionSQLCommand, OutputId>(command);
 
     res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });

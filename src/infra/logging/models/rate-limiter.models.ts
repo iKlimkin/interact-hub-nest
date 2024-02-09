@@ -20,5 +20,5 @@ export type MatchApiType = {
 export type MatchApiLimitType = {
   ip?: string;
   url: string;
-  limitTime: Date;
+  timeLimit: Date;
 };

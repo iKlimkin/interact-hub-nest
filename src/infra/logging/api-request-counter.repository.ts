@@ -1,9 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import {
-  MatchApiLimitType,
-  MatchApiType,
-} from '../interceptors/models/rate-limiter.models';
+import { MatchApiLimitType, MatchApiType } from './models/rate-limiter.models';
 import { ApiRequestModelType, RequestCounter } from './api-request.schema';
 
 @Injectable()
@@ -20,7 +17,7 @@ export class ApiRequestCounterRepository {
       return true;
     } catch (error) {
       console.error(
-        `Occured some problems during count client's api requests ${error}`,
+        `Occurred some problems during count client's api requests ${error}`,
       );
       return false;
     }
@@ -28,7 +25,7 @@ export class ApiRequestCounterRepository {
 
   async getClientRequestsCollection(): Promise<MatchApiType[]> {
     try {
-      return await this.RequestCounterApiModel.find().lean();
+      return this.RequestCounterApiModel.find().lean();
     } catch (error) {
       throw new InternalServerErrorException(
         'Database fails request loggers operate',
@@ -38,18 +35,18 @@ export class ApiRequestCounterRepository {
   }
 
   async apiClientCounter(inputData: MatchApiLimitType): Promise<number | 0> {
-    const { ip, limitTime, url } = inputData;
+    const { ip, timeLimit, url } = inputData;
     try {
       const counter = await this.RequestCounterApiModel.countDocuments({
         ip,
         url,
-        timestamp: { $gte: limitTime },
+        timestamp: { $gte: timeLimit },
       });
 
       return counter;
     } catch (error) {
       console.error(
-        `Occured some problems during add client's api requests ${error}`,
+        `Occurred some problems during add client's api requests ${error}`,
       );
       return 0;
     }

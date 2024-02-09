@@ -41,6 +41,7 @@ import { CreateUserSessionSQLUseCase } from '../../../security/application/use-c
 import { SecuritySQLRepository } from '../../../security/infrastructure/security.sql-repository';
 import { CheckCredentialsSQLUseCase } from '../../application/use-cases/check-credentials-sql.use-case';
 import { AuthUsersSQLRepository } from '../auth-users.sql-repository';
+import { ApiRequestCounterSQLRepository } from '../../../../infra/logging/api-request-counter.sql-repository';
 
 export const userAccountProviders: Provider[] = [
   AuthUsersRepository,
@@ -66,6 +67,7 @@ export const Strategies: Provider[] = [
 export const requestLoggerProviders: Provider[] = [
   ApiRequestCounterService,
   ApiRequestCounterRepository,
+  ApiRequestCounterSQLRepository,
 ];
 
 export const securitiesProviders: Provider[] = [
