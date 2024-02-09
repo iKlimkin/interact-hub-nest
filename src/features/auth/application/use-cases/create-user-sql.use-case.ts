@@ -8,7 +8,7 @@ import { validateOrRejectModel } from '../../../../infra/validators/validate-or-
 import { CreateUserResultData } from '../../../admin/application/user.admins.service';
 import { UsersSQLRepository } from '../../../admin/infrastructure/users.sql-repository';
 import { UsersSQLDto } from '../../api/models/auth.output.models/auth.output.models';
-import { CreateUserSQLCommand } from './commands/create-user-sql.command copy';
+import { CreateUserSQLCommand } from './commands/create-user-sql.command';
 import { EmailNotificationEvent } from './events/user-created-event';
 
 @CommandHandler(CreateUserSQLCommand)
@@ -39,7 +39,10 @@ export class CreateUserSQLUseCase
         password_salt: passwordSalt,
         password_hash: passwordHash,
         confirmation_code: uuidv4(),
-        confirmation_expiration_date: add(new Date(), { hours: 1, minutes: 15 }),
+        confirmation_expiration_date: add(new Date(), {
+          hours: 1,
+          minutes: 15,
+        }),
         is_confirmed: false,
       };
 
@@ -55,7 +58,10 @@ export class CreateUserSQLUseCase
         notice.addData({ userId: result.userId });
       }
 
-      const event = new EmailNotificationEvent(email, userDto.confirmation_code);
+      const event = new EmailNotificationEvent(
+        email,
+        userDto.confirmation_code,
+      );
 
       this.eventBus.publish(event);
 

@@ -34,30 +34,32 @@ export class AuthUsersSqlRepository {
     @InjectDataSource()
     private dataSource: DataSource,
   ) {}
-  // async createTemporaryUserAccount(
-  //   inputData: UserRecoveryType,
-  //   email: string,
-  // ): Promise<OutputId> {
-  //   try {
-  //     const { recoveryCode, expirationDate } = inputData;
+  async createTemporaryUserAccount(
+    inputData: UserRecoveryType,
+    email: string,
+  ): Promise<OutputId | null> {
+    try {
+      const { recoveryCode, expirationDate } = inputData;
 
-  //     const insertedTempUser = new this.TempUserAccountModel({
-  //       email,
-  //       recoveryCode,
-  //       expirationDate,
-  //     });
+      const insertQuery = `
+        INSERT INTO temporary_user_accounts (email, recovery_code, code_expiration_time)
+        VALUES ($1, $2, $3)
+        RETURNING id
+      `;
 
-  //     await insertedTempUser.save();
+      const result = await this.dataSource.query(insertQuery, [
+        email,
+        recoveryCode,
+        expirationDate,
+      ]);
+      console.log({ result });
 
-  //     return {
-  //       id: insertedTempUser._id.toString(),
-  //     };
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(
-  //       `While creating the user occured some errors: ${error}`,
-  //     );
-  //   }
-  // }
+      return result[0];
+    } catch (error) {
+      console.error(`While creating the user occurred some errors: ${error}`);
+      return null;
+    }
+  }
 
   // async findTemporaryUserAccountByCode(
   //   recoveryCode: string,
@@ -202,31 +204,33 @@ export class AuthUsersSqlRepository {
   //   }
   // }
 
-  // async updateRecoveryCode(
-  //   email: string,
-  //   recoveryData: UserRecoveryType,
-  // ): Promise<boolean> {
-  //   try {
-  //     const filter = { 'accountData.email': email };
-  //     const update = {
-  //       $set: {
-  //         'passwordRecovery.recoveryCode': recoveryData.recoveryCode,
-  //         'passwordRecovery.expirationDate': recoveryData.expirationDate,
-  //       },
-  //     };
+  async updateRecoveryCode(
+    email: string,
+    recoveryData: UserRecoveryType,
+  ): Promise<boolean> {
+    try {
+      const updateQuery = `
+        UPDATE user_accounts
+        SET
+          password_recovery_code = $1,
+          password_recovery_expiration = $2
+        WHERE email = $3
+      `;
 
-  //     const recoveredPass = await this.UserAccountModel.updateOne(
-  //       filter,
-  //       update,
-  //     );
+      const result = await this.dataSource.query(updateQuery, [
+        recoveryData.recoveryCode,
+        recoveryData.expirationDate,
+        email,
+      ]);
 
-  //     return recoveredPass.modifiedCount === 1;
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(
-  //       'Database fails operate during update recovery code operation',
-  //     );
-  //   }
-  // }
+      return result[1] > 0;
+    } catch (error) {
+      console.error(
+        `Database fails operate during update recovery code operation ${error}`,
+      );
+      return false;
+    }
+  }
 
   // async findUserByRecoveryCode(
   //   recoveryCode: string,

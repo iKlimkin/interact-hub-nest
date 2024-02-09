@@ -26,7 +26,7 @@ import { UpdateIssuedTokenCommand } from '../../../security/application/use-case
 import { AuthService } from '../../application/auth.service';
 import { ConfirmEmailCommand } from '../../application/use-cases/commands/confirm-email.command';
 import { CreateTempAccountCommand } from '../../application/use-cases/commands/create-temp-account.command';
-import { CreateUserSQLCommand } from '../../application/use-cases/commands/create-user-sql.command copy';
+import { CreateUserSQLCommand } from '../../application/use-cases/commands/create-user-sql.command';
 import { PasswordRecoveryCommand } from '../../application/use-cases/commands/recovery-password.command';
 import { UpdateConfirmationCodeCommand } from '../../application/use-cases/commands/update-confirmation-code.command';
 import { UpdatePasswordForNonExistAccountCommand } from '../../application/use-cases/commands/update-password-for-non-existing-account.command';
@@ -45,6 +45,8 @@ import { AuthQuerySqlRepository } from '../query-repositories/auth-query.sql-rep
 import { AuthQueryRepository } from '../query-repositories/auth-query-repo';
 import { DeleteActiveSessionSqlCommand } from '../../../security/application/use-cases/commands/delete-active-session-sql.command';
 import { UpdateIssuedTokenSqlCommand } from '../../../security/application/use-cases/commands/update-Issued-token-sql.command';
+import { CreateTemporaryAccountSqlCommand } from '../../application/use-cases/commands/create-temp-account-sql.command';
+import { PasswordRecoverySqlCommand } from '../../application/use-cases/commands/recovery-password-sql.command';
 
 type ClientInfo = {
   ip: string;
@@ -155,24 +157,23 @@ export class AuthSQLController {
   @Post('password-recovery')
   @HttpCode(HttpStatus.NO_CONTENT)
   async passwordRecovery(@Body() inputEmailModel: InputRecoveryEmailModel) {
-    const foundUserAccount = await this.authQueryRepository.findByLoginOrEmail(
-      inputEmailModel,
-    );
+    const foundUserAccount =
+      await this.authQuerySqlRepository.findByLoginOrEmail(inputEmailModel);
 
     if (!foundUserAccount) {
-      const command = new CreateTempAccountCommand(inputEmailModel);
+      const command = new CreateTemporaryAccountSqlCommand(inputEmailModel);
 
-      await this.commandBus.execute<CreateTempAccountCommand, OutputId>(
+      await this.commandBus.execute<CreateTemporaryAccountSqlCommand, OutputId>(
         command,
       );
 
       return;
     }
 
-    const command = new PasswordRecoveryCommand(inputEmailModel);
+    const command = new PasswordRecoverySqlCommand(inputEmailModel);
 
     const recoveredPassword = await this.commandBus.execute<
-      PasswordRecoveryCommand,
+    PasswordRecoverySqlCommand,
       boolean
     >(command);
   }

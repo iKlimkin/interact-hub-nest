@@ -70,8 +70,7 @@ export class SecuritySqlRepository {
       `;
 
       const result = await this.dataSource.query(deleteQuery, [deviceId]);
-      console.log({result});
-      
+
       return result[1] > 0;
     } catch (error) {
       console.error(

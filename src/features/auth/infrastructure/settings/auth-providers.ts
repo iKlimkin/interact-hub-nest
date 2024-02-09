@@ -46,6 +46,9 @@ import { LocalStrategy } from '../guards/strategies/local-strategy';
 import { AuthQuerySqlRepository } from '../../api/query-repositories/auth-query.sql-repo';
 import { DeleteActiveSessionSqlUseCase } from '../../../security/application/use-cases/delete-active-session-sql.use-case';
 import { UpdateIssuedTokenSqlUseCase } from '../../../security/application/use-cases/update-issued-token-sql.use-case';
+import { CreateTemporaryAccountSqlUseCase } from '../../application/use-cases/create-temporary-account-sql.use-case';
+import { PasswordRecoverySqlUseCase } from '../../application/use-cases/recovery-password-sql.use-case';
+
 
 export const userAccountProviders: Provider[] = [
   AuthUsersRepository,
@@ -102,6 +105,8 @@ export const authSQLUseCases: Provider[] = [
   UpdateIssuedTokenSqlUseCase,
   CheckCredentialsSQLUseCase,
   DeleteActiveSessionSqlUseCase,
+  CreateTemporaryAccountSqlUseCase,
+  PasswordRecoverySqlUseCase,
   CreateSAUseCase,
   DeleteSAUseCase,
 ];
