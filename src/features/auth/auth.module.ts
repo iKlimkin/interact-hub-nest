@@ -9,7 +9,7 @@ import { UsersRepository } from '../admin/infrastructure/users.repository';
 import { SecurityQueryRepo } from '../security/api/query-repositories/security.query.repo';
 import { SecurityService } from '../security/application/security.service';
 import { AuthService } from './application/auth.service';
-import { authSQLControllers } from './infrastructure/settings/auth-controllers';
+import { authControllers, authSQLControllers } from './infrastructure/settings/auth-controllers';
 import {
   Strategies,
   adapters,
@@ -52,7 +52,9 @@ import { mongooseModels } from './infrastructure/settings/mongoose-models';
 
     ...authSQLUseCases,
   ],
-  controllers: authSQLControllers,
+  controllers:
+  authSQLControllers,
+  // authControllers,
   exports: [
     JwtModule,
     BcryptAdapter,

@@ -25,7 +25,6 @@ import { DeleteActiveSessionCommand } from '../../../security/application/use-ca
 import { UpdateIssuedTokenCommand } from '../../../security/application/use-cases/commands/update-Issued-token.command';
 import { AuthService } from '../../application/auth.service';
 import { ConfirmEmailCommand } from '../../application/use-cases/commands/confirm-email.command';
-import { CreateSessionCommand } from '../../application/use-cases/commands/create-session.command';
 import { CreateTempAccountCommand } from '../../application/use-cases/commands/create-temp-account.command';
 import { CreateUserSQLCommand } from '../../application/use-cases/commands/create-user-sql.command copy';
 import { PasswordRecoveryCommand } from '../../application/use-cases/commands/recovery-password.command';
@@ -42,6 +41,7 @@ import { InputRecoveryPassModel } from '../models/auth-input.models.ts/input-rec
 import { InputRegistrationCodeModel } from '../models/auth-input.models.ts/input-registration-code.model';
 import { InputRegistrationModel } from '../models/auth-input.models.ts/input-registration.model';
 import { UserInfoType } from '../models/user-models';
+import { AuthQuerySqlRepository } from '../query-repositories/auth-query.sql-repo';
 import { AuthQueryRepository } from '../query-repositories/auth-query-repo';
 
 type ClientInfo = {
@@ -52,6 +52,7 @@ type ClientInfo = {
 @Controller('auth')
 export class AuthSQLController {
   constructor(
+    private authQuerySqlRepository: AuthQuerySqlRepository,
     private authQueryRepository: AuthQueryRepository,
     private authService: AuthService,
     private commandBus: CommandBus,
@@ -66,11 +67,13 @@ export class AuthSQLController {
     @GetClientInfo() clientInfo: ClientInfo,
     @Res({ passthrough: true }) res: Response,
   ) {
+
     const { accessToken, refreshToken } = await this.authService.getTokens(
       userInfo.userId,
     );
 
     const userPayload = this.authService.getUserPayloadByToken(refreshToken);
+
     if (!userPayload) throw new Error();
 
     const { browser, deviceType } = getDeviceInfo(clientInfo.userAgentInfo);
@@ -181,9 +184,8 @@ export class AuthSQLController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { login, email } = inputModel;
-    console.log({ inputModel });
 
-    const foundUser = await this.authQueryRepository.findByLoginOrEmail({
+    const foundUser = await this.authQuerySqlRepository.findByLoginOrEmail({
       login,
       email,
     });
@@ -191,11 +193,11 @@ export class AuthSQLController {
     if (foundUser) {
       let errors: ErrorType;
 
-      if (foundUser.accountData.email === email) {
+      if (foundUser.email === email) {
         errors = makeErrorsMessages('email');
       }
 
-      if (foundUser.accountData.login === login) {
+      if (foundUser.login === login) {
         errors = makeErrorsMessages('login');
       }
 
@@ -253,7 +255,7 @@ export class AuthSQLController {
   @UseGuards(AccessTokenGuard)
   @Get('me')
   async getProfile(@CurrentUserInfo() userInfo: UserInfoType) {
-    const user = await this.authQueryRepository.getUserById(userInfo.userId);
+    const user = await this.authQuerySqlRepository.getUserById(userInfo.userId);
 
     if (!user) {
       throw new NotFoundException('User not found');

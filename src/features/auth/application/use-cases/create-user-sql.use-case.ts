@@ -38,9 +38,9 @@ export class CreateUserSQLUseCase
         email,
         password_salt: passwordSalt,
         password_hash: passwordHash,
-        confirmationCode: uuidv4(),
-        expirationDate: add(new Date(), { hours: 1, minutes: 15 }),
-        isConfirmed: false,
+        confirmation_code: uuidv4(),
+        confirmation_expiration_date: add(new Date(), { hours: 1, minutes: 15 }),
+        is_confirmed: false,
       };
 
       const result = await this.usersSQLRepository.save(userDto);
@@ -55,7 +55,7 @@ export class CreateUserSQLUseCase
         notice.addData({ userId: result.userId });
       }
 
-      const event = new EmailNotificationEvent(email, userDto.confirmationCode);
+      const event = new EmailNotificationEvent(email, userDto.confirmation_code);
 
       this.eventBus.publish(event);
 

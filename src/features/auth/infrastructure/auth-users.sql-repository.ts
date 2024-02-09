@@ -11,7 +11,7 @@ import { PasswordRecoveryType } from '../api/models/auth-input.models.ts/input-p
 import {
   UserAccountType,
   UserRecoveryType,
-  UsersResponseDto,
+  UsersResponseModel,
   UsersSQLDto,
 } from '../api/models/auth.output.models/auth.output.models';
 import { LoginOrEmailType } from '../api/models/auth.output.models/auth.user.types';
@@ -29,7 +29,7 @@ type PasswordsType = {
 };
 
 @Injectable()
-export class AuthUsersSQLRepository {
+export class AuthUsersSqlRepository {
   constructor(
     @InjectDataSource()
     private dataSource: DataSource,
@@ -128,20 +128,24 @@ export class AuthUsersSQLRepository {
 
   async findByLoginOrEmail(
     inputData: LoginOrEmailType,
-  ): Promise<UsersResponseDto | null> {
+  ): Promise<UsersResponseModel | null> {
     try {
-      const { email, login, loginOrEmail } = inputData
+      const { email, login, loginOrEmail } = inputData;
 
       const query = `
         SELECT *
         FROM user_accounts
         WHERE email LIKE $1 OR email LIKE $3 OR login LIKE $2 OR login LIKE $3
-      `
-      const result = await this.dataSource.query<UsersResponseDto>(query, [email, login, loginOrEmail])
+      `;
+      const result = await this.dataSource.query<UsersResponseModel>(query, [
+        email,
+        login,
+        loginOrEmail,
+      ]);
 
       if (!result) return null;
 
-      return result[0]
+      return result[0];
     } catch (e) {
       console.error(
         `there were some problems during find user by login or email, ${e}`,

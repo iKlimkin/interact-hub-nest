@@ -37,7 +37,9 @@ export class TestDatabaseRepo {
 
   async deleteAllData() {
     const sqlDataSource = this.dataSource.query(`
-      delete from "user_accounts";
+      DELETE FROM user_sessions;
+      DELETE FROM user_accounts;
+      DELETE FROM api_requests;
     `);
 
     await Promise.all([
@@ -46,7 +48,7 @@ export class TestDatabaseRepo {
       this.CommentModel.deleteMany(),
       this.UserAccountModel.deleteMany(),
       this.SecurityModel.deleteMany(),
-      sqlDataSource
+      sqlDataSource,
     ]);
   }
 }

@@ -35,9 +35,9 @@ export class CreateSAUseCase implements ICommandHandler<CreateSACommand> {
       email,
       password_salt: passwordSalt,
       password_hash: passwordHash,
-      confirmationCode: uuidv4(),
-      expirationDate: add(new Date(), { hours: 1, minutes: 15 }),
-      isConfirmed: true,
+      confirmation_code: uuidv4(),
+      confirmation_expiration_date: add(new Date(), { hours: 1, minutes: 15 }),
+      is_confirmed: true,
     };
 
     const userAdminId = await this.usersSQLRepository.save(userAdminSQLDto);

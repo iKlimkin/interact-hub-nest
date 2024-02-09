@@ -8,7 +8,7 @@ import { getSAViewSQLModel } from '../models/userAdmin.view.models/saView.model'
 import { SAViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
 
 @Injectable()
-export class UsersSQLQueryRepository {
+export class UsersSqlQueryRepository {
   constructor(
     @InjectDataSource()
     private dataSource: DataSource,

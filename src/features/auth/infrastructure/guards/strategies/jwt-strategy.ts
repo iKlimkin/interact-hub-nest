@@ -4,10 +4,17 @@ import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { jwtConstants } from '../constants';
 import { SecurityQueryRepo } from '../../../../security/api/query-repositories/security.query.repo';
+import { SecuritySqlQueryRepo } from '../../../../security/api/query-repositories/security.query.sql-repo';
 
 @Injectable()
-export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
-  constructor(private securityQueryRepo: SecurityQueryRepo) {
+export class AccessTokenStrategy extends PassportStrategy(
+  Strategy,
+  'access-token',
+) {
+  constructor(
+    private securityQueryRepo: SecurityQueryRepo,
+    private securitySqlQueryRepo: SecuritySqlQueryRepo,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -20,7 +27,11 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
       payload.deviceId,
     );
 
-    if (!userSession) return false;
+    const userSqlSession = await this.securitySqlQueryRepo.getUserSession(
+      payload.deviceId,
+    );
+
+    if (!userSession && !userSqlSession) return false;
     return payload;
   }
 }
@@ -28,9 +39,12 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
 @Injectable()
 export class RefreshTokenStrategy extends PassportStrategy(
   Strategy,
-  'jwt-refresh',
+  'refresh-token',
 ) {
-  constructor(private securityQueryRepo: SecurityQueryRepo) {
+  constructor(
+    private securityQueryRepo: SecurityQueryRepo,
+    private securitySqlQueryRepo: SecuritySqlQueryRepo,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
       ignoreExpiration: false,
@@ -46,7 +60,14 @@ export class RefreshTokenStrategy extends PassportStrategy(
 
     const userSession = await this.securityQueryRepo.getUserSession(deviceId);
 
-    if (!userSession || tokenIssuedAt !== userSession.lastActiveDate) {
+    const userSqlSession = await this.securitySqlQueryRepo.getUserSession(
+      deviceId,
+    );
+
+    if (
+      (!userSession || tokenIssuedAt !== userSession.lastActiveDate) &&
+      (!userSqlSession || tokenIssuedAt !== userSqlSession.lastActiveDate)
+    ) {
       throw new UnauthorizedException('Invalid refresh token');
     }
 

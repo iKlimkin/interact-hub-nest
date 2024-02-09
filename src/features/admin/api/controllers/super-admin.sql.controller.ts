@@ -24,13 +24,13 @@ import { CreateUserResultData } from '../../application/user.admins.service';
 import { InputUserModel } from '../models/create-user.model';
 import { SAQueryFilter } from '../models/outputSA.models.ts/users-admin-query.filter';
 import { SAViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
-import { UsersSQLQueryRepository } from '../query-repositories/users.sql-query.repo';
+import { UsersSqlQueryRepository } from '../query-repositories/users.query.sql-repo';
 
 @UseGuards(BasicSAAuthGuard)
 @Controller('users')
 export class SuperAdminsSQLController {
   constructor(
-    private usersSQLQueryRepository: UsersSQLQueryRepository,
+    private usersSQLQueryRepository: UsersSqlQueryRepository,
     private commandBus: CommandBus,
   ) {}
 

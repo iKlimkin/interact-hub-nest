@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BcryptAdapter } from '../../../../infra/adapters/bcrypt-adapter';
 import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
 import { UserIdType } from '../../../admin/api/models/outputSA.models.ts/user-models';
-import { AuthUsersSQLRepository } from '../../infrastructure/auth-users.sql-repository';
+import { AuthUsersSqlRepository } from '../../infrastructure/auth-users.sql-repository';
 import { CheckCredentialsSQLCommand } from './commands/check-credentials-sql.command';
 import { CheckCredentialsCommand } from './commands/check-credentials.command';
 
@@ -11,7 +11,7 @@ export class CheckCredentialsSQLUseCase
   implements ICommandHandler<CheckCredentialsCommand>
 {
   constructor(
-    private authUsersSQLRepository: AuthUsersSQLRepository,
+    private authUsersSqlRepository: AuthUsersSqlRepository,
     private bcryptAdapter: BcryptAdapter,
   ) {}
 
@@ -20,7 +20,7 @@ export class CheckCredentialsSQLUseCase
   ): Promise<UserIdType | null> {
     await validateOrRejectModel(command, CheckCredentialsSQLCommand);
 
-    const user = await this.authUsersSQLRepository.findByLoginOrEmail({
+    const user = await this.authUsersSqlRepository.findByLoginOrEmail({
       loginOrEmail: command.inputData.loginOrEmail,
     });
 

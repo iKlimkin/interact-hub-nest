@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import {
-  UsersResponseDto,
+  UsersResponseModel,
   UsersSQLDto,
 } from '../../auth/api/models/auth.output.models/auth.output.models';
 import { CreateUserResultData } from '../application/user.admins.service';
@@ -24,7 +24,7 @@ export class UsersSQLRepository {
             RETURNING "id"
             `;
 
-      const result = await this.dataSource.query<UsersResponseDto>(
+      const result = await this.dataSource.query<UsersResponseModel>(
         query,
         Object.values(userDto),
       );
@@ -36,7 +36,7 @@ export class UsersSQLRepository {
     }
   }
 
-  async getUserById(userId: string): Promise<UsersResponseDto | null> {
+  async getUserById(userId: string): Promise<UsersResponseModel | null> {
     try {
       const query = `
           SELECT *
@@ -44,7 +44,7 @@ export class UsersSQLRepository {
           WHERE "id" = $1
         `;
 
-      const user = await this.dataSource.query<UsersResponseDto[]>(query, [
+      const user = await this.dataSource.query<UsersResponseModel[]>(query, [
         userId,
       ]);
 

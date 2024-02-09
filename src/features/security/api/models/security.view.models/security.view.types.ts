@@ -11,6 +11,11 @@ export type SecurityViewDeviceModel = Omit<
   'expirationDate'
 >;
 
+// export type SessionSqlViewModel = Omit<
+//   SecurityDeviceModel,
+//   'expirationDate'
+// >;
+
 export type SecurityDeviceType = {
   ip: string;
   title: string;
@@ -25,8 +30,8 @@ export interface UserSQLSession {
   id: string;
   ip: string;
   title: string;
-  userId: string;
-  deviceId: string;
+  user_id: string;
+  device_id: string;
   refresh_token: string;
   rt_issued_at: Date;
   rt_expiration_date: Date;
