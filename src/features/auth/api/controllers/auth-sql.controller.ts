@@ -30,7 +30,7 @@ import { CreateUserSQLCommand } from '../../application/use-cases/commands/creat
 import { PasswordRecoveryCommand } from '../../application/use-cases/commands/recovery-password.command';
 import { UpdateConfirmationCodeCommand } from '../../application/use-cases/commands/update-confirmation-code.command';
 import { UpdatePasswordForNonExistAccountCommand } from '../../application/use-cases/commands/update-password-for-non-existing-account.command';
-import { UpdatePasswordForExistingAccountCommand } from '../../application/use-cases/commands/update-password.command';
+
 import { GetClientInfo } from '../../infrastructure/decorators/client-ip.decorator';
 import { CurrentUserInfo } from '../../infrastructure/decorators/current-user-info.decorator';
 import { AccessTokenGuard } from '../../infrastructure/guards/accessToken.guard';
@@ -47,6 +47,9 @@ import { DeleteActiveSessionSqlCommand } from '../../../security/application/use
 import { UpdateIssuedTokenSqlCommand } from '../../../security/application/use-cases/commands/update-Issued-token-sql.command';
 import { CreateTemporaryAccountSqlCommand } from '../../application/use-cases/commands/create-temp-account-sql.command';
 import { PasswordRecoverySqlCommand } from '../../application/use-cases/commands/recovery-password-sql.command';
+import { UpdatePasswordSqlCommand } from '../../application/use-cases/commands/update-password.command';
+import { UpdatePasswordTemporaryAccountSqlCommand } from '../../application/use-cases/commands/update-password-temporary-account-sql.command';
+import { UpdateConfirmationCodeSqlCommand } from '../../application/use-cases/commands/update-confirmation-code-sql.command';
 
 type ClientInfo = {
   ip: string;
@@ -128,39 +131,33 @@ export class AuthSQLController {
   @Post('new-password')
   @HttpCode(HttpStatus.NO_CONTENT)
   async newPassword(@Body() body: InputRecoveryPassModel) {
-    const userAccount = await this.authQueryRepository.findUserByRecoveryCode(
-      body.recoveryCode,
-    );
+    const userAccount =
+      await this.authQuerySqlRepository.findUserAccountByRecoveryCode(
+        body.recoveryCode,
+      );
 
     if (userAccount) {
-      const command = new UpdatePasswordForExistingAccountCommand(body);
+      const command = new UpdatePasswordSqlCommand(body);
 
-      return this.commandBus.execute<
-        UpdatePasswordForExistingAccountCommand,
-        boolean
-      >(command);
+      return this.commandBus.execute<UpdatePasswordSqlCommand, boolean>(
+        command,
+      );
     }
 
-    const command = new UpdatePasswordForNonExistAccountCommand(body);
+    const command = new UpdatePasswordTemporaryAccountSqlCommand(body);
 
-    const updatedPassword = await this.commandBus.execute<
-      UpdatePasswordForNonExistAccountCommand,
-      boolean
-    >(command);
-
-    if (updatedPassword) {
-      throw new NotFoundException();
-    }
+    return this.commandBus.execute(command);
   }
 
   @UseInterceptors(RateLimitInterceptor)
   @Post('password-recovery')
   @HttpCode(HttpStatus.NO_CONTENT)
   async passwordRecovery(@Body() inputEmailModel: InputRecoveryEmailModel) {
-    const foundUserAccount =
-      await this.authQuerySqlRepository.findByLoginOrEmail(inputEmailModel);
+    const userAccount = await this.authQuerySqlRepository.findByLoginOrEmail(
+      inputEmailModel,
+    );
 
-    if (!foundUserAccount) {
+    if (!userAccount) {
       const command = new CreateTemporaryAccountSqlCommand(inputEmailModel);
 
       await this.commandBus.execute<CreateTemporaryAccountSqlCommand, OutputId>(
@@ -172,10 +169,7 @@ export class AuthSQLController {
 
     const command = new PasswordRecoverySqlCommand(inputEmailModel);
 
-    const recoveredPassword = await this.commandBus.execute<
-    PasswordRecoverySqlCommand,
-      boolean
-    >(command);
+    await this.commandBus.execute<PasswordRecoverySqlCommand, boolean>(command);
   }
 
   @Post('registration')
@@ -240,16 +234,17 @@ export class AuthSQLController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { email } = inputModel;
-    const confirmedUser = await this.authQueryRepository.findByLoginOrEmail({
+    const confirmedUser = await this.authQuerySqlRepository.findByLoginOrEmail({
       email,
     });
 
-    if (!confirmedUser || confirmedUser.emailConfirmation.isConfirmed) {
+    if (!confirmedUser || confirmedUser.is_confirmed) {
       const errors = makeErrorsMessages('confirmation');
       res.status(HttpStatus.BAD_REQUEST).send(errors);
       return;
     }
-    const command = new UpdateConfirmationCodeCommand(confirmedUser);
+
+    const command = new UpdateConfirmationCodeSqlCommand(confirmedUser);
 
     await this.commandBus.execute(command);
   }

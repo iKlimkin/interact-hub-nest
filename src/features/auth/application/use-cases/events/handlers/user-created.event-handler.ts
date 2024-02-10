@@ -1,5 +1,5 @@
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
-import { EmailNotificationEvent } from '../user-created-event';
+import { EmailNotificationEvent } from '../email-notification-event';
 import { EmailManager } from '../../../../../../infra/application/managers/email-manager';
 
 @EventsHandler(EmailNotificationEvent)

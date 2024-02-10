@@ -9,7 +9,7 @@ import { CreateUserResultData } from '../../../admin/application/user.admins.ser
 import { UsersSQLRepository } from '../../../admin/infrastructure/users.sql-repository';
 import { UsersSQLDto } from '../../api/models/auth.output.models/auth.output.models';
 import { CreateUserSQLCommand } from './commands/create-user-sql.command';
-import { EmailNotificationEvent } from './events/user-created-event';
+import { EmailNotificationEvent } from './events/email-notification-event';
 
 @CommandHandler(CreateUserSQLCommand)
 export class CreateUserSQLUseCase

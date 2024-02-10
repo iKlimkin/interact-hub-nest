@@ -18,7 +18,7 @@ export class PasswordRecoverySqlUseCase
   async execute(command: PasswordRecoverySqlCommand): Promise<boolean> {
     const recoveryPassInfo: UserRecoveryType = createRecoveryCode();
     const { email } = command.inputData;
-
+    
     const updateRecoveryCode =
       await this.authUsersSqlRepository.updateRecoveryCode(
         email,

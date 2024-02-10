@@ -31,7 +31,7 @@ import { CreateUserCommand } from '../../application/use-cases/commands/create-u
 import { PasswordRecoveryCommand } from '../../application/use-cases/commands/recovery-password.command';
 import { UpdateConfirmationCodeCommand } from '../../application/use-cases/commands/update-confirmation-code.command';
 import { UpdatePasswordForNonExistAccountCommand } from '../../application/use-cases/commands/update-password-for-non-existing-account.command';
-import { UpdatePasswordForExistingAccountCommand } from '../../application/use-cases/commands/update-password.command';
+import { UpdatePasswordForExistingAccountCommand } from '../../application/use-cases/commands/update-password-sql.command';
 import { GetClientInfo } from '../../infrastructure/decorators/client-ip.decorator';
 import { CurrentUserInfo } from '../../infrastructure/decorators/current-user-info.decorator';
 import { AccessTokenGuard } from '../../infrastructure/guards/accessToken.guard';
@@ -41,8 +41,8 @@ import { InputRecoveryEmailModel } from '../models/auth-input.models.ts/input-pa
 import { InputRecoveryPassModel } from '../models/auth-input.models.ts/input-recovery.model';
 import { InputRegistrationCodeModel } from '../models/auth-input.models.ts/input-registration-code.model';
 import { InputRegistrationModel } from '../models/auth-input.models.ts/input-registration.model';
-import { AuthQueryRepository } from '../query-repositories/auth-query-repo';
 import { UserInfoType } from '../models/user-models';
+import { AuthQueryRepository } from '../query-repositories/auth-query-repo';
 
 type ClientInfo = {
   ip: string;

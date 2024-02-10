@@ -34,7 +34,7 @@ export type UserConfirmationType = {
 };
 
 export interface UsersSQLDto
-  extends Omit<UsersResponseModel, 'id' | 'created_at'> {}
+  extends Omit<UsersResponseModel, 'id' | 'created_at' | 'password_recovery_code' | 'password_recovery_expiration'> {}
 
 export interface UsersResponseModel {
   id: string;
@@ -46,5 +46,6 @@ export interface UsersResponseModel {
   confirmation_code: string;
   confirmation_expiration_date: Date;
   is_confirmed: boolean;
-  recovery_code?: string;
+  password_recovery_code: string | null;
+  password_recovery_expiration: string | null;
 }

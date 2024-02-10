@@ -1,5 +1,5 @@
-import { InputRecoveryPassModel } from "../../../api/models/auth-input.models.ts/input-recovery.model";
+import { InputRecoveryPassModel } from '../../../api/models/auth-input.models.ts/input-recovery.model';
 
-export class UpdatePasswordForExistingAccountCommand {
+export class UpdatePasswordSqlCommand {
   constructor(public inputData: InputRecoveryPassModel) {}
 }

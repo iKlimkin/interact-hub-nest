@@ -48,6 +48,10 @@ import { DeleteActiveSessionSqlUseCase } from '../../../security/application/use
 import { UpdateIssuedTokenSqlUseCase } from '../../../security/application/use-cases/update-issued-token-sql.use-case';
 import { CreateTemporaryAccountSqlUseCase } from '../../application/use-cases/create-temporary-account-sql.use-case';
 import { PasswordRecoverySqlUseCase } from '../../application/use-cases/recovery-password-sql.use-case';
+import { UpdatePasswordSqlUseCase } from '../../application/use-cases/update-password-sql.use-case';
+import { CreateUserAccountEventHandler } from '../../application/use-cases/events/handlers/create-user-account-sql.event-handler';
+import { UpdatePasswordTemporaryAccountSqlUseCase } from '../../application/use-cases/update-password-temporary-account-sql.use-case';
+import { UpdateConfirmationCodeSqlUseCase } from '../../application/use-cases/update-confirmation-code-sql.use-case';
 
 
 export const userAccountProviders: Provider[] = [
@@ -106,7 +110,10 @@ export const authSQLUseCases: Provider[] = [
   CheckCredentialsSQLUseCase,
   DeleteActiveSessionSqlUseCase,
   CreateTemporaryAccountSqlUseCase,
+  UpdatePasswordTemporaryAccountSqlUseCase,
   PasswordRecoverySqlUseCase,
+  UpdatePasswordSqlUseCase,
+  UpdateConfirmationCodeSqlUseCase,
   CreateSAUseCase,
   DeleteSAUseCase,
 ];
@@ -118,6 +125,6 @@ export const securityUseCases: Provider[] = [
   DeleteOtherUserSessionsUseCase,
 ];
 
-export const authEventHandlers: Provider[] = [UserCreatedEventHandler];
+export const authEventHandlers: Provider[] = [UserCreatedEventHandler, CreateUserAccountEventHandler];
 
 export const adapters: Provider[] = [BcryptAdapter, EmailManager, EmailAdapter];

@@ -3,7 +3,7 @@ import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { v4 as uuidv4 } from 'uuid';
 import { AuthUsersRepository } from '../../infrastructure/auth-users.repository';
 import { UpdateConfirmationCodeCommand } from './commands/update-confirmation-code.command';
-import { EmailNotificationEvent } from './events/user-created-event';
+import { EmailNotificationEvent } from './events/email-notification-event';
 
 @CommandHandler(UpdateConfirmationCodeCommand)
 export class UpdateConfirmationCodeUseCase
@@ -31,7 +31,7 @@ export class UpdateConfirmationCodeUseCase
       return updatedCode;
     } catch (error) {
       throw new InternalServerErrorException(
-        'during update confirmation occured some problems',
+        'during update confirmation occurred some problems',
         error,
       );
     }

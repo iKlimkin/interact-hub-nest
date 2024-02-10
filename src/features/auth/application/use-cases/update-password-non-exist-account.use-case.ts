@@ -19,14 +19,10 @@ export class UpdatePasswordForNonExistAccountUseCase
   async execute(
     command: UpdatePasswordForNonExistAccountCommand,
   ): Promise<boolean> {
-    try {
-      await validateOrRejectModel(
-        command,
-        UpdatePasswordForNonExistAccountCommand,
-      );
-    } catch (error) {
-      throw new BadRequestException();
-    }
+    await validateOrRejectModel(
+      command,
+      UpdatePasswordForNonExistAccountCommand,
+    );
 
     const { recoveryCode, newPassword } = command.inputDto;
 

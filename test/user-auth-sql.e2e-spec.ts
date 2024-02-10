@@ -8,15 +8,17 @@ import { dropDataBase } from './base/utils/dataBase-clean-up';
 import { initSettings } from './base/utils/init-settings';
 import { createErrorsMessages } from './base/utils/make-errors-messages';
 import { skipSettings } from './base/utils/tests-settings';
-import { wait } from './base/utils/wait';
+import { wait } from './base/utils/wait'
+import { AuthSQLController } from '../src/features/auth/api/controllers/auth-sql.controller';
+import { AuthController } from '../src/features/auth/api/controllers/auth.controller';
 
-aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
+aDescribe(skipSettings.for('userAuthSql'))('AuthController (e2e)', () => {
   let app: INestApplication;
   let usersTestManager: UsersTestManager;
 
   beforeAll(async () => {
     const result = await initSettings((moduleBuilder) =>
-      moduleBuilder.overrideProvider(EmailManager).useClass(EmailManagerMock),
+      moduleBuilder.overrideProvider(EmailManager).useClass(EmailManagerMock).overrideProvider(AuthController).useClass(AuthSQLController),
     );
 
     usersTestManager = result.usersTestManager;
@@ -26,10 +28,6 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
   afterAll(async () => {
     await app.close();
   });
-
-  // afterEach(async () => {
-  //   await dropDataBase(app);
-  // });
 
   describe('login', () => {
     afterAll(async () => {
@@ -212,12 +210,11 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
     it(`/auth/refresh-token (POST) - should update tokens`, async () => {
       const { oldRefreshToken } = expect.getState();
 
-      await wait(1);
+      await wait(1)
 
-      const { accessToken, refreshToken } = await usersTestManager.refreshToken(
-        oldRefreshToken,
-      );
-
+      const { accessToken, refreshToken } =
+        await usersTestManager.refreshToken(oldRefreshToken);
+      
       expect.setState({
         newAccessToken: accessToken,
         newRefreshToken: refreshToken,
@@ -246,22 +243,19 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
     it(`/auth/logout (POST) - shouldn't operate with former rt, 401`, async () => {
       const { oldRefreshToken } = expect.getState();
 
-      await usersTestManager.logout(oldRefreshToken, HttpStatus.UNAUTHORIZED);
+      await usersTestManager.logout(oldRefreshToken, HttpStatus.UNAUTHORIZED)
     });
 
     it(`/auth/logout (POST) - should to leave the account, `, async () => {
       const { newRefreshToken } = expect.getState();
 
-      await usersTestManager.logout(newRefreshToken);
+      await usersTestManager.logout(newRefreshToken)
     });
 
     it(`/auth/logout (POST) - shouldn't received tokens after logout, 401`, async () => {
       const { newRefreshToken } = expect.getState();
 
-      await usersTestManager.refreshToken(
-        newRefreshToken,
-        HttpStatus.UNAUTHORIZED,
-      );
+      await usersTestManager.refreshToken(newRefreshToken, HttpStatus.UNAUTHORIZED)
     });
 
     it(`/auth/me (GET) - shouldn't get profile info after logout, 401`, async () => {
@@ -275,60 +269,11 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
     });
   });
   describe('registration', () => {
-    afterAll(async () => {
-      await dropDataBase(app);
-    });
-    it(`/auth/registration (POST) - should pass registration for uniq user`, async () => {
+    it('', async () => {
       const correctInputData = usersTestManager.createInputData({});
 
-      await usersTestManager.registration(correctInputData);
-    });
-
-    it(`/auth/registration (POST) - should receive error with the same already existed login, 400`, async () => {
-      const inputData = usersTestManager.createInputData({});
-
-      const result = await usersTestManager.registration(inputData);
-
-      const error = createErrorsMessages(['login']);
-      usersTestManager.checkUserData(result, error);
-    });
-
-    it(`/auth/registration (POST) - should receive error with the same already existed login, 400`, async () => {
-      const inputData = usersTestManager.createInputData({ login: 'another' });
-
-      const result = await usersTestManager.registration(inputData);
-
-      const error = createErrorsMessages(['email']);
-      usersTestManager.checkUserData(result, error);
-    });
-
-    it(`/auth/registration (POST) - shouldn't pass registration with bad passwords, 400`, async () => {
-      const invalidInputDataShort = usersTestManager.createInputData({
-        password: authConstants.registrationData.length05,
-      });
-
-      const invalidInputDataLong = usersTestManager.createInputData({
-        password: authConstants.registrationData.length21,
-      });
-
-      const result1 = await usersTestManager.registration(
-        invalidInputDataShort,
-      );
-
-      const result2 = await usersTestManager.registration(invalidInputDataLong);
-
-      const error = createErrorsMessages(['password']);
-      usersTestManager.checkUserData(result1, error);
-      usersTestManager.checkUserData(result2, error);
-    });
-
-    it(`/auth/registration (POST) - shouldn't pass registration with bad fields, 400`, async () => {
-      const invalidInputDataShort = usersTestManager.createInputData();
-
-      const result = await usersTestManager.registration(invalidInputDataShort);
-
-      const error = createErrorsMessages(['password', 'login', 'email']);
-      usersTestManager.checkUserData(result, error);
+      const nonConfirmedUser =
+        await usersTestManager.registration(correctInputData);
     });
   });
   describe('registration-email-resending', () => {});

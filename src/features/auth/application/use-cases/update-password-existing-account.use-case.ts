@@ -3,7 +3,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BcryptAdapter } from '../../../../infra/adapters/bcrypt-adapter';
 import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
 import { AuthUsersRepository } from '../../infrastructure/auth-users.repository';
-import { UpdatePasswordForExistingAccountCommand } from './commands/update-password.command';
+import { UpdatePasswordForExistingAccountCommand } from './commands/update-password-sql.command';
 
 @CommandHandler(UpdatePasswordForExistingAccountCommand)
 export class UpdatePasswordForExistingAccountUseCase
@@ -17,14 +17,10 @@ export class UpdatePasswordForExistingAccountUseCase
   async execute(
     command: UpdatePasswordForExistingAccountCommand,
   ): Promise<boolean> {
-    try {
-      await validateOrRejectModel(
-        command,
-        UpdatePasswordForExistingAccountCommand,
-      );
-    } catch (error) {
-      throw new BadRequestException();
-    }
+    await validateOrRejectModel(
+      command,
+      UpdatePasswordForExistingAccountCommand,
+    );
 
     const { recoveryCode, newPassword } = command.inputData;
 

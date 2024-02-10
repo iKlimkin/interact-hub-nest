@@ -1,6 +1,8 @@
 import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { InjectModel } from '@nestjs/mongoose';
 import { BcryptAdapter } from '../../../../infra/adapters/bcrypt-adapter';
+import { LayerNoticeInterceptor } from '../../../../infra/utils/error-layer-interceptor';
+import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
 import {
   UserAccount,
   UserAccountDocument,
@@ -8,10 +10,7 @@ import {
 } from '../../../admin/domain/entities/userAccount.schema';
 import { AuthUsersRepository } from '../../infrastructure/auth-users.repository';
 import { CreateUserCommand } from './commands/create-user.command';
-import { EmailNotificationEvent } from './events/user-created-event';
-import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
-import { LayerNoticeInterceptor } from '../../../../infra/utils/error-layer-interceptor';
-import { CreateUserErrors } from '../../../../infra/utils/interlayer-error-handler.ts/user-errors';
+import { EmailNotificationEvent } from './events/email-notification-event';
 
 @CommandHandler(CreateUserCommand)
 export class CreateUserUseCase implements ICommandHandler<CreateUserCommand> {

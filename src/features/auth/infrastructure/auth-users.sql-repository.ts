@@ -34,6 +34,7 @@ export class AuthUsersSqlRepository {
     @InjectDataSource()
     private dataSource: DataSource,
   ) {}
+
   async createTemporaryUserAccount(
     inputData: UserRecoveryType,
     email: string,
@@ -61,24 +62,27 @@ export class AuthUsersSqlRepository {
     }
   }
 
-  // async findTemporaryUserAccountByCode(
-  //   recoveryCode: string,
-  // ): Promise<TemporaryAccountDBType | null> {
-  //   try {
-  //     const foundTempUserAccountModel = await this.TempUserAccountModel.findOne(
-  //       {
-  //         recoveryCode,
-  //       },
-  //     );
+  async findTemporaryAccountByRecoveryCode(
+    recoveryCode: string,
+  ): Promise<TemporaryAccountDBType | null> {
+    try {
+      const findQuery = `
+        SELECT *
+        FROM temporary_user_accounts
+        WHERE recovery_code = $1
+      `;
+      const result = await this.dataSource.query(findQuery, [recoveryCode]);
 
-  //     if (!foundTempUserAccountModel) return null;
+      if (!result) return null;
 
-  //     return foundTempUserAccountModel;
-  //   } catch (error) {
-  //     console.error(`While find the user occured some errors: ${error}`);
-  //     return null;
-  //   }
-  // }
+      return result[0];
+    } catch (error) {
+      console.error(
+        `While find the temporary account occurred some errors: ${error}`,
+      );
+      return null;
+    }
+  }
 
   // async findUserById(userId: string): Promise<UserAccountDocument | null> {
   //   try {
@@ -93,18 +97,21 @@ export class AuthUsersSqlRepository {
   //   }
   // }
 
-  // async deleteTemporaryUserAccount(recoveryCode: string): Promise<boolean> {
-  //   try {
-  //     const tmpAccount = await this.TempUserAccountModel.deleteOne({
-  //       recoveryCode,
-  //     });
+  async deleteTemporaryUserAccount(recoveryCode: string): Promise<boolean> {
+    try {
+      const deleteQuery = `
+        DELETE
+        FROM temporary_user_accounts
+        WHERE recovery_code = $1
+      `;
+      const result = await this.dataSource.query(deleteQuery, [recoveryCode]);
 
-  //     return tmpAccount.deletedCount === 1;
-  //   } catch (error) {
-  //     console.error('Database fails operate with deleting user', error);
-  //     return false;
-  //   }
-  // }
+      return result[1] > 0;
+    } catch (error) {
+      console.error('Database fails operate with deleting user', error);
+      return false;
+    }
+  }
 
   // async findUserByConfirmationCode(
   //   emailConfirmationCode: string,
@@ -186,23 +193,30 @@ export class AuthUsersSqlRepository {
   //   }
   // }
 
-  // async updateConfirmationCode(
-  //   email: string,
-  //   confirmationCode: string,
-  // ): Promise<boolean> {
-  //   try {
-  //     const confirmedUser = await this.UserAccountModel.updateOne(
-  //       { 'accountData.email': email },
-  //       { $set: { 'emailConfirmation.confirmationCode': confirmationCode } },
-  //     );
+  async updateConfirmationCode(
+    email: string,
+    confirmationCode: string,
+  ): Promise<boolean> {
+    try {
+      const updateQuery = `
+      UPDATE user_accounts
+      SET
+        confirmation_code = $1
+        WHERE email = $2
+      `;
+      const result = await this.dataSource.query(updateQuery, [
+        confirmationCode,
+        email,
+      ]);
 
-  //     return confirmedUser.modifiedCount === 1;
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(
-  //       'Database fails operate during update confirmation code operation',
-  //     );
-  //   }
-  // }
+      return result[1] > 0;
+    } catch (error) {
+      console.error(
+        `Database fails operate during update confirmation code operation ${error}`,
+      );
+      return false;
+    }
+  }
 
   async updateRecoveryCode(
     email: string,
@@ -232,56 +246,62 @@ export class AuthUsersSqlRepository {
     }
   }
 
-  // async findUserByRecoveryCode(
-  //   recoveryCode: string,
-  // ): Promise<UserAccountDocument | null> {
-  //   try {
-  //     const filter = {
-  //       'passwordRecovery.recoveryCode': recoveryCode,
-  //       'passwordRecovery.expirationDate': { $gt: new Date().toISOString() },
-  //     };
+  async findUserAccountByRecoveryCode(
+    recoveryCode: string,
+  ): Promise<UsersResponseModel | null> {
+    try {
+      const currentTime = new Date().toISOString();
 
-  //     const foundUser = await this.UserAccountModel.findOne(filter);
+      const filterQuery = `
+        SELECT *
+        FROM user_accounts
+        WHERE
+          password_recovery_code = $1
+          AND password_recovery_expiration > $2;
+      `;
 
-  //     if (!foundUser) return null;
+      const result = await this.dataSource.query<UsersResponseModel>(
+        filterQuery,
+        [recoveryCode, currentTime],
+      );
 
-  //     return foundUser;
-  //   } catch (e) {
-  //     console.error(
-  //       `there were some problems during find user by confirmation code, ${e}`,
-  //     );
-  //     return null;
-  //   }
-  // }
+      if (!result) return null;
 
-  // async updateUserPassword(
-  //   inputData: Pick<PasswordRecoveryType, 'recoveryCode'> & PasswordsType,
-  // ): Promise<boolean> {
-  //   try {
-  //     const filter = {
-  //       'passwordRecovery.recoveryCode': inputData.recoveryCode,
-  //     };
-  //     const update = {
-  //       $set: {
-  //         'accountData.passwordSalt': inputData.passwordSalt,
-  //         'accountData.passwordHash': inputData.passwordHash,
-  //         'passwordRecovery.recoveryCode': null,
-  //       },
-  //     };
+      return result[0];
+    } catch (e) {
+      console.error(
+        `there were some problems during find user by confirmation code, ${e}`,
+      );
+      return null;
+    }
+  }
 
-  //     const updatedPasswordData = await this.UserAccountModel.updateOne(
-  //       filter,
-  //       update,
-  //     );
+  async updateUserPassword(
+    inputData: Pick<PasswordRecoveryType, 'recoveryCode'> & PasswordsType,
+  ): Promise<boolean> {
+    try {
+      const updateQuery = `
+      UPDATE user_accounts
+      SET
+        password_recovery_code = null,
+        password_salt = $1,
+        password_hash = $2
+      WHERE password_recovery_code = $3
+      `;
 
-  //     return updatedPasswordData.modifiedCount === 1;
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(
-  //       'Database fails operate with update user password',
-  //       error,
-  //     );
-  //   }
-  // }
+      const result = await this.dataSource.query(
+        updateQuery,
+        Object.values(inputData),
+      );
+
+      return result[1] > 0;
+    } catch (error) {
+      console.error(
+        `Database fails operate with update user password ${error}`,
+      );
+      return false;
+    }
+  }
 
   // async updateUserCredentials(
   //   email: string,

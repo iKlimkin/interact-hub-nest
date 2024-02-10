@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { UserAccountViewModel, UsersResponseModel } from '../models/auth.output.models/auth.output.models';
+import {
+  UserAccountViewModel,
+  UsersResponseModel,
+} from '../models/auth.output.models/auth.output.models';
 import { LoginOrEmailType } from '../models/auth.output.models/auth.user.types';
 import { getUserAccountSqlViewModel } from '../models/auth.output.models/getUserAccount.view.model';
 
@@ -36,27 +39,36 @@ export class AuthQuerySqlRepository {
     }
   }
 
-  //   async findUserByRecoveryCode(
-  //     recoveryCode: string,
-  //   ): Promise<UserAccountViewModel | null> {
-  //     try {
-  //       const filter = {
-  //         'passwordRecovery.recoveryCode': recoveryCode,
-  //         'passwordRecovery.expirationDate': { $gt: new Date().toISOString() },
-  //       };
+  async findUserAccountByRecoveryCode(
+    recoveryCode: string,
+  ): Promise<UserAccountViewModel | null> {
+    try {
+      const currentTime = new Date().toISOString();
 
-  //       const foundUser = await this.UserAccountModel.findOne(filter);
+      const filterQuery = `
+        SELECT *
+        FROM user_accounts
+        WHERE
+          password_recovery_code = $1
+          AND password_recovery_expiration > $2;
+      `;
 
-  //       if (!foundUser) return null;
+      const result = await this.dataSource.query<UsersResponseModel[]>(
+        filterQuery,
+        [recoveryCode, currentTime],
+      );
+      console.log({result});
 
-  //       return getUserAccountViewModel(foundUser);
-  //     } catch (e) {
-  //       console.error(
-  //         `there were some problems during find user by confirmation code, ${e}`,
-  //       );
-  //       return null;
-  //     }
-  //   }
+      if (!result.length) return null;
+
+      return getUserAccountSqlViewModel(result[0]);
+    } catch (e) {
+      console.error(
+        `there were some problems during find user by recovery code, ${e}`,
+      );
+      return null;
+    }
+  }
 
   async getUserById(userId: string): Promise<UserAccountViewModel | null> {
     try {

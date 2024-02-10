@@ -1,12 +1,10 @@
 import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { OutputId } from '../../../../domain/likes.types';
 import { UserRecoveryType } from '../../api/models/auth.output.models/auth.output.models';
-import { AuthUsersRepository } from '../../infrastructure/auth-users.repository';
+import { AuthUsersSqlRepository } from '../../infrastructure/auth-users.sql-repository';
 import { CreateTemporaryAccountSqlCommand } from './commands/create-temp-account-sql.command';
-import {} from './commands/create-temp-account.command';
 import { SendRecoveryMsgCommand } from './commands/send-recovery-msg.command';
 import { createRecoveryCode } from './helpers/create-recovery-message.helper';
-import { AuthUsersSqlRepository } from '../../infrastructure/auth-users.sql-repository';
 
 @CommandHandler(CreateTemporaryAccountSqlCommand)
 export class CreateTemporaryAccountSqlUseCase
@@ -21,7 +19,6 @@ export class CreateTemporaryAccountSqlUseCase
     const recoveryPassInfo: UserRecoveryType = createRecoveryCode();
 
     const { email } = command.inputData;
-    console.log({email});
 
     const temporaryUserAccount =
       await this.authUsersSqlRepository.createTemporaryUserAccount(
