@@ -20,9 +20,7 @@ export class ConfirmEmailUseCase
 
     if (!user) return null;
 
-    const { confirmationCode } = user.emailConfirmation;
-
-    if (!user.canBeConfirmed(confirmationCode)) return null;
+    if (!user.canBeConfirmed()) return null;
 
     user.confirm();
 

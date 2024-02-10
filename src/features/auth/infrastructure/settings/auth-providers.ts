@@ -24,7 +24,7 @@ import { SecuritySqlRepository } from '../../../security/infrastructure/security
 import { AuthQueryRepository } from '../../api/query-repositories/auth-query-repo';
 import { CheckCredentialsSQLUseCase } from '../../application/use-cases/check-credentials-sql.use-case';
 import { CheckCredentialsUseCase } from '../../application/use-cases/check-credentials.use-case';
-import { ConfirmEmailUseCase } from '../../application/use-cases/confirm-email-use-case';
+import { ConfirmEmailUseCase } from '../../application/use-cases/confirm-email.use-case';
 import { CreateTempAccountUseCase } from '../../application/use-cases/create-temporary-account.use-case';
 import { CreateUserSessionUseCase } from '../../application/use-cases/create-user-session.use-case';
 import { CreateUserSQLUseCase } from '../../application/use-cases/create-user-sql.use-case';
@@ -52,7 +52,7 @@ import { UpdatePasswordSqlUseCase } from '../../application/use-cases/update-pas
 import { CreateUserAccountEventHandler } from '../../application/use-cases/events/handlers/create-user-account-sql.event-handler';
 import { UpdatePasswordTemporaryAccountSqlUseCase } from '../../application/use-cases/update-password-temporary-account-sql.use-case';
 import { UpdateConfirmationCodeSqlUseCase } from '../../application/use-cases/update-confirmation-code-sql.use-case';
-
+import { ConfirmEmailSqlUseCase } from '../../application/use-cases/confirm-email-sql.use-case';
 
 export const userAccountProviders: Provider[] = [
   AuthUsersRepository,
@@ -113,6 +113,7 @@ export const authSQLUseCases: Provider[] = [
   UpdatePasswordTemporaryAccountSqlUseCase,
   PasswordRecoverySqlUseCase,
   UpdatePasswordSqlUseCase,
+  ConfirmEmailSqlUseCase,
   UpdateConfirmationCodeSqlUseCase,
   CreateSAUseCase,
   DeleteSAUseCase,
@@ -125,6 +126,9 @@ export const securityUseCases: Provider[] = [
   DeleteOtherUserSessionsUseCase,
 ];
 
-export const authEventHandlers: Provider[] = [UserCreatedEventHandler, CreateUserAccountEventHandler];
+export const authEventHandlers: Provider[] = [
+  UserCreatedEventHandler,
+  CreateUserAccountEventHandler,
+];
 
 export const adapters: Provider[] = [BcryptAdapter, EmailManager, EmailAdapter];

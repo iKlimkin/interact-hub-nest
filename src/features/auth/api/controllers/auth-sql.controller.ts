@@ -50,6 +50,7 @@ import { PasswordRecoverySqlCommand } from '../../application/use-cases/commands
 import { UpdatePasswordSqlCommand } from '../../application/use-cases/commands/update-password.command';
 import { UpdatePasswordTemporaryAccountSqlCommand } from '../../application/use-cases/commands/update-password-temporary-account-sql.command';
 import { UpdateConfirmationCodeSqlCommand } from '../../application/use-cases/commands/update-confirmation-code-sql.command';
+import { ConfirmEmailSqlCommand } from '../../application/use-cases/commands/confirm-email-sql.command';
 
 type ClientInfo = {
   ip: string;
@@ -213,10 +214,10 @@ export class AuthSQLController {
     @Body() inputCode: InputRegistrationCodeModel,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const command = new ConfirmEmailCommand(inputCode);
+    const command = new ConfirmEmailSqlCommand(inputCode);
 
     const confirmedUser = await this.commandBus.execute<
-      ConfirmEmailCommand,
+    ConfirmEmailSqlCommand,
       boolean
     >(command);
 

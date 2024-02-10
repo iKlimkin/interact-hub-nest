@@ -10,7 +10,7 @@ import {
   UserAccountModelType,
 } from '../../../src/features/admin/domain/entities/userAccount.schema';
 import { ConfirmEmailCommand } from '../../../src/features/auth/application/use-cases/commands/confirm-email.command';
-import { ConfirmEmailUseCase } from '../../../src/features/auth/application/use-cases/confirm-email-use-case';
+import { ConfirmEmailUseCase } from '../../../src/features/auth/application/use-cases/confirm-email.use-case';
 import { AuthUsersRepository } from '../../../src/features/auth/infrastructure/auth-users.repository';
 import { applyAppSettings } from '../../../src/settings/apply-app.settings';
 import { dropDataBase } from '../../base/utils/database-clean-up';

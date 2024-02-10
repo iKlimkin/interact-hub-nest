@@ -66,11 +66,8 @@ export class UserAccount {
     return userAccount;
   }
 
-  canBeConfirmed(code: string): boolean {
-    return (
-      !this.emailConfirmation.isConfirmed &&
-      this.emailConfirmation.confirmationCode === code
-    );
+  canBeConfirmed(): boolean {
+    return !this.emailConfirmation.isConfirmed;
   }
 
   updateHashAndSalt(hash: string, salt: string) {

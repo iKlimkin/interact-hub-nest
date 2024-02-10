@@ -1,27 +1,15 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { WithId } from 'mongodb';
+import { Injectable } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 import { OutputId } from '../../../domain/likes.types';
-import {
-  UserAccount,
-  UserAccountDocument,
-  UserAccountModelType,
-} from '../../admin/domain/entities/userAccount.schema';
+import { UserAccountDocument } from '../../admin/domain/entities/userAccount.schema';
 import { PasswordRecoveryType } from '../api/models/auth-input.models.ts/input-password-rec.type';
 import {
-  UserAccountType,
   UserRecoveryType,
   UsersResponseModel,
-  UsersSQLDto,
 } from '../api/models/auth.output.models/auth.output.models';
 import { LoginOrEmailType } from '../api/models/auth.output.models/auth.user.types';
 import { TemporaryAccountDBType } from '../api/models/temp-account.models.ts/temp-account-models';
-import {
-  TempUserAccount,
-  TempUserAccountModelType,
-} from '../domain/entities/temp-account.schema';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
 
 type PasswordsType = {
   passwordHash: string;
@@ -113,27 +101,35 @@ export class AuthUsersSqlRepository {
     }
   }
 
-  // async findUserByConfirmationCode(
-  //   emailConfirmationCode: string,
-  // ): Promise<UserAccountDocument | null> {
-  //   try {
-  //     const filter = {
-  //       'emailConfirmation.confirmationCode': emailConfirmationCode,
-  //       'emailConfirmation.expirationDate': { $gt: new Date().toISOString() },
-  //     };
+  async findUserAccountByConfirmationCode(
+    confirmationCode: string,
+  ): Promise<UsersResponseModel | null> {
+    try {
+      const currentTime = new Date().toISOString();
 
-  //     const foundSmartUser = await this.UserAccountModel.findOne(filter);
+      const filterQuery = `
+        SELECT *
+        FROM user_accounts
+        WHERE
+          confirmation_code = $1
+          AND confirmation_expiration_date > $2;
+      `;
 
-  //     if (!foundSmartUser) return null;
+      const result = await this.dataSource.query(filterQuery, [
+        confirmationCode,
+        currentTime,
+      ]);
 
-  //     return foundSmartUser;
-  //   } catch (e) {
-  //     console.error(
-  //       `there were some problems during find user by confirmation code, ${e}`,
-  //     );
-  //     return null;
-  //   }
-  // }
+      if (!result.length) return null;
+
+      return result[0];
+    } catch (e) {
+      console.error(
+        `there were some problems during find user's account by confirmation code, ${e}`,
+      );
+      return null;
+    }
+  }
 
   async findByLoginOrEmail(
     inputData: LoginOrEmailType,
@@ -178,20 +174,25 @@ export class AuthUsersSqlRepository {
   //   }
   // }
 
-  // async updateConfirmation(id: string): Promise<boolean> {
-  //   try {
-  //     const confirmedUser = await this.UserAccountModel.findByIdAndUpdate(id, {
-  //       $set: { 'emailConfirmation.isConfirmed': true },
-  //     });
+  async updateConfirmation(id: string): Promise<boolean> {
+    try {
+      const updateQuery = `
+        UPDATE user_accounts
+        SET
+          is_confirmed = true
+          WHERE id = $1
+      `;
 
-  //     return !!confirmedUser;
-  //   } catch (error) {
-  //     console.error(
-  //       `there were some problems during update user's confirmation by id: ${error}`,
-  //     );
-  //     return false;
-  //   }
-  // }
+      const result = await this.dataSource.query(updateQuery, [id]);
+
+      return result[1] > 0;
+    } catch (error) {
+      console.error(
+        `there were some problems during update user's confirmation code: ${error}`,
+      );
+      return false;
+    }
+  }
 
   async updateConfirmationCode(
     email: string,
