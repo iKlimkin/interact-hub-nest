@@ -21,16 +21,16 @@ import {
 } from '../../../../infra/utils/error-handler';
 import { InputSessionDataValidator } from '../../../security/api/models/security-input.models/create-session.model';
 import { CreateSessionSQLCommand } from '../../../security/application/use-cases/commands/create-session.sql-command';
-import { DeleteActiveSessionCommand } from '../../../security/application/use-cases/commands/delete-active-session.command';
-import { UpdateIssuedTokenCommand } from '../../../security/application/use-cases/commands/update-Issued-token.command';
+import { DeleteActiveSessionSqlCommand } from '../../../security/application/use-cases/commands/delete-active-session-sql.command';
+import { UpdateIssuedTokenSqlCommand } from '../../../security/application/use-cases/commands/update-Issued-token-sql.command';
 import { AuthService } from '../../application/auth.service';
-import { ConfirmEmailCommand } from '../../application/use-cases/commands/confirm-email.command';
-import { CreateTempAccountCommand } from '../../application/use-cases/commands/create-temp-account.command';
+import { ConfirmEmailSqlCommand } from '../../application/use-cases/commands/confirm-email-sql.command';
+import { CreateTemporaryAccountSqlCommand } from '../../application/use-cases/commands/create-temp-account-sql.command';
 import { CreateUserSQLCommand } from '../../application/use-cases/commands/create-user-sql.command';
-import { PasswordRecoveryCommand } from '../../application/use-cases/commands/recovery-password.command';
-import { UpdateConfirmationCodeCommand } from '../../application/use-cases/commands/update-confirmation-code.command';
-import { UpdatePasswordForNonExistAccountCommand } from '../../application/use-cases/commands/update-password-for-non-existing-account.command';
-
+import { PasswordRecoverySqlCommand } from '../../application/use-cases/commands/recovery-password-sql.command';
+import { UpdateConfirmationCodeSqlCommand } from '../../application/use-cases/commands/update-confirmation-code-sql.command';
+import { UpdatePasswordTemporaryAccountSqlCommand } from '../../application/use-cases/commands/update-password-temporary-account-sql.command';
+import { UpdatePasswordSqlCommand } from '../../application/use-cases/commands/update-password.command';
 import { GetClientInfo } from '../../infrastructure/decorators/client-ip.decorator';
 import { CurrentUserInfo } from '../../infrastructure/decorators/current-user-info.decorator';
 import { AccessTokenGuard } from '../../infrastructure/guards/accessToken.guard';
@@ -42,15 +42,6 @@ import { InputRegistrationCodeModel } from '../models/auth-input.models.ts/input
 import { InputRegistrationModel } from '../models/auth-input.models.ts/input-registration.model';
 import { UserInfoType } from '../models/user-models';
 import { AuthQuerySqlRepository } from '../query-repositories/auth-query.sql-repo';
-import { AuthQueryRepository } from '../query-repositories/auth-query-repo';
-import { DeleteActiveSessionSqlCommand } from '../../../security/application/use-cases/commands/delete-active-session-sql.command';
-import { UpdateIssuedTokenSqlCommand } from '../../../security/application/use-cases/commands/update-Issued-token-sql.command';
-import { CreateTemporaryAccountSqlCommand } from '../../application/use-cases/commands/create-temp-account-sql.command';
-import { PasswordRecoverySqlCommand } from '../../application/use-cases/commands/recovery-password-sql.command';
-import { UpdatePasswordSqlCommand } from '../../application/use-cases/commands/update-password.command';
-import { UpdatePasswordTemporaryAccountSqlCommand } from '../../application/use-cases/commands/update-password-temporary-account-sql.command';
-import { UpdateConfirmationCodeSqlCommand } from '../../application/use-cases/commands/update-confirmation-code-sql.command';
-import { ConfirmEmailSqlCommand } from '../../application/use-cases/commands/confirm-email-sql.command';
 
 type ClientInfo = {
   ip: string;
@@ -61,7 +52,6 @@ type ClientInfo = {
 export class AuthSQLController {
   constructor(
     private authQuerySqlRepository: AuthQuerySqlRepository,
-    private authQueryRepository: AuthQueryRepository,
     private authService: AuthService,
     private commandBus: CommandBus,
   ) {}
@@ -217,7 +207,7 @@ export class AuthSQLController {
     const command = new ConfirmEmailSqlCommand(inputCode);
 
     const confirmedUser = await this.commandBus.execute<
-    ConfirmEmailSqlCommand,
+      ConfirmEmailSqlCommand,
       boolean
     >(command);
 

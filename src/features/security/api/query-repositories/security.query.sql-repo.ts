@@ -23,14 +23,12 @@ export class SecuritySqlQueryRepo {
         userId,
       ]);
 
-      if (!result) return null;
+      if (!result.length) return null;
 
       return result.map(getSqlSessionViewModel);
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Database fails operate with find user sessions',
-        error,
-      );
+      console.error(`Database fails operate with find user sessions ${error}`);
+      return null;
     }
   }
 
@@ -44,11 +42,11 @@ export class SecuritySqlQueryRepo {
         WHERE device_id = $1
       `;
 
-      const result = await this.dataSource.query<UserSQLSession>(findQuery, [
+      const result = await this.dataSource.query<UserSQLSession[]>(findQuery, [
         deviceId,
       ]);
 
-      if (!result) return null;
+      if (!result.length) return null;
 
       return getSqlSessionViewModel(result[0]);
     } catch (error) {

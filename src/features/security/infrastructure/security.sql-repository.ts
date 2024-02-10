@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { OutputId } from '../../../domain/likes.types';
@@ -55,17 +55,18 @@ export class SecuritySqlRepository {
 
       return result[1] > 0;
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Database fails operate with update session',
-        error,
+      console.error(
+        `Database fails operate with update token's issued at ${error}`,
       );
+      return false;
     }
   }
 
   async deleteSpecificSession(deviceId: string): Promise<boolean> {
     try {
       const deleteQuery = `
-        DELETE FROM user_sessions
+        DELETE
+        FROM user_sessions
         WHERE device_id = $1
       `;
 
@@ -83,7 +84,8 @@ export class SecuritySqlRepository {
   async deleteOtherUserSessions(deviceId: string): Promise<boolean> {
     try {
       const deleteManyQuery = `
-        DELETE FROM user_sessions
+        DELETE
+        FROM user_sessions
         WHERE device_id <> $1
       `;
 
@@ -91,10 +93,10 @@ export class SecuritySqlRepository {
 
       return result[1] > 0;
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Database fails operate with delete other sessions',
-        error,
+      console.error(
+        `Database fails operate with delete other sessions ${error}`,
       );
+      return false;
     }
   }
 }

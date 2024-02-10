@@ -41,7 +41,6 @@ export class AuthUsersSqlRepository {
         recoveryCode,
         expirationDate,
       ]);
-      console.log({ result });
 
       return result[0];
     } catch (error) {
@@ -72,18 +71,28 @@ export class AuthUsersSqlRepository {
     }
   }
 
-  // async findUserById(userId: string): Promise<UserAccountDocument | null> {
-  //   try {
-  //     const foundSmartUser = await this.UserAccountModel.findById(userId);
+  async findUserAccountById(
+    userId: string,
+  ): Promise<UsersResponseModel | null> {
+    try {
+      const findQuery = `
+        SELECT *
+        FROM user_accounts
+        WHERE id = $1
+      `;
+      const result = await this.dataSource.query<UsersResponseModel[]>(
+        findQuery,
+        [userId],
+      );
 
-  //     if (!foundSmartUser) return null;
+      if (!result) return null;
 
-  //     return foundSmartUser;
-  //   } catch (error) {
-  //     console.error(`While find the user occured some errors: ${error}`);
-  //     return null;
-  //   }
-  // }
+      return result[0];
+    } catch (error) {
+      console.error(`While find the user occurred some errors: ${error}`);
+      return null;
+    }
+  }
 
   async deleteTemporaryUserAccount(recoveryCode: string): Promise<boolean> {
     try {
@@ -158,21 +167,6 @@ export class AuthUsersSqlRepository {
       return null;
     }
   }
-
-  // async findByEmail(email: string): Promise<UserAccountType | null> {
-  //   try {
-  //     const foundUser = await this.UserAccountModel.findOne({
-  //       'accountData.email': email,
-  //     });
-
-  //     if (!foundUser) return null;
-
-  //     return foundUser;
-  //   } catch (e) {
-  //     console.error(`there were some problems during find user by email, ${e}`);
-  //     return null;
-  //   }
-  // }
 
   async updateConfirmation(id: string): Promise<boolean> {
     try {
