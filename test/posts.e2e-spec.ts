@@ -10,13 +10,13 @@ import { FeedbacksTestManager } from './base/managers/FeedbacksTestManager';
 import { PostsTestManager } from './base/managers/PostsTestManager';
 import { SAManager } from './base/managers/SAManager';
 import {
-  authConstants,
   feedbacksConstants,
 } from './base/rest-models-helpers/feedbacks.constants';
 import { postConstants } from './base/rest-models-helpers/post-models';
 import { dropDataBase } from './base/utils/dataBase-clean-up';
 import { skipSettings } from './base/utils/tests-settings';
 import { createErrorsMessages } from './base/utils/make-errors-messages';
+import { userConstants } from './base/rest-models-helpers/users.constants';
 
 aDescribe(skipSettings.for('posts'))('PostsController (e2e)', () => {
   let app: INestApplication;
@@ -209,7 +209,7 @@ aDescribe(skipSettings.for('posts'))('PostsController (e2e)', () => {
     it("/posts/:postId/comments (POST) - shouldn't create comment with invalid token, expect UNAUTHORIZED", async () => {
       const { post, user1 } = expect.getState();
 
-      const invalidToken = authConstants.invalidToken;
+      const invalidToken = userConstants.invalidData.anyData;
       await feedbacksTestManager.createComment(
         { user: user1, token: invalidToken, post },
         feedbacksConstants.createdContent[0],

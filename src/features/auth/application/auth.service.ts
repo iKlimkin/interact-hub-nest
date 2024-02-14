@@ -14,7 +14,7 @@ import { UserInfoType } from '../api/models/user-models';
 export class AuthService {
   constructor(private jwtService: JwtService) {}
 
-  async getTokens(userId: string) {
+  async getTokens(userId: string): Promise<JwtTokens> {
     const deviceId = uuidv4();
     const payload = { userId, deviceId };
     const [accessToken, refreshToken] = await this.createNewTokens(payload);
@@ -61,7 +61,7 @@ export class AuthService {
   private async createNewTokens(
     payload: UserInfoType,
   ): Promise<[accessToken: string, refreshToken: string]> {
-    return await Promise.all([
+    return Promise.all([
       this.jwtService.signAsync(payload, {
         secret: jwtConstants.jwt_access_secret,
         expiresIn: '10h',

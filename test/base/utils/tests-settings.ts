@@ -6,6 +6,7 @@ export const skipSettings = {
   posts: true,
   appTests: true,
   blogs: true,
+  security: true,
 
   for(testName: TestsName): boolean {
     if (this.run_all_tests) {
@@ -26,6 +27,7 @@ enum TestsNames {
   userAuthSql = 'userAuthSql',
   posts = 'posts',
   blogs = 'blogs',
+  security = 'security',
 }
 
 type TestsName = keyof typeof TestsNames;

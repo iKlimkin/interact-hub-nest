@@ -57,6 +57,7 @@ export class RefreshTokenStrategy extends PassportStrategy(
     const { iat, deviceId } = payload;
 
     const tokenIssuedAt = new Date(iat * 1000).toISOString();
+
     const userSession = await this.securityQueryRepo.getUserSession(deviceId);
 
     const userSqlSession = await this.securitySqlQueryRepo.getUserSession(

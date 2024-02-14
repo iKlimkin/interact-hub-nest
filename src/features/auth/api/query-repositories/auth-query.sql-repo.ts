@@ -1,11 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import {
-  UserAccountViewModel,
-  UsersResponseModel,
-} from '../models/auth.output.models/auth.output.models';
+import { UserAccountViewModel } from '../models/auth.output.models/auth.output.models';
 import { LoginOrEmailType } from '../models/auth.output.models/auth.user.types';
-import { getUserAccountSqlViewModel } from '../models/auth.output.models/getUserAccount.view.model';
+import { UsersResponseModel } from '../models/auth.output.models/auth-sql.output.models';
+import { getUserAccountSqlViewModel } from '../models/auth.output.models/auth-sql.view.model';
 
 @Injectable()
 export class AuthQuerySqlRepository {
@@ -57,7 +55,7 @@ export class AuthQuerySqlRepository {
         filterQuery,
         [recoveryCode, currentTime],
       );
-      console.log({result});
+      console.log({ result });
 
       if (!result.length) return null;
 

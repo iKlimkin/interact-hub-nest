@@ -7,7 +7,7 @@ import { ConfigurationType } from '../../../src/config/configuration';
 import { EmailManager } from '../../../src/infra/application/managers/email-manager';
 import { applyAppSettings } from '../../../src/settings/apply-app.settings';
 import { UsersTestManager } from '../managers/UsersTestManager';
-import { EmailManagerMock } from '../mock/email.manager.mock';
+import { EmailManagerMock, EmailMockService } from '../mock/email.manager.mock';
 import { deleteAllData } from './dataBase-clean-up';
 
 export const initSettings = async (
@@ -27,11 +27,13 @@ export const initSettings = async (
 
   const app = testingAppModule.createNestApplication();
 
+  // const emailManagerMock = app.get<EmailMockService>(EmailMockService)
+
   const configService = app.get(ConfigService);
   const port = configService.get('PORT', { infer: true });
   const env = configService.get('getEnv', { infer: true });
 
-  console.log('in tests ENV: ', { port }, { env });
+  console.log('in tests ENV: ', { port }, env);
 
   applyAppSettings(app);
 
@@ -47,5 +49,6 @@ export const initSettings = async (
     databaseConnection,
     httpServer,
     usersTestManager,
+    // emailManagerMock,
   };
 };

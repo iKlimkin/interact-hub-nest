@@ -1,11 +1,8 @@
 export type LoginCredentials = {
-
   loginOrEmail: string;
 
   password: string;
 };
-
-
 
 export type LoginOrEmailType = {
   login?: string | null;
@@ -14,9 +11,8 @@ export type LoginOrEmailType = {
 };
 
 export type AuthUserType = {
-  id?: string
+  id?: string;
   login: string;
   email: string;
   password: string;
 };
-

@@ -3,26 +3,26 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { OutputId } from '../../../domain/likes.types';
 import {
-  UserSQLSession,
-  UserSQLSessionDTO,
-} from '../api/models/security.view.models/security.view.types';
+  UserSqlSessionDTO,
+  UserSqlSession,
+} from '../api/models/security.view.models/security.sql-view.types';
 
 @Injectable()
 export class SecuritySqlRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
   async save(
-    sessionDto: Readonly<UserSQLSessionDTO>,
+    sessionDto: Readonly<UserSqlSessionDTO>,
   ): Promise<OutputId | null> {
     try {
       const query = `
       INSERT INTO "user_sessions"
-      ("ip", "title", "user_id", "device_id",
+      ("ip", "user_agent_info", "user_id", "device_id",
       "refresh_token", "rt_issued_at", "rt_expiration_date")
       VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING "id"
       `;
 
-      const result = await this.dataSource.query<UserSQLSession>(
+      const result = await this.dataSource.query<UserSqlSession>(
         query,
         Object.values(sessionDto),
       );
@@ -39,17 +39,19 @@ export class SecuritySqlRepository {
 
   async updateIssuedToken(
     deviceId: string,
-    issuedAt: string,
+    issuedAt: Date,
+    exp: Date,
   ): Promise<boolean> {
     try {
       const updateQuery = `
         UPDATE user_sessions
-        SET rt_issued_at = $1
-        WHERE device_id = $2
+        SET rt_issued_at = $1, rt_expiration_date = $2
+        WHERE device_id = $3
       `;
 
       const result = await this.dataSource.query(updateQuery, [
         issuedAt,
+        exp,
         deviceId,
       ]);
 

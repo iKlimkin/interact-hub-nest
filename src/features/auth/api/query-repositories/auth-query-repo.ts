@@ -2,7 +2,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
 import { UserAccountViewModel } from '../models/auth.output.models/auth.output.models';
 import { LoginOrEmailType } from '../models/auth.output.models/auth.user.types';
-import { getUserAccountViewModel } from '../models/auth.output.models/getUserAccount.view.model';
+import { getUserAccountViewModel } from '../models/auth.output.models/user-account.view.model';
 import {
   UserAccount,
   UserAccountModelType,

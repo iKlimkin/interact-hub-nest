@@ -3,7 +3,6 @@ import { EmailManager } from '../src/infra/application/managers/email-manager';
 import { aDescribe } from './base/aDescribe';
 import { UsersTestManager } from './base/managers/UsersTestManager';
 import { EmailManagerMock } from './base/mock/email.manager.mock';
-import { authConstants } from './base/rest-models-helpers/feedbacks.constants';
 import { dropDataBase } from './base/utils/dataBase-clean-up';
 import { initSettings } from './base/utils/init-settings';
 import { createErrorsMessages } from './base/utils/make-errors-messages';
@@ -11,6 +10,8 @@ import { skipSettings } from './base/utils/tests-settings';
 import { wait } from './base/utils/wait'
 import { AuthSQLController } from '../src/features/auth/api/controllers/auth-sql.controller';
 import { AuthController } from '../src/features/auth/api/controllers/auth.controller';
+import { userConstants } from './base/rest-models-helpers/users.constants';
+
 
 aDescribe(skipSettings.for('userAuthSql'))('AuthController (e2e)', () => {
   let app: INestApplication;
@@ -54,7 +55,7 @@ aDescribe(skipSettings.for('userAuthSql'))('AuthController (e2e)', () => {
     it(`/auth/login (POST) - shouldn't pass login with invalid registration login, expect 400`, async () => {
       const invalidLogin = 'lo';
       const inputData = usersTestManager.createInputData({
-        login: authConstants.registrationData.length02,
+        login: userConstants.registrationData.length02,
       });
 
       const result = await usersTestManager.authLogin(
@@ -68,7 +69,7 @@ aDescribe(skipSettings.for('userAuthSql'))('AuthController (e2e)', () => {
     });
     it(`/auth/login (POST) - shouldn't pass login with invalid registration login, expect 400`, async () => {
       const inputData = usersTestManager.createInputData({
-        login: authConstants.registrationData.length101,
+        login: userConstants.registrationData.length101,
       });
 
       const result = await usersTestManager.authLogin(
@@ -83,7 +84,7 @@ aDescribe(skipSettings.for('userAuthSql'))('AuthController (e2e)', () => {
 
     it(`/auth/login (POST) - shouldn't pass login with invalid user's email, expect 400`, async () => {
       const inputData = usersTestManager.createInputData({
-        email: authConstants.registrationData.length02,
+        email: userConstants.registrationData.length02,
       });
 
       const result = await usersTestManager.authLogin(
@@ -98,7 +99,7 @@ aDescribe(skipSettings.for('userAuthSql'))('AuthController (e2e)', () => {
 
     it(`/auth/login (POST) - shouldn't pass login with invalid user's email, expect 400`, async () => {
       const inputData = usersTestManager.createInputData({
-        email: authConstants.registrationData.length101,
+        email: userConstants.registrationData.length101,
       });
 
       const result = await usersTestManager.authLogin(
@@ -113,7 +114,7 @@ aDescribe(skipSettings.for('userAuthSql'))('AuthController (e2e)', () => {
 
     it(`/auth/login (POST) - shouldn't pass login with short user's password, expect 400`, async () => {
       const inputData = usersTestManager.createInputData({
-        password: authConstants.registrationData.length05,
+        password: userConstants.registrationData.length05,
       });
 
       const result = await usersTestManager.authLogin(
@@ -128,7 +129,7 @@ aDescribe(skipSettings.for('userAuthSql'))('AuthController (e2e)', () => {
 
     it(`/auth/login (POST) - shouldn't pass login with long user's password, expect 400`, async () => {
       const inputData = usersTestManager.createInputData({
-        password: authConstants.registrationData.length21,
+        password: userConstants.registrationData.length21,
       });
 
       const result = await usersTestManager.authLogin(

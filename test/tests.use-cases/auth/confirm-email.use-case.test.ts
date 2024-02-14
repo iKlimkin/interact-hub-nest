@@ -13,7 +13,7 @@ import { ConfirmEmailCommand } from '../../../src/features/auth/application/use-
 import { ConfirmEmailUseCase } from '../../../src/features/auth/application/use-cases/confirm-email.use-case';
 import { AuthUsersRepository } from '../../../src/features/auth/infrastructure/auth-users.repository';
 import { applyAppSettings } from '../../../src/settings/apply-app.settings';
-import { dropDataBase } from '../../base/utils/database-clean-up';
+import { dropDataBase } from '../../base/utils/dataBase-clean-up';
 
 // class MockAuthRepository {
 //   async findUserByConfirmationCode(code: string, user: UserAccountDocument) {

@@ -48,10 +48,24 @@ export class UsersTestManager {
     inputData: AuthUserType,
     expectedStatus: number = HttpStatus.NO_CONTENT,
   ) {
-    await request(this.application)
+    const response = await request(this.application)
       .post(`${RouterPaths.auth}/registration`)
       .send(inputData)
       .expect(expectedStatus);
+
+    return response.body;
+  }
+
+  async registrationEmailResending(
+    email: string,
+    expectedStatus: number = HttpStatus.NO_CONTENT,
+  ) {
+    const response = await request(this.application)
+      .post(`${RouterPaths.auth}/registration-email-resending`)
+      .send({ email })
+      .expect(expectedStatus);
+
+      return response.body
   }
 
   async updateUser(adminAccessToken: string, updateModel: any) {
@@ -94,7 +108,7 @@ export class UsersTestManager {
       .post(`${RouterPaths.auth}/refresh-token`)
       .set('Cookie', `${refreshToken}`)
       .expect(expectedStatus);
-      
+
     if (expectedStatus === HttpStatus.CREATED) {
       expect(response.body).toEqual({ accessToken: expect.any(String) });
       expect(response.headers['set-cookie']).toBeDefined();

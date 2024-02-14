@@ -2,7 +2,6 @@ import { WithId } from 'mongodb';
 import {
   SecurityDeviceType,
   SecurityViewDeviceModel,
-  UserSQLSession,
 } from './security.view.types';
 
 export type SecurityDBType = WithId<SecurityDeviceType>;
@@ -16,11 +15,4 @@ export const getSecurityViewModel = (
   deviceId: session.deviceId,
 });
 
-export const getSqlSessionViewModel = (
-  session: UserSQLSession,
-): SecurityViewDeviceModel => ({
-  ip: session.ip,
-  title: session.title,
-  lastActiveDate: session.rt_issued_at.toISOString(),
-  deviceId: session.device_id,
-});
+

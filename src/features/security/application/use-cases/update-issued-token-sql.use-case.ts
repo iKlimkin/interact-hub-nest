@@ -13,6 +13,7 @@ export class UpdateIssuedTokenSqlUseCase
       await this.securitySqlRepository.updateIssuedToken(
         command.deviceId,
         command.issuedAt,
+        command.expirationDate,
       );
     return updatedSessionDate;
   }

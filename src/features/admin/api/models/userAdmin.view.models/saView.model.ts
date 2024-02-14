@@ -1,4 +1,4 @@
-import { UsersResponseModel } from '../../../../auth/api/models/auth.output.models/auth.output.models';
+import { UsersResponseModel } from '../../../../auth/api/models/auth.output.models/auth-sql.output.models';
 import { SAViewModel } from './userAdmin.view.model';
 
 export const getSAViewSQLModel = (user: UsersResponseModel): SAViewModel => ({

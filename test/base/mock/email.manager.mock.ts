@@ -1,4 +1,3 @@
-
 // export const EmailServiceMockObject = {
 //   sendEmailConfirmationMessage: jest.fn().mockImplementation(async () => {
 //     console.log('Call mock method sendPasswordRecoveryMail / MailService');
@@ -10,6 +9,8 @@
 //   }),
 // };
 
+import { EmailManager } from '../../../src/infra/application/managers/email-manager';
+
 export class EmailManagerMock {
   async sendEmailConfirmationMessage(): Promise<void> {
     await Promise.resolve();
@@ -17,4 +18,22 @@ export class EmailManagerMock {
   async sendEmailRecoveryMessage(): Promise<void> {
     await Promise.resolve();
   }
+}
+
+export class EmailMockService extends EmailManager {
+  sendEmailConfirmationMessage(
+    email: string,
+    confirmationCode: string,
+  ): Promise<any> {
+    return Promise.resolve({confirmationCode, email})
+  }
+
+  sendEmailRecoveryMessage(email: string, recoveryCode: string): Promise<any> {
+    return Promise.resolve(recoveryCode)
+  }
+}
+
+
+class EmailAdapterMock {
+  sendEmail = jest.fn().mockResolvedValue({});
 }

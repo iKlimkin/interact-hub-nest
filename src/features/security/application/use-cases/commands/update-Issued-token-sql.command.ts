@@ -1,6 +1,7 @@
 export class UpdateIssuedTokenSqlCommand {
   constructor(
     public deviceId: string,
-    public issuedAt: string,
+    public issuedAt: Date,
+    public expirationDate: Date,
   ) {}
 }

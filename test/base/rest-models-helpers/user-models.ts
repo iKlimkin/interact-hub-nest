@@ -1,4 +1,4 @@
-import { UserViewModel } from '../../../src/features/admin/api/models/userAdmin.view.models/userAdmin.view.model';
+import { SAViewModel } from '../../../src/features/admin/api/models/userAdmin.view.models/userAdmin.view.model';
 
 class UserValidationConstants {
   userValidationErrors = {
@@ -13,7 +13,7 @@ class UserValidationConstants {
     login: expect.any(String),
     email: expect.any(String),
     createdAt: expect.any(String),
-  } as UserViewModel;
+  } as SAViewModel;
 
  
 }

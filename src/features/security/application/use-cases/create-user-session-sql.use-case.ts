@@ -3,7 +3,7 @@ import { OutputId } from '../../../../domain/likes.types';
 import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
 import { SecuritySqlRepository } from '../../infrastructure/security.sql-repository';
 import { CreateSessionSQLCommand } from './commands/create-session.sql-command';
-import { UserSQLSessionDTO } from '../../api/models/security.view.models/security.view.types';
+import { UserSqlSessionDTO } from '../../api/models/security.view.models/security.sql-view.types';
 
 @CommandHandler(CreateSessionSQLCommand)
 export class CreateUserSessionSQLUseCase
@@ -17,9 +17,9 @@ export class CreateUserSessionSQLUseCase
     const { ip, browser, deviceType, refreshToken, userId, userPayload } =
       command.inputData;
 
-    const sessionDto: UserSQLSessionDTO = {
+    const sessionDto: UserSqlSessionDTO = {
       ip,
-      title: `Device type: ${deviceType}, Application: ${browser}`,
+      user_agent_info: `Device type: ${deviceType}, Application: ${browser}`,
       user_id: userId,
       device_id: userPayload.deviceId,
       refresh_token: refreshToken,

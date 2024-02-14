@@ -11,7 +11,7 @@ import { ApiRequestCounterService } from '../logging/api-request-counter.service
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class RateLimitInterceptor implements NestInterceptor {
+export class RateLimitSqlInterceptor implements NestInterceptor {
   constructor(
     private readonly apiRequestCounterService: ApiRequestCounterService,
     private configService: ConfigService,
@@ -30,7 +30,7 @@ export class RateLimitInterceptor implements NestInterceptor {
     const url = request.originalUrl;
     const timestamp = new Date();
 
-    await this.apiRequestCounterService.addClientRequest({
+    await this.apiRequestCounterService.addApiRequestSql({
       ip,
       url,
       timestamp,
@@ -39,22 +39,22 @@ export class RateLimitInterceptor implements NestInterceptor {
     const duration = 10000;
     const timeLimit = new Date(timestamp.getTime() - duration);
 
-    const requestCount = await this.apiRequestCounterService.apiClientCounter({
+    const { count } = await this.apiRequestCounterService.apiRequestCounterSql({
       ip,
       url,
       timeLimit,
     });
 
-    if (requestCount <= 5) return next.handle();
+    if (count <= 5) return next.handle();
 
-    const requestLogger =
-      await this.apiRequestCounterService.getClientRequestLogger();
+    const requestSqlLogger =
+      await this.apiRequestCounterService.getApiRequestLoggerSql();
 
     const responseInfo = {
       requestInfo: [
         {
-          ip: requestLogger[0].ip,
-          url: requestLogger[0].url,
+          ip: requestSqlLogger[0].ip,
+          url: requestSqlLogger[0].url,
         },
       ],
     };

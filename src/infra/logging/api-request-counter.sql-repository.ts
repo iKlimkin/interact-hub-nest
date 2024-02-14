@@ -11,8 +11,7 @@ export class ApiRequestCounterSQLRepository {
       const { ip, url } = inputData;
       const query = `
         INSERT INTO api_requests (ip, url)
-        VALUES
-        ($1, $2)
+        VALUES ($1, $2)
       `;
 
       const result = await this.dataSource.query(query, [ip, url]);
@@ -50,7 +49,8 @@ export class ApiRequestCounterSQLRepository {
   async getApiRequestLoggerSql(): Promise<MatchApiType[]> {
     try {
       return this.dataSource.query(`
-          SELECT * FROM api_requests
+            SELECT *
+            FROM api_requests
           `);
     } catch (error) {
       throw new InternalServerErrorException(

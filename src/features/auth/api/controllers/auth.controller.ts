@@ -108,7 +108,7 @@ export class AuthController {
     const userInfoAfterRefresh =
       this.authService.getUserPayloadByToken(refreshToken);
 
-    const issuedAt = new Date(userInfoAfterRefresh!.iat * 1000).toISOString();
+    const issuedAt = new Date(userInfoAfterRefresh!.iat * 1000).toISOString()
 
     const command = new UpdateIssuedTokenCommand(deviceId, issuedAt);
 

@@ -41,7 +41,7 @@ export class SecurityController implements SecurityInterface {
       await this.securityQueryRepo.getUserActiveSessions(userId);
 
     if (!securityData) {
-      throw new UnauthorizedException('have no active sessions');
+      throw new UnauthorizedException('Have no active sessions');
     }
 
     return securityData;

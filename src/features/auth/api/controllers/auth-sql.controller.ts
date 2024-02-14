@@ -13,7 +13,7 @@ import {
 import { CommandBus } from '@nestjs/cqrs';
 import { Response } from 'express';
 import { OutputId } from '../../../../domain/likes.types';
-import { RateLimitInterceptor } from '../../../../infra/interceptors/rate-limit.interceptor.ts';
+import { RateLimitSqlInterceptor } from '../../../../infra/interceptors/rate-limit-sql.interceptor';
 import { getDeviceInfo } from '../../../../infra/utils/device-handler';
 import {
   ErrorType,
@@ -57,7 +57,7 @@ export class AuthSQLController {
   ) {}
 
   @UseGuards(LocalAuthGuard)
-  @UseInterceptors(RateLimitInterceptor)
+  @UseInterceptors(RateLimitSqlInterceptor)
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(
@@ -108,17 +108,22 @@ export class AuthSQLController {
     const userInfoAfterRefresh =
       this.authService.getUserPayloadByToken(refreshToken);
 
-    const issuedAt = new Date(userInfoAfterRefresh!.iat * 1000).toISOString();
+    const issuedAt = new Date(userInfoAfterRefresh!.iat * 1000);
+    const expirationDate = new Date(userInfoAfterRefresh!.exp * 1000);
 
-    const command = new UpdateIssuedTokenSqlCommand(deviceId, issuedAt);
+    const command = new UpdateIssuedTokenSqlCommand(
+      deviceId,
+      issuedAt,
+      expirationDate,
+    );
 
-    await this.commandBus.execute(command);
+    await this.commandBus.execute<UpdateIssuedTokenSqlCommand,boolean>(command);
 
     res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
-    res.send({ accessToken });
+    return { accessToken };
   }
 
-  @UseInterceptors(RateLimitInterceptor)
+  @UseInterceptors(RateLimitSqlInterceptor)
   @Post('new-password')
   @HttpCode(HttpStatus.NO_CONTENT)
   async newPassword(@Body() body: InputRecoveryPassModel) {
@@ -140,7 +145,7 @@ export class AuthSQLController {
     return this.commandBus.execute(command);
   }
 
-  @UseInterceptors(RateLimitInterceptor)
+  @UseInterceptors(RateLimitSqlInterceptor)
   @Post('password-recovery')
   @HttpCode(HttpStatus.NO_CONTENT)
   async passwordRecovery(@Body() inputEmailModel: InputRecoveryEmailModel) {
@@ -164,7 +169,7 @@ export class AuthSQLController {
   }
 
   @Post('registration')
-  @UseInterceptors(RateLimitInterceptor)
+  @UseInterceptors(RateLimitSqlInterceptor)
   @HttpCode(HttpStatus.NO_CONTENT)
   async registration(
     @Body() inputModel: InputRegistrationModel,
@@ -197,7 +202,7 @@ export class AuthSQLController {
     await this.commandBus.execute(command);
   }
 
-  @UseInterceptors(RateLimitInterceptor)
+  @UseInterceptors(RateLimitSqlInterceptor)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('registration-confirmation')
   async registrationConfirmation(
@@ -217,7 +222,7 @@ export class AuthSQLController {
     }
   }
 
-  @UseInterceptors(RateLimitInterceptor)
+  @UseInterceptors(RateLimitSqlInterceptor)
   @Post('registration-email-resending')
   @HttpCode(HttpStatus.NO_CONTENT)
   async registrationEmailResending(

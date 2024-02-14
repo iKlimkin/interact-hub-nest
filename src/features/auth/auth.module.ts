@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { DynamicModule, Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -9,7 +9,10 @@ import { UsersRepository } from '../admin/infrastructure/users.repository';
 import { SecurityQueryRepo } from '../security/api/query-repositories/security.query.repo';
 import { SecurityService } from '../security/application/security.service';
 import { AuthService } from './application/auth.service';
-import { authControllers, authSQLControllers } from './infrastructure/settings/auth-controllers';
+import {
+  authControllers,
+  authSqlControllers,
+} from './infrastructure/settings/auth-controllers';
 import {
   Strategies,
   adapters,
@@ -39,7 +42,6 @@ import { mongooseModels } from './infrastructure/settings/mongoose-models';
 
     ...authUseCases,
     ...requestLoggerProviders,
-
     ...adapters,
 
     AuthService,
@@ -53,8 +55,9 @@ import { mongooseModels } from './infrastructure/settings/mongoose-models';
     ...authSQLUseCases,
   ],
   controllers:
-  authSQLControllers,
-  // authControllers,
+    process.env.MAIN_DB === 'MONGO'
+      ? authControllers
+      : authSqlControllers,
   exports: [
     JwtModule,
     BcryptAdapter,

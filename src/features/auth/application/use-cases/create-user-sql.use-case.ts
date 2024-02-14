@@ -7,9 +7,9 @@ import { CreateUserErrors } from '../../../../infra/utils/interlayer-error-handl
 import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
 import { CreateUserResultData } from '../../../admin/application/user.admins.service';
 import { UsersSQLRepository } from '../../../admin/infrastructure/users.sql-repository';
-import { UsersSQLDto } from '../../api/models/auth.output.models/auth.output.models';
 import { CreateUserSQLCommand } from './commands/create-user-sql.command';
 import { EmailNotificationEvent } from './events/email-notification-event';
+import { UsersSQLDto } from '../../api/models/auth.output.models/auth-sql.output.models';
 
 @CommandHandler(CreateUserSQLCommand)
 export class CreateUserSQLUseCase

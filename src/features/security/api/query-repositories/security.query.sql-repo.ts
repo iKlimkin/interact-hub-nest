@@ -1,10 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { getSqlSessionViewModel } from '../models/security.view.models/security.view.model';
-import {
-  SecurityViewDeviceModel,
-  UserSQLSession,
-} from '../models/security.view.models/security.view.types';
+import { SecurityViewDeviceModel } from '../models/security.view.models/security.view.types';
+import { getSqlSessionViewModel } from '../models/security.view.models/security.sql-view.models';
+import { UserSqlSession } from '../models/security.view.models/security.sql-view.types';
 
 @Injectable()
 export class SecuritySqlQueryRepo {
@@ -19,7 +17,7 @@ export class SecuritySqlQueryRepo {
         FROM user_sessions
         WHERE user_id = $1
       `;
-      const result = await this.dataSource.query<UserSQLSession[]>(findQuery, [
+      const result = await this.dataSource.query<UserSqlSession[]>(findQuery, [
         userId,
       ]);
 
@@ -42,7 +40,7 @@ export class SecuritySqlQueryRepo {
         WHERE device_id = $1
       `;
 
-      const result = await this.dataSource.query<UserSQLSession[]>(findQuery, [
+      const result = await this.dataSource.query<UserSqlSession[]>(findQuery, [
         deviceId,
       ]);
 

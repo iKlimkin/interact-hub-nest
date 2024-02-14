@@ -2,14 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { OutputId } from '../../../domain/likes.types';
-import { UserAccountDocument } from '../../admin/domain/entities/userAccount.schema';
 import { PasswordRecoveryType } from '../api/models/auth-input.models.ts/input-password-rec.type';
-import {
-  UserRecoveryType,
-  UsersResponseModel,
-} from '../api/models/auth.output.models/auth.output.models';
+import { UserRecoveryType } from '../api/models/auth.output.models/auth.output.models';
 import { LoginOrEmailType } from '../api/models/auth.output.models/auth.user.types';
 import { TemporaryAccountDBType } from '../api/models/temp-account.models.ts/temp-account-models';
+import { UsersResponseModel } from '../api/models/auth.output.models/auth-sql.output.models';
 
 type PasswordsType = {
   passwordHash: string;

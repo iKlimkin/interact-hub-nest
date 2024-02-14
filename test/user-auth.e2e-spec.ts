@@ -2,34 +2,36 @@ import { HttpStatus, INestApplication } from '@nestjs/common';
 import { EmailManager } from '../src/infra/application/managers/email-manager';
 import { aDescribe } from './base/aDescribe';
 import { UsersTestManager } from './base/managers/UsersTestManager';
-import { EmailManagerMock } from './base/mock/email.manager.mock';
-import { authConstants } from './base/rest-models-helpers/feedbacks.constants';
 import { dropDataBase } from './base/utils/dataBase-clean-up';
 import { initSettings } from './base/utils/init-settings';
 import { createErrorsMessages } from './base/utils/make-errors-messages';
 import { skipSettings } from './base/utils/tests-settings';
 import { wait } from './base/utils/wait';
+import {
+  EmailManagerMock,
+  EmailMockService,
+} from './base/mock/email.manager.mock';
+import { userConstants } from './base/rest-models-helpers/users.constants';
 
 aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
   let app: INestApplication;
   let usersTestManager: UsersTestManager;
+  let emailManagerMock: EmailMockService;
 
   beforeAll(async () => {
     const result = await initSettings((moduleBuilder) =>
-      moduleBuilder.overrideProvider(EmailManager).useClass(EmailManagerMock),
+      moduleBuilder.overrideProvider(EmailManager).useClass(EmailMockService),
     );
 
     usersTestManager = result.usersTestManager;
+    // emailManagerMock = result.emailManagerMock;
+
     app = result.app;
   });
 
   afterAll(async () => {
     await app.close();
   });
-
-  // afterEach(async () => {
-  //   await dropDataBase(app);
-  // });
 
   describe('login', () => {
     afterAll(async () => {
@@ -56,7 +58,7 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
     it(`/auth/login (POST) - shouldn't pass login with invalid registration login, expect 400`, async () => {
       const invalidLogin = 'lo';
       const inputData = usersTestManager.createInputData({
-        login: authConstants.registrationData.length02,
+        login: userConstants.registrationData.length02,
       });
 
       const result = await usersTestManager.authLogin(
@@ -70,7 +72,7 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
     });
     it(`/auth/login (POST) - shouldn't pass login with invalid registration login, expect 400`, async () => {
       const inputData = usersTestManager.createInputData({
-        login: authConstants.registrationData.length101,
+        login: userConstants.registrationData.length101,
       });
 
       const result = await usersTestManager.authLogin(
@@ -85,7 +87,7 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
 
     it(`/auth/login (POST) - shouldn't pass login with invalid user's email, expect 400`, async () => {
       const inputData = usersTestManager.createInputData({
-        email: authConstants.registrationData.length02,
+        email: userConstants.registrationData.length02,
       });
 
       const result = await usersTestManager.authLogin(
@@ -100,7 +102,7 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
 
     it(`/auth/login (POST) - shouldn't pass login with invalid user's email, expect 400`, async () => {
       const inputData = usersTestManager.createInputData({
-        email: authConstants.registrationData.length101,
+        email: userConstants.registrationData.length101,
       });
 
       const result = await usersTestManager.authLogin(
@@ -115,7 +117,7 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
 
     it(`/auth/login (POST) - shouldn't pass login with short user's password, expect 400`, async () => {
       const inputData = usersTestManager.createInputData({
-        password: authConstants.registrationData.length05,
+        password: userConstants.registrationData.length05,
       });
 
       const result = await usersTestManager.authLogin(
@@ -130,7 +132,7 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
 
     it(`/auth/login (POST) - shouldn't pass login with long user's password, expect 400`, async () => {
       const inputData = usersTestManager.createInputData({
-        password: authConstants.registrationData.length21,
+        password: userConstants.registrationData.length21,
       });
 
       const result = await usersTestManager.authLogin(
@@ -249,7 +251,7 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
       await usersTestManager.logout(oldRefreshToken, HttpStatus.UNAUTHORIZED);
     });
 
-    it(`/auth/logout (POST) - should to leave the account, `, async () => {
+    it(`/auth/logout (POST) - should leave from account, `, async () => {
       const { newRefreshToken } = expect.getState();
 
       await usersTestManager.logout(newRefreshToken);
@@ -274,10 +276,12 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
       );
     });
   });
+
   describe('registration', () => {
     afterAll(async () => {
       await dropDataBase(app);
     });
+
     it(`/auth/registration (POST) - should pass registration for uniq user`, async () => {
       const correctInputData = usersTestManager.createInputData({});
 
@@ -287,16 +291,22 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
     it(`/auth/registration (POST) - should receive error with the same already existed login, 400`, async () => {
       const inputData = usersTestManager.createInputData({});
 
-      const result = await usersTestManager.registration(inputData);
+      const result = await usersTestManager.registration(
+        inputData,
+        HttpStatus.BAD_REQUEST,
+      );
 
       const error = createErrorsMessages(['login']);
       usersTestManager.checkUserData(result, error);
     });
 
-    it(`/auth/registration (POST) - should receive error with the same already existed login, 400`, async () => {
+    it(`/auth/registration (POST) - should receive error with the same already existed email, 400`, async () => {
       const inputData = usersTestManager.createInputData({ login: 'another' });
 
-      const result = await usersTestManager.registration(inputData);
+      const result = await usersTestManager.registration(
+        inputData,
+        HttpStatus.BAD_REQUEST,
+      );
 
       const error = createErrorsMessages(['email']);
       usersTestManager.checkUserData(result, error);
@@ -304,18 +314,22 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
 
     it(`/auth/registration (POST) - shouldn't pass registration with bad passwords, 400`, async () => {
       const invalidInputDataShort = usersTestManager.createInputData({
-        password: authConstants.registrationData.length05,
+        password: userConstants.registrationData.length05,
       });
 
       const invalidInputDataLong = usersTestManager.createInputData({
-        password: authConstants.registrationData.length21,
+        password: userConstants.registrationData.length21,
       });
 
       const result1 = await usersTestManager.registration(
         invalidInputDataShort,
+        HttpStatus.BAD_REQUEST,
       );
 
-      const result2 = await usersTestManager.registration(invalidInputDataLong);
+      const result2 = await usersTestManager.registration(
+        invalidInputDataLong,
+        HttpStatus.BAD_REQUEST,
+      );
 
       const error = createErrorsMessages(['password']);
       usersTestManager.checkUserData(result1, error);
@@ -325,15 +339,81 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
     it(`/auth/registration (POST) - shouldn't pass registration with bad fields, 400`, async () => {
       const invalidInputDataShort = usersTestManager.createInputData();
 
-      const result = await usersTestManager.registration(invalidInputDataShort);
+      await wait(10);
 
-      const error = createErrorsMessages(['password', 'login', 'email']);
+      const result = await usersTestManager.registration(
+        invalidInputDataShort,
+        HttpStatus.BAD_REQUEST,
+      );
+
+      const error = createErrorsMessages(['login', 'password', 'email']);
       usersTestManager.checkUserData(result, error);
     });
   });
-  describe('registration-email-resending', () => {});
+  describe('registration-email-resending', () => {
+    beforeAll(async () => {
+      const inputData = usersTestManager.createInputData({});
+      const user = await usersTestManager.createSA(inputData);
+
+      expect.setState({ user, userInputData: inputData });
+    });
+
+    afterAll(async () => {
+      await dropDataBase(app);
+    });
+
+    it(`/auth/registration-email-resending (POST) - shouldn't passed api with invalid email, 400`, async () => {
+      const res = await usersTestManager.registrationEmailResending(
+        '@',
+        HttpStatus.BAD_REQUEST,
+      );
+
+      const error = createErrorsMessages(['email']);
+
+      usersTestManager.checkUserData(res, error);
+    });
+
+    it(`/auth/registration-email-resending (POST) - shouldn't passed api with a non-existent email in the system, 400`, async () => {
+      const res = await usersTestManager.registrationEmailResending(
+        '1@m.ru',
+        HttpStatus.BAD_REQUEST,
+      );
+
+      const error = createErrorsMessages(
+        ['email'],
+        `Email is already confirmed or user doesn't exist`,
+      );
+
+      usersTestManager.checkUserData(res, error);
+    });
+
+    it(`/auth/registration-email-resending (POST) - shouldn't send message with confirmation code, user is confirmed, 400 `, async () => {
+      const { userInputData } = expect.getState();
+
+      const res = await usersTestManager.registrationEmailResending(
+        userInputData.email,
+        HttpStatus.BAD_REQUEST,
+      );
+
+      const error = createErrorsMessages(
+        ['email'],
+        `Email is already confirmed or user doesn't exist`,
+      );
+
+      usersTestManager.checkUserData(res, error);
+    });
+
+    it(`/auth/registration-email-resending (POST) - should send confirmation code, at least receive 204`, async () => {
+      const inputData = usersTestManager.createInputData({
+        email: userConstants.registrationData.EMAIL2,
+        login: userConstants.registrationData.length05
+      });
+      await usersTestManager.registration(inputData);
+
+      await usersTestManager.registrationEmailResending(inputData.email);
+    });
+  });
   describe('registration-confirmation', () => {});
   describe('password-recovery', () => {});
   describe('new-password', () => {});
-  describe('logout', () => {});
 });

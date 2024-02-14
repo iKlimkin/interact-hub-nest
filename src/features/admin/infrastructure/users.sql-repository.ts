@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import {
-  UsersResponseModel,
-  UsersSQLDto,
-} from '../../auth/api/models/auth.output.models/auth.output.models';
 import { CreateUserResultData } from '../application/user.admins.service';
+import {
+  UsersSQLDto,
+  UsersResponseModel,
+} from '../../auth/api/models/auth.output.models/auth-sql.output.models';
 
 @Injectable()
 export class UsersSQLRepository {
