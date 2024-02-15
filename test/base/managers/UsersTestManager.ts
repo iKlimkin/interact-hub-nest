@@ -5,6 +5,7 @@ import { ErrorsMessages } from '../../../src/infra/utils/error-handler';
 import { SAViewModel } from '../../../src/features/admin/api/models/userAdmin.view.models/userAdmin.view.model';
 import { JwtTokens } from '../../../src/features/auth/api/models/jwt.types';
 import { INestApplication, HttpStatus } from '@nestjs/common';
+import { UserProfileType } from '../../../src/features/auth/api/models/auth.output.models/auth.output.models';
 
 export class UsersTestManager {
   constructor(protected readonly app: INestApplication) {}
@@ -67,6 +68,16 @@ export class UsersTestManager {
 
       return response.body
   }
+
+  async registrationConfirmation (
+    code: string | null,
+    expectedStatus: number = HttpStatus.NO_CONTENT
+) { 
+  await request(this.application)
+    .post(`${RouterPaths.auth}/registration-confirmation`)
+    .send({code})
+    .expect(expectedStatus)
+}
 
   async updateUser(adminAccessToken: string, updateModel: any) {
     return request(this.application)
@@ -145,6 +156,8 @@ export class UsersTestManager {
         login: user.login,
         userId: expect.any(String),
       });
+
+      return res.body as UserProfileType
   }
 
   async logout(
@@ -155,6 +168,18 @@ export class UsersTestManager {
       .post(`${RouterPaths.auth}/logout`)
       .set('Cookie', `${refreshToken}`)
       .expect(expectedStatus);
+  }
+
+  async deleteUser (userId: number) {
+    await request(this.application)
+      .delete(`${RouterPaths.users}/${userId}`)
+      .set('Authorization', 'Basic YWRtaW46cXdlcnR5')
+      .expect(HttpStatus.NO_CONTENT);
+
+    await request(this.application)
+      .get(`${RouterPaths.users}/${userId}`)
+      .set('Authorization', 'Basic YWRtaW46cXdlcnR5')
+      .expect(HttpStatus.NOT_FOUND);
   }
 
   private extractRefreshToken(response: any) {

@@ -82,9 +82,8 @@ export class SuperAdminsSQLController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteSA(@Param('id', ObjectIdPipe) userId: string): Promise<void> {
-    console.log({ userId });
-
     const command = new DeleteSACommand(userId);
+
     const result = await this.commandBus.execute<DeleteSACommand, boolean>(
       command,
     );

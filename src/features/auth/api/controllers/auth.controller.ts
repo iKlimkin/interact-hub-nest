@@ -108,7 +108,7 @@ export class AuthController {
     const userInfoAfterRefresh =
       this.authService.getUserPayloadByToken(refreshToken);
 
-    const issuedAt = new Date(userInfoAfterRefresh!.iat * 1000).toISOString()
+    const issuedAt = new Date(userInfoAfterRefresh!.iat * 1000).toISOString();
 
     const command = new UpdateIssuedTokenCommand(deviceId, issuedAt);
 
@@ -181,6 +181,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { login, email } = inputModel;
+    console.log({ email });
 
     const foundUser = await this.authQueryRepository.findByLoginOrEmail({
       login,

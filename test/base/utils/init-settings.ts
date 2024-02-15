@@ -9,6 +9,8 @@ import { applyAppSettings } from '../../../src/settings/apply-app.settings';
 import { UsersTestManager } from '../managers/UsersTestManager';
 import { EmailManagerMock, EmailMockService } from '../mock/email.manager.mock';
 import { deleteAllData } from './dataBase-clean-up';
+import { SecuritySqlQueryRepo } from '../../../src/features/security/api/query-repositories/security.query.sql-repo';
+import { DataSource } from 'typeorm';
 
 export const initSettings = async (
   addSettingsToModuleBuilder?: (moduleBuilder: TestingModuleBuilder) => void,
@@ -17,7 +19,7 @@ export const initSettings = async (
     imports: [AppModule],
   })
     .overrideProvider(EmailManager)
-    .useValue(EmailManagerMock);
+    .useValue(EmailMockService);
 
   if (addSettingsToModuleBuilder) {
     addSettingsToModuleBuilder(testingModuleBuilder);
@@ -27,8 +29,11 @@ export const initSettings = async (
 
   const app = testingAppModule.createNestApplication();
 
-  // const emailManagerMock = app.get<EmailMockService>(EmailMockService)
+  // const emailManagerMock = testingAppModule.get<EmailMockService>(EmailMockService)
 
+  const securitySqlQueryRepo = testingAppModule.get<SecuritySqlQueryRepo>(SecuritySqlQueryRepo)
+  const dataBase = testingAppModule.get<DataSource>(DataSource)
+  
   const configService = app.get(ConfigService);
   const port = configService.get('PORT', { infer: true });
   const env = configService.get('getEnv', { infer: true });
@@ -49,6 +54,7 @@ export const initSettings = async (
     databaseConnection,
     httpServer,
     usersTestManager,
-    // emailManagerMock,
+    securitySqlQueryRepo,
+    dataBase,
   };
 };

@@ -7,16 +7,21 @@ import { initSettings } from './base/utils/init-settings';
 import { createErrorsMessages } from './base/utils/make-errors-messages';
 import { skipSettings } from './base/utils/tests-settings';
 import { wait } from './base/utils/wait';
+import { TestBed } from '@automock/jest';
 import {
   EmailManagerMock,
   EmailMockService,
 } from './base/mock/email.manager.mock';
 import { userConstants } from './base/rest-models-helpers/users.constants';
+import { SecuritySqlQueryRepo } from '../src/features/security/api/query-repositories/security.query.sql-repo';
+import { DataSource } from 'typeorm';
 
 aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
   let app: INestApplication;
   let usersTestManager: UsersTestManager;
   let emailManagerMock: EmailMockService;
+  let securitySqlQueryRepo: SecuritySqlQueryRepo;
+  let dataBase: DataSource;
 
   beforeAll(async () => {
     const result = await initSettings((moduleBuilder) =>
@@ -25,6 +30,8 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
 
     usersTestManager = result.usersTestManager;
     // emailManagerMock = result.emailManagerMock;
+    securitySqlQueryRepo = result.securitySqlQueryRepo;
+    dataBase = result.dataBase;
 
     app = result.app;
   });
@@ -404,13 +411,69 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
     });
 
     it(`/auth/registration-email-resending (POST) - should send confirmation code, at least receive 204`, async () => {
+      const { user } = expect.getState();
+
+      await usersTestManager.deleteUser(user.id);
+
       const inputData = usersTestManager.createInputData({
         email: userConstants.registrationData.EMAIL2,
-        login: userConstants.registrationData.length05
+        login: userConstants.registrationData.length05,
       });
       await usersTestManager.registration(inputData);
 
       await usersTestManager.registrationEmailResending(inputData.email);
+      expect.setState({ registrationData: inputData })
+    });
+
+    it(`/auth/registration-email-resending (POST) - should get confirmation code after registration, 204`, async () => {
+      const { registrationData } = expect.getState()
+
+      await wait(10);
+      const { accessToken } = await usersTestManager.authLogin(registrationData);
+
+      const userInfo = await usersTestManager.getProfile(null, accessToken);
+
+      const result = await dataBase.query(
+        `SELECT confirmation_code FROM user_accounts WHERE id = '${userInfo.userId}'`,
+      );
+
+      const confirmationCode = result[0]['confirmation_code'];
+
+      // const emailSpy = jest.spyOn(
+      //   emailManagerMock,
+      //   'sendEmailConfirmationMessage',
+      // );
+
+      // expect(emailSpy).toHaveBeenCalled();
+      // expect(emailSpy).resolves;
+
+      expect.setState({ confirmationCode });
+    });
+
+    it(`/auth/registration-confirmation (POST) - should'nt accept invalid confirmationCode, 400`, async () => {
+      await usersTestManager.registrationConfirmation(
+        null,
+        HttpStatus.BAD_REQUEST,
+      );
+    });
+
+    it(`/auth/registration-confirmation (POST) - should accept confirmationCode, and confirmed user, 204`, async () => {
+      const { confirmationCode } = expect.getState();
+
+      const responseBefore = await dataBase.query(
+        `SELECT * FROM user_accounts WHERE confirmation_code = '${confirmationCode}'`,
+      );
+      console.log({ responseBefore });
+
+      expect(responseBefore[0]['is_confirmed']).toBeFalsy();
+      await usersTestManager.registrationConfirmation(confirmationCode);
+
+      const response = await dataBase.query(
+        `SELECT is_confirmed FROM user_accounts WHERE confirmation_code = '${confirmationCode}'`,
+      );
+      console.log({ response });
+
+      expect(response[0]['is_confirmed']).toBeTruthy();
     });
   });
   describe('registration-confirmation', () => {});

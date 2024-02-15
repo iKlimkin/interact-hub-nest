@@ -34,6 +34,6 @@ export class EmailMockService extends EmailManager {
 }
 
 
-class EmailAdapterMock {
+export class EmailAdapterMock {
   sendEmail = jest.fn().mockResolvedValue({});
 }

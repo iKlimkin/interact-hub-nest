@@ -42,6 +42,7 @@ import { InputRegistrationCodeModel } from '../models/auth-input.models.ts/input
 import { InputRegistrationModel } from '../models/auth-input.models.ts/input-registration.model';
 import { UserInfoType } from '../models/user-models';
 import { AuthQuerySqlRepository } from '../query-repositories/auth-query.sql-repo';
+import { UserProfileType } from '../models/auth.output.models/auth.output.models';
 
 type ClientInfo = {
   ip: string;
@@ -117,7 +118,9 @@ export class AuthSQLController {
       expirationDate,
     );
 
-    await this.commandBus.execute<UpdateIssuedTokenSqlCommand,boolean>(command);
+    await this.commandBus.execute<UpdateIssuedTokenSqlCommand, boolean>(
+      command,
+    );
 
     res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
     return { accessToken };
@@ -247,7 +250,9 @@ export class AuthSQLController {
 
   @UseGuards(AccessTokenGuard)
   @Get('me')
-  async getProfile(@CurrentUserInfo() userInfo: UserInfoType) {
+  async getProfile(
+    @CurrentUserInfo() userInfo: UserInfoType,
+  ): Promise<UserProfileType> {
     const user = await this.authQuerySqlRepository.getUserById(userInfo.userId);
 
     if (!user) {

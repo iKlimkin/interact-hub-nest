@@ -59,12 +59,18 @@ export class UsersSQLRepository {
 
   async deleteUser(userId: string): Promise<boolean> {
     try {
-      const query = `
-        DELETE FROM "user_accounts"
-        WHERE "id" = $1
-     `;
+      const deleteSessionsQuery = `
+      DELETE FROM user_sessions
+      WHERE user_id = $1
+    `;
+    await this.dataSource.query(deleteSessionsQuery, [userId]);
 
-      const result = await this.dataSource.query(query, [userId]);
+    const deleteUserAccountsQuery = `
+      DELETE FROM user_accounts
+      WHERE id = $1
+    `;
+
+    const result = await this.dataSource.query(deleteUserAccountsQuery, [userId]);
 
       return result[1] > 0;
     } catch (error) {
