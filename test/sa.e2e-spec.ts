@@ -1,47 +1,91 @@
-import { INestApplication } from '@nestjs/common';
-import { TestingModule, Test } from '@nestjs/testing';
-import { UsersTestManager } from './base/managers/UsersTestManager';
+import { HttpStatus, INestApplication } from '@nestjs/common';
+import { EmailManager } from '../src/infra/application/managers/email-manager';
 import { aDescribe } from './base/aDescribe';
-import { expectLength } from './base/utils/expect-length.test-utils';
-import { AppModule } from '../src/app.module';
-import { applyAppSettings } from '../src/settings/apply-app.settings';
+import { UsersTestManager } from './base/managers/UsersTestManager';
+import { EmailMockService } from './base/mock/email.manager.mock';
+import { dropDataBase } from './base/utils/dataBase-clean-up';
+import { initSettings } from './base/utils/init-settings';
 import { skipSettings } from './base/utils/tests-settings';
+import { SATestManager } from './base/managers/SATestManager';
+import { DataSource } from 'typeorm';
+import { AuthUserType } from '../src/features/auth/api/models/auth.output.models/auth.user.types';
+import { defaultSATestModel } from './base/rest-models-helpers/users.constants';
+import { PaginationModel } from './base/utils/pagination-model';
+import { SAViewModel } from '../src/features/admin/api/models/userAdmin.view.models/userAdmin.view.model';
 
-const TEST_ADMIN_CREDENTIALS = {
-  login: 'test',
-  password: 'qwerty',
-};
-
-// Кастомная реализация пропуска тестов
-aDescribe(skipSettings.for('appTests'))('AppController (e2e)', () => {
+aDescribe(skipSettings.for('sa'))('saController (e2e)', () => {
   let app: INestApplication;
-  let userTestManger: UsersTestManager;
+  let usersTestManager: UsersTestManager;
+  let saTestManager: SATestManager;
+  let dataBase: DataSource;
+  let paginationModel: PaginationModel<SAViewModel>
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    })
-      // .overrideProvider(AdminUserService)
-      // .useValue(UserServiceMockObject)
-      .compile();
+  beforeAll(async () => {
+    const appSettings = await initSettings();
 
-    app = moduleFixture.createNestApplication();
+    // usersTestManager = appSettings.usersTestManager;
+    app = appSettings.app;
 
-    // Применяем все настройки приложения (pipes, guards, filters, ...)
-    applyAppSettings(app);
-
-    await app.init();
-
-    // Init userManager
-    userTestManger = new UsersTestManager(app);
-
-    // change env
-    console.log(process.env.ENV);
+    paginationModel = new PaginationModel()
+    saTestManager = new SATestManager(app);
   });
 
   afterAll(async () => {
     await app.close();
   });
 
-  it('/ (POST)', async () => {})
+  describe('create SA', () => {
+    afterAll(async () => {
+      await dropDataBase(app);
+    });
+
+    it(`/sa/users (POST) - should create sa, 201`, async () => {
+      let i = 1;
+      const paginationData: AuthUserType[] = [];
+
+      while (i !== 10) {
+        const inputData = saTestManager.createInputData({}, i);
+        paginationData.push(inputData);
+        i++;
+
+        await saTestManager.createSA(inputData);
+        expect.setState({ paginationData })
+      }
+    });
+
+    it(`/sa/users (GET) - test pagination sa, 200`, async () => {
+      const { paginationData } = expect.getState()
+      
+      let data = {
+        pagesCount: 0,
+        page: 1,
+        pageSize: 10,
+        totalCount: 9,
+        items: paginationData,
+      }
+
+      const query1 = {};
+      const datapg = paginationModel.getData(data)
+      
+      const result1 = await saTestManager.getSAPagination(query1, defaultSATestModel);
+
+      const query2 = { searchLoginTerm: 'ykt91Ue6F3' };
+      
+      // const result2 = await saTestManager.getSAPagination(query2, defaultSATestModel)
+      
+      const query3 = { searchEmailTerm: 'qwert5wq@yaol.com' }
+
+
+
+      const query4 = {
+        pageSize: 3,
+        pageNumber: 2,
+        sortDirection: 'asc',
+        sortBy: 'login',
+      };
+
+
+
+    });
+  });
 });

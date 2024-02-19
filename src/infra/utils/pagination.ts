@@ -10,6 +10,11 @@ export type PaginationType = {
   sortSQLDirection: string;
 };
 
+export type SortOptions = {
+  sortDirection: string;
+  sortBy: string;
+};
+
 export const getPagination = async (
   inputData: BaseFilter,
   option?: boolean,
@@ -19,7 +24,6 @@ export const getPagination = async (
 
   const sortSQLDirection: SortDirection =
     inputData.sortDirection === 'asc' ? 'asc' : 'desc';
-
 
   const pageNumber: number = inputData.pageNumber
     ? Math.min(+inputData.pageNumber, 50)
@@ -64,6 +68,6 @@ export const getPagination = async (
     pageSize,
     skip,
     sortBySQL,
-    sortSQLDirection,
+    sortSQLDirection: sortSQLDirection.toUpperCase(),
   };
 };

@@ -15,7 +15,7 @@ import {
 import { CommandBus } from '@nestjs/cqrs';
 import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
 import { ObjectIdPipe } from '../../../../infra/pipes/valid-objectId.pipe';
-import { LayerNoticeInterceptor } from '../../../../infra/utils/error-layer-interceptor';
+import { LayerNoticeInterceptor } from '../../../../infra/utils/interlayer-error-handler.ts/error-layer-interceptor';
 import { CreateUserErrors } from '../../../../infra/utils/interlayer-error-handler.ts/user-errors';
 import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth.guard';
 import { CreateSACommand } from '../../application/use-cases/commands/create-sa.command';
@@ -27,8 +27,8 @@ import { SAViewModel } from '../models/userAdmin.view.models/userAdmin.view.mode
 import { UsersSqlQueryRepository } from '../query-repositories/users.query.sql-repo';
 
 @UseGuards(BasicSAAuthGuard)
-@Controller('users')
-export class SuperAdminsSQLController {
+@Controller('sa/users')
+export class SASqlController {
   constructor(
     private usersSQLQueryRepository: UsersSqlQueryRepository,
     private commandBus: CommandBus,

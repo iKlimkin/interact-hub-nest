@@ -3,7 +3,7 @@ import { HydratedDocument, Model, Types } from 'mongoose';
 import { CreateBlogModelType } from '../../api/models/input.blog.models/create.blog.model';
 import { validateOrReject } from 'class-validator';
 import { BadRequestException } from '@nestjs/common';
-import { BlogViewModel } from '../../api/models/blog.view.models/blog.view.models';
+import { BlogViewModelType } from '../../api/models/output.blog.models/blog.view.model-type';
 
 export type BlogDocument = HydratedDocument<Blog>;
 export type BlogModelType = Model<BlogDocument> & StaticsType;
@@ -48,7 +48,7 @@ export class Blog {
     return blog;
   }
 
-  getBlogsViewModel(blogModel: BlogDocument): BlogViewModel {
+  getBlogsViewModel(blogModel: BlogDocument): BlogViewModelType {
     return {
       id: blogModel._id.toString(),
       name: blogModel.name,

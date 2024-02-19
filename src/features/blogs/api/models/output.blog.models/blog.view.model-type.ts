@@ -1,4 +1,4 @@
-export type BlogViewModel = {
+export type BlogViewModelType = {
   /**
    * id of the existing blog
    */

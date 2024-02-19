@@ -1,7 +1,7 @@
 import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { InjectModel } from '@nestjs/mongoose';
 import { BcryptAdapter } from '../../../../infra/adapters/bcrypt-adapter';
-import { LayerNoticeInterceptor } from '../../../../infra/utils/error-layer-interceptor';
+import { LayerNoticeInterceptor } from '../../../../infra/utils/interlayer-error-handler.ts/error-layer-interceptor';
 import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
 import {
   UserAccount,

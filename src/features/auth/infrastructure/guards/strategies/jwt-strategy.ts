@@ -48,12 +48,11 @@ export class RefreshTokenStrategy extends PassportStrategy(
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
       ignoreExpiration: false,
-      passReqToCallback: true,
       secretOrKey: jwtConstants.jwt_refresh_secret,
     });
   }
 
-  async validate(req: Request, payload: any) {
+  async validate(payload: any) {
     const { iat, deviceId } = payload;
 
     const tokenIssuedAt = new Date(iat * 1000).toISOString();
@@ -76,5 +75,5 @@ export class RefreshTokenStrategy extends PassportStrategy(
 }
 
 const cookieExtractor = (request: Request): string => {
-  return request.headers.cookie?.split('=')[1] as string;
-};
+  return request.cookies.refreshToken || request.headers.cookie?.split('=')[1]
+}

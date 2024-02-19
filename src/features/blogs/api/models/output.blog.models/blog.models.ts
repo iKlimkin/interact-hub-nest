@@ -11,3 +11,13 @@ export type BlogType = {
 export type BlogsTypeWithId = BlogType & { id: string }
 
 export type BlogDBType = WithId<BlogType>;
+
+
+export type BlogsSqlDbType = {
+    id: string;
+    title: string;
+    description: string;
+    website_url: string;
+    created_at: Date;
+    is_membership: boolean;
+}

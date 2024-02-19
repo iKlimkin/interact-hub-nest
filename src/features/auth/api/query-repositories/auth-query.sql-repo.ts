@@ -4,10 +4,11 @@ import { UserAccountViewModel } from '../models/auth.output.models/auth.output.m
 import { LoginOrEmailType } from '../models/auth.output.models/auth.user.types';
 import { UsersResponseModel } from '../models/auth.output.models/auth-sql.output.models';
 import { getUserAccountSqlViewModel } from '../models/auth.output.models/auth-sql.view.model';
+import { InjectDataSource } from '@nestjs/typeorm';
 
 @Injectable()
 export class AuthQuerySqlRepository {
-  constructor(private dataSource: DataSource) {}
+  constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async findByLoginOrEmail(
     inputData: LoginOrEmailType,
@@ -55,7 +56,6 @@ export class AuthQuerySqlRepository {
         filterQuery,
         [recoveryCode, currentTime],
       );
-      console.log({ result });
 
       if (!result.length) return null;
 

@@ -95,6 +95,7 @@ export class AuthController {
   }
 
   @UseGuards(RefreshTokenGuard)
+  @HttpCode(HttpStatus.OK)
   @Post('refresh-token')
   async refreshToken(
     @CurrentUserInfo() userInfo: UserInfoType,

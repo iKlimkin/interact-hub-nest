@@ -1,8 +1,9 @@
-import { DynamicModule, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { BcryptAdapter } from '../../infra/adapters/bcrypt-adapter';
 import { UsersQueryRepository } from '../admin/api/query-repositories/users.query.repo';
 import { UsersRepository } from '../admin/infrastructure/users.repository';
@@ -34,6 +35,13 @@ import { mongooseModels } from './infrastructure/settings/mongoose-models';
     PassportModule,
     MongooseModule.forFeature(mongooseModels),
     CqrsModule,
+    ThrottlerModule.forRoot([
+      {
+        name: 'default',
+        ttl: 10000,
+        limit: 50,
+      },
+    ]),
   ],
 
   providers: [
@@ -55,9 +63,7 @@ import { mongooseModels } from './infrastructure/settings/mongoose-models';
     ...authSQLUseCases,
   ],
   controllers:
-    process.env.MAIN_DB === 'MONGO'
-      ? authControllers
-      : authSqlControllers,
+    process.env.MAIN_DB === 'MONGO' ? authControllers : authSqlControllers,
   exports: [
     JwtModule,
     BcryptAdapter,

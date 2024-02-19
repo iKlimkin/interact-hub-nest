@@ -1,4 +1,4 @@
-import { BlogViewModel } from '../../../src/features/blogs/api/models/blog.view.models/blog.view.models';
+import { BlogViewModelType } from '../../../src/features/blogs/api/models/output.blog.models/blog.view.model-type';
 
 export const blogValidationErrors = {
   errorsMessages: expect.arrayContaining([
@@ -15,4 +15,4 @@ export const blogEqualTo = {
   websiteUrl: expect.any(String),
   isMembership: expect.any(Boolean),
   createdAt: expect.any(String),
-} as BlogViewModel;
+} as BlogViewModelType;

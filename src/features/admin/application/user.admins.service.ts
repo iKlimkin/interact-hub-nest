@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { BcryptAdapter } from '../../../infra/adapters/bcrypt-adapter';
-import { LayerNoticeInterceptor } from '../../../infra/utils/error-layer-interceptor';
+import { LayerNoticeInterceptor } from '../../../infra/utils/interlayer-error-handler.ts/error-layer-interceptor';
 import { CreateUserErrors } from '../../../infra/utils/interlayer-error-handler.ts/user-errors';
 import { AuthUserType } from '../../auth/api/models/auth.output.models/auth.user.types';
 import {

@@ -9,7 +9,9 @@ export type UserType = {
   passwordHash: string;
 };
 
-export type UserProfileType = Pick<UserType, 'login' | 'email'> & { userId: string }
+export type UserProfileType = Pick<UserType, 'login' | 'email'> & {
+  userId: string;
+};
 
 export type UserRecoveryType = {
   recoveryCode: string;

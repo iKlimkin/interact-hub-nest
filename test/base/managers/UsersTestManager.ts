@@ -113,14 +113,14 @@ export class UsersTestManager {
 
   async refreshToken(
     refreshToken: string,
-    expectedStatus: number = HttpStatus.CREATED,
+    expectedStatus: number = HttpStatus.OK,
   ): Promise<JwtTokens | any> {
     const response = await request(this.application)
       .post(`${RouterPaths.auth}/refresh-token`)
       .set('Cookie', `${refreshToken}`)
       .expect(expectedStatus);
 
-    if (expectedStatus === HttpStatus.CREATED) {
+    if (expectedStatus === HttpStatus.OK) {
       expect(response.body).toEqual({ accessToken: expect.any(String) });
       expect(response.headers['set-cookie']).toBeDefined();
 

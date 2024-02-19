@@ -15,12 +15,15 @@ import {
 import { userConstants } from './base/rest-models-helpers/users.constants';
 import { SecuritySqlQueryRepo } from '../src/features/security/api/query-repositories/security.query.sql-repo';
 import { DataSource } from 'typeorm';
+import { TestingModule } from '@nestjs/testing';
+import { AuthUsersSqlRepository } from '../src/features/auth/infrastructure/auth-users.sql-repository';
 
 aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
   let app: INestApplication;
+  let testingAppModule: TestingModule;
   let usersTestManager: UsersTestManager;
   let emailManagerMock: EmailMockService;
-  let securitySqlQueryRepo: SecuritySqlQueryRepo;
+  let authUsersSqlRepository: AuthUsersSqlRepository;
   let dataBase: DataSource;
 
   beforeAll(async () => {
@@ -28,10 +31,12 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
       moduleBuilder.overrideProvider(EmailManager).useClass(EmailMockService),
     );
 
+    testingAppModule = result.testingAppModule;
+
     usersTestManager = result.usersTestManager;
-    // emailManagerMock = result.emailManagerMock;
-    securitySqlQueryRepo = result.securitySqlQueryRepo;
-    dataBase = result.dataBase;
+    // const emailManagerMock = testingAppModule.get<EmailMockService>(EmailMockService)
+
+    dataBase = testingAppModule.get<DataSource>(DataSource);
 
     app = result.app;
   });
@@ -422,14 +427,16 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
       await usersTestManager.registration(inputData);
 
       await usersTestManager.registrationEmailResending(inputData.email);
-      expect.setState({ registrationData: inputData })
+      expect.setState({ registrationData: inputData });
     });
 
     it(`/auth/registration-email-resending (POST) - should get confirmation code after registration, 204`, async () => {
-      const { registrationData } = expect.getState()
+      const { registrationData } = expect.getState();
 
       await wait(10);
-      const { accessToken } = await usersTestManager.authLogin(registrationData);
+      const { accessToken } = await usersTestManager.authLogin(
+        registrationData,
+      );
 
       const userInfo = await usersTestManager.getProfile(null, accessToken);
 
@@ -463,7 +470,6 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
       const responseBefore = await dataBase.query(
         `SELECT * FROM user_accounts WHERE confirmation_code = '${confirmationCode}'`,
       );
-      console.log({ responseBefore });
 
       expect(responseBefore[0]['is_confirmed']).toBeFalsy();
       await usersTestManager.registrationConfirmation(confirmationCode);
@@ -471,7 +477,6 @@ aDescribe(skipSettings.for('userAuth'))('AuthController (e2e)', () => {
       const response = await dataBase.query(
         `SELECT is_confirmed FROM user_accounts WHERE confirmation_code = '${confirmationCode}'`,
       );
-      console.log({ response });
 
       expect(response[0]['is_confirmed']).toBeTruthy();
     });

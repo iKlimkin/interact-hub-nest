@@ -16,6 +16,16 @@ export const getEnvConfiguration = () => ({
     HTTP_BASIC_PASS: process.env.HTTP_BASIC_PASS,
   },
   dbConnection: getMongoConnection(),
+  pg: {
+    name: 'postgres',
+    url: process.env.POSTGRES_URL,
+    host: 'postgres',
+    db_name: 'InteractHubNest',
+    port: process.env.POSTGRES_PORT,
+    username: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+  },
+
   getEnv: getEnv(),
 });
 

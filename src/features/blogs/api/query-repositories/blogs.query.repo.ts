@@ -5,9 +5,9 @@ import { BaseModel } from '../../../../infra/utils/base-query-pagination-model';
 import { getPagination } from '../../../../infra/utils/pagination';
 import { getSearchTerm } from '../../../../infra/utils/search-term-finder';
 import { Blog, BlogModelType } from '../../domain/entities/blog.schema';
-import { BlogViewModel } from '../models/blog.view.models/blog.view.models';
+import { BlogViewModelType } from '../models/output.blog.models/blog.view.model-type';
 import { BlogDBType, BlogType } from '../models/output.blog.models/blog.models';
-import { BlogsQueryFilter } from '../models/output.blog.models/blogs-query.filter';
+import { BlogsQueryFilter } from '../models/input.blog.models/blogs-query.filter';
 import { ObjectId } from 'mongodb';
 import { Types } from 'mongoose';
 
@@ -20,7 +20,7 @@ export class BlogsQueryRepo {
   ): Promise<PaginationViewModel<BlogType>> {
     try {
       const blogModel = new this.BlogModel();
-      return BaseModel.paginateAndTransform<BlogDBType, BlogViewModel>(
+      return BaseModel.paginateAndTransform<BlogDBType, BlogViewModelType>(
         this.BlogModel,
         blogModel.getBlogsViewModel,
         inputData,
@@ -32,10 +32,10 @@ export class BlogsQueryRepo {
     }
   }
 
-  async getBlogById(blogId: string): Promise<BlogViewModel | null> {
+  async getBlogById(blogId: string): Promise<BlogViewModelType | null> {
     try {
       const foundedBlog = await this.BlogModel.findById(new ObjectId(blogId));
-      
+
       if (!foundedBlog) return null;
 
       return foundedBlog.getBlogsViewModel(foundedBlog);
@@ -47,7 +47,7 @@ export class BlogsQueryRepo {
 
   async getBlogsByQuery(
     inputData: BlogsQueryFilter,
-  ): Promise<PaginationViewModel<BlogViewModel>> {
+  ): Promise<PaginationViewModel<BlogViewModelType>> {
     const { searchNameTerm } = inputData;
     const { pageNumber, pageSize, sort, skip } = await getPagination(inputData);
 
@@ -63,7 +63,7 @@ export class BlogsQueryRepo {
 
       const blogModel = new this.BlogModel();
 
-      const blogsViewModel = new PaginationViewModel<BlogViewModel>(
+      const blogsViewModel = new PaginationViewModel<BlogViewModelType>(
         blogs.map(blogModel.getBlogsViewModel),
         pageNumber,
         pageSize,

@@ -8,7 +8,6 @@ import { BasicAuthorization } from './base/managers/BasicAuthManager';
 import { BlogsTestManager } from './base/managers/BlogsTestManager';
 import { FeedbacksTestManager } from './base/managers/FeedbacksTestManager';
 import { PostsTestManager } from './base/managers/PostsTestManager';
-import { SAManager } from './base/managers/SAManager';
 import {
   feedbacksConstants,
 } from './base/rest-models-helpers/feedbacks.constants';
@@ -17,6 +16,7 @@ import { dropDataBase } from './base/utils/dataBase-clean-up';
 import { skipSettings } from './base/utils/tests-settings';
 import { createErrorsMessages } from './base/utils/make-errors-messages';
 import { userConstants } from './base/rest-models-helpers/users.constants';
+import { SATestManager } from './base/managers/SATestManager';
 
 aDescribe(skipSettings.for('posts'))('PostsController (e2e)', () => {
   let app: INestApplication;
@@ -24,7 +24,7 @@ aDescribe(skipSettings.for('posts'))('PostsController (e2e)', () => {
   let blogTestManager: BlogsTestManager;
   let basicAuthManager: BasicAuthorization;
   let authManager: AuthManager;
-  let saManager: SAManager;
+  let saManager: SATestManager;
   let feedbacksTestManager: FeedbacksTestManager;
 
   beforeAll(async () => {
@@ -42,7 +42,7 @@ aDescribe(skipSettings.for('posts'))('PostsController (e2e)', () => {
     blogTestManager = new BlogsTestManager(app);
     basicAuthManager = new BasicAuthorization(app);
     authManager = new AuthManager(app);
-    saManager = new SAManager(app);
+    saManager = new SATestManager(app);
     feedbacksTestManager = new FeedbacksTestManager(app);
 
     await dropDataBase(app);
@@ -182,14 +182,14 @@ aDescribe(skipSettings.for('posts'))('PostsController (e2e)', () => {
     beforeAll(async () => {
       const { blog } = expect.getState();
       const userInputData = saManager.createInputData({});
-      const { user: user1 } = await saManager.createUser(userInputData);
+      const { user: user1 } = await saManager.createSA(userInputData);
       const result1 = await authManager.login(userInputData);
 
       const userAnotherData = saManager.createInputData({
         login: 'login',
         email: 'email@test.test',
       });
-      const { user: user2 } = await saManager.createUser(userAnotherData);
+      const { user: user2 } = await saManager.createSA(userAnotherData);
       const result2 = await authManager.login(userAnotherData);
 
       const inputPostData = postTestManager.createInputData({

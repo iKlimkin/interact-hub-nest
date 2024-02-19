@@ -7,7 +7,7 @@ import {
   BlogsTypeWithId,
 } from '../../../src/features/blogs/api/models/output.blog.models/blog.models';
 import { ErrorsMessages } from '../../../src/infra/utils/error-handler';
-import { BlogViewModel } from '../../../src/features/blogs/api/models/blog.view.models/blog.view.models';
+import { BlogViewModelType } from '../../../src/features/blogs/api/models/output.blog.models/blog.view.model-type';
 import {
   CreatePostModel,
   InputPostModelByBlogId,
@@ -78,7 +78,7 @@ export class BlogsTestManager {
   }
   async createPost(
     inputData: InputPostModelByBlogId,
-    blog: BlogViewModel,
+    blog: BlogViewModelType,
     expectedStatus: number = HttpStatus.CREATED,
   ): Promise<PostViewModel> {
     const response = await request(this.application)

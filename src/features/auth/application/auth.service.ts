@@ -64,11 +64,11 @@ export class AuthService {
     return Promise.all([
       this.jwtService.signAsync(payload, {
         secret: jwtConstants.jwt_access_secret,
-        expiresIn: '10s',
+        expiresIn: '10m',
       }),
       this.jwtService.signAsync(payload, {
         secret: jwtConstants.jwt_refresh_secret,
-        expiresIn: '20s',
+        expiresIn: '20m',
       }),
     ]);
   }

@@ -8,12 +8,11 @@ import {
   Post,
   Res,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { Response } from 'express';
 import { OutputId } from '../../../../domain/likes.types';
-import { RateLimitSqlInterceptor } from '../../../../infra/interceptors/rate-limit-sql.interceptor';
+import { CustomThrottlerGuard } from '../../../../infra/logging/rate-limit.throttler';
 import { getDeviceInfo } from '../../../../infra/utils/device-handler';
 import {
   ErrorType,
@@ -40,9 +39,9 @@ import { InputRecoveryEmailModel } from '../models/auth-input.models.ts/input-pa
 import { InputRecoveryPassModel } from '../models/auth-input.models.ts/input-recovery.model';
 import { InputRegistrationCodeModel } from '../models/auth-input.models.ts/input-registration-code.model';
 import { InputRegistrationModel } from '../models/auth-input.models.ts/input-registration.model';
+import { UserProfileType } from '../models/auth.output.models/auth.output.models';
 import { UserInfoType } from '../models/user-models';
 import { AuthQuerySqlRepository } from '../query-repositories/auth-query.sql-repo';
-import { UserProfileType } from '../models/auth.output.models/auth.output.models';
 
 type ClientInfo = {
   ip: string;
@@ -57,8 +56,7 @@ export class AuthSQLController {
     private commandBus: CommandBus,
   ) {}
 
-  @UseGuards(LocalAuthGuard)
-  @UseInterceptors(RateLimitSqlInterceptor)
+  @UseGuards(CustomThrottlerGuard, LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(
@@ -96,6 +94,7 @@ export class AuthSQLController {
   }
 
   @UseGuards(RefreshTokenGuard)
+  @HttpCode(HttpStatus.OK)
   @Post('refresh-token')
   async refreshToken(
     @CurrentUserInfo() userInfo: UserInfoType,
@@ -126,7 +125,7 @@ export class AuthSQLController {
     return { accessToken };
   }
 
-  @UseInterceptors(RateLimitSqlInterceptor)
+  @UseGuards(CustomThrottlerGuard)
   @Post('new-password')
   @HttpCode(HttpStatus.NO_CONTENT)
   async newPassword(@Body() body: InputRecoveryPassModel) {
@@ -148,7 +147,7 @@ export class AuthSQLController {
     return this.commandBus.execute(command);
   }
 
-  @UseInterceptors(RateLimitSqlInterceptor)
+  @UseGuards(CustomThrottlerGuard)
   @Post('password-recovery')
   @HttpCode(HttpStatus.NO_CONTENT)
   async passwordRecovery(@Body() inputEmailModel: InputRecoveryEmailModel) {
@@ -172,7 +171,7 @@ export class AuthSQLController {
   }
 
   @Post('registration')
-  @UseInterceptors(RateLimitSqlInterceptor)
+  @UseGuards(CustomThrottlerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async registration(
     @Body() inputModel: InputRegistrationModel,
@@ -205,7 +204,7 @@ export class AuthSQLController {
     await this.commandBus.execute(command);
   }
 
-  @UseInterceptors(RateLimitSqlInterceptor)
+  @UseGuards(CustomThrottlerGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('registration-confirmation')
   async registrationConfirmation(
@@ -225,7 +224,7 @@ export class AuthSQLController {
     }
   }
 
-  @UseInterceptors(RateLimitSqlInterceptor)
+  @UseGuards(CustomThrottlerGuard)
   @Post('registration-email-resending')
   @HttpCode(HttpStatus.NO_CONTENT)
   async registrationEmailResending(

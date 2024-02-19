@@ -1,5 +1,5 @@
 import { SuperAdminsController } from '../../../admin/api/controllers/super-admin.controller';
-import { SuperAdminsSQLController } from '../../../admin/api/controllers/super-admin.sql.controller';
+import { SASqlController } from '../../../admin/api/controllers/sa.sql.controller';
 import { SecurityController } from '../../../security/api/security.controller';
 import { SecuritySqlController } from '../../../security/api/security.sql-controller';
 import { AuthSQLController } from '../../api/controllers/auth-sql.controller';
@@ -13,6 +13,6 @@ export const authControllers = [
 
 export const authSqlControllers = [
   AuthSQLController,
-  SuperAdminsSQLController,
+  SASqlController,
   SecuritySqlController,
 ];

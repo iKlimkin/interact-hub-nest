@@ -2,7 +2,7 @@ import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { add } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 import { BcryptAdapter } from '../../../../infra/adapters/bcrypt-adapter';
-import { LayerNoticeInterceptor } from '../../../../infra/utils/error-layer-interceptor';
+import { LayerNoticeInterceptor } from '../../../../infra/utils/interlayer-error-handler.ts/error-layer-interceptor';
 import { CreateUserErrors } from '../../../../infra/utils/interlayer-error-handler.ts/user-errors';
 import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
 import { CreateUserResultData } from '../../../admin/application/user.admins.service';

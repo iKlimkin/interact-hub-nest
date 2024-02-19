@@ -32,11 +32,14 @@ import { BlogType } from '../models/output.blog.models/blog.models';
 import { BlogsQueryFilter } from '../models/input.blog.models/blogs-query.filter';
 import { BlogsQueryRepo } from '../query-repositories/blogs.query.repo';
 import { DeleteBlogCommand } from '../../application/use-case/delete-blog-use-case';
+import { CreateBlogSqlCommand } from '../../application/use-case/commands/create-blog-sql.command';
+import { BlogsSqlQueryRepo } from '../query-repositories/blogs.query.sql-repo';
 
 @Controller('blogs')
-export class BlogsController {
+export class BlogsSqlController {
   constructor(
     private readonly blogsQueryRepo: BlogsQueryRepo,
+    private readonly blogsSqlQueryRepo: BlogsSqlQueryRepo,
     private readonly postsQueryRepo: PostsQueryRepository,
     private readonly commandBus: CommandBus,
   ) {}
@@ -91,19 +94,17 @@ export class BlogsController {
   async createBlog(
     @Body() createBlogDto: InputBlogModel,
   ): Promise<BlogViewModelType> {
-    const command = new CreateBlogCommand(createBlogDto);
+    const command = new CreateBlogSqlCommand(createBlogDto);
 
-    const blog = await this.commandBus.execute<CreateBlogCommand, OutputId>(
+    const blog = await this.commandBus.execute<CreateBlogSqlCommand, OutputId>(
       command,
     );
 
-    const newlyCreatedBlog = await this.blogsQueryRepo.getBlogById(blog.id);
+    const result = await this.blogsSqlQueryRepo.getBlogById(blog.id);
 
-    if (!newlyCreatedBlog) {
-      throw new NotFoundException('Newest created blog not found');
-    }
+    if (!result) throw new Error();
 
-    return newlyCreatedBlog;
+    return result;
   }
 
   @Post(':id/posts')

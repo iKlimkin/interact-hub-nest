@@ -20,5 +20,3 @@ export type SecurityDeviceType = {
   issuedAt: string;
   expirationDate: string;
 };
-
-

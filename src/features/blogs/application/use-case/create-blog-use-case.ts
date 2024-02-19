@@ -19,11 +19,7 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlogCommand> {
   ) {}
 
   async execute(command: CreateBlogCommand): Promise<OutputId> {
-    try {
-      await validateOrRejectModel(command, CreateBlogCommand);
-    } catch (error) {
-      throw new BadRequestException(error);
-    }
+    await validateOrRejectModel(command, CreateBlogCommand);
 
     const smartBlogModel = await this.BlogModel.makeInstance(
       command.createBlogDto,

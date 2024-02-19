@@ -21,6 +21,8 @@ export class UsersSqlQueryRepository {
 
     const { pageNumber, pageSize, skip, sortBySQL, sortSQLDirection } =
       await getPagination(queryOptions, !0);
+    const data = await getPagination(queryOptions, !0);
+    console.log({ data });
 
     const searchTerms = [
       `%${searchLoginTerm ? searchLoginTerm : ''}%`,
@@ -31,7 +33,7 @@ export class UsersSqlQueryRepository {
     SELECT *
       FROM user_accounts
       WHERE login ILIKE $1 OR email ILIKE $2
-      ORDER BY "${sortBySQL}" ${sortSQLDirection}
+      ORDER BY ${sortBySQL} ${sortSQLDirection}
       LIMIT $3 OFFSET $4
     `;
 
@@ -43,7 +45,7 @@ export class UsersSqlQueryRepository {
 
     const [countResult] = await this.dataSource.query(
       `
-      SELECT count(*)
+      SELECT COUNT(*)
       FROM user_accounts
       WHERE login ILIKE $1 OR email ILIKE $2
     `,
@@ -81,7 +83,7 @@ export class UsersSqlQueryRepository {
 
       return getSAViewSQLModel(result[0]);
     } catch (error) {
-      console.error('Database fails operate with find adminUser', error);
+      console.error('Database fails operate with find user', error);
       return null;
     }
   }

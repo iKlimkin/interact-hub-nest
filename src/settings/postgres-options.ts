@@ -11,7 +11,7 @@ export class TypeOrmOptions implements TypeOrmOptionsFactory {
     const nodeEnv = this.configService.getOrThrow<ConfigurationType>('ENV', {
       infer: true,
     }).env;
-    console.log({nodeEnv});
+    console.log({ nodeEnv });
 
     if (
       (nodeEnv && nodeEnv.toUpperCase() === 'DEVELOPMENT') ||
@@ -36,6 +36,19 @@ export class TypeOrmOptions implements TypeOrmOptionsFactory {
       database: 'InteractHubNest',
       autoLoadEntities: false,
       synchronize: false,
+    };
+  }
+
+  private createContainerConnection(): TypeOrmModuleOptions {
+    console.log('local container connection to postgres');
+    const pgConfig = this.configService.get<ConfigurationType>('pg', {
+      infer: true,
+    });
+
+    return {
+      type: pgConfig.pg.name,
+      url: pgConfig.url,
+      synchronize: true,
     };
   }
 

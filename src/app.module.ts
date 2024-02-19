@@ -16,9 +16,10 @@ import { TypeOrmOptions } from './settings/postgres-options';
     MongooseModule.forRootAsync({
       useFactory: createAsyncMongoConnection,
       inject: [ConfigService],
-    }),
+  }),
     MongooseModule.forFeature(mongooseSchemas),
     TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
       useClass: TypeOrmOptions,
     }),
     AuthModule,

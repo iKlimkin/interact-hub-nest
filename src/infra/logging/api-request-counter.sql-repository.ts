@@ -34,7 +34,7 @@ export class ApiRequestCounterSQLRepository {
         SELECT COUNT(*)
         FROM api_requests
         WHERE ip = $1 AND timestamp >= $2
-        `;
+      `;
       const [count] = await this.dataSource.query(query, [ip, timeLimit]);
 
       return count;
