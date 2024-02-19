@@ -14,3 +14,7 @@ export type UpdateBlogModel = {
    */
   websiteUrl: string;
 };
+
+export type UpdateBlogCommandType = UpdateBlogModel & {
+  blogId: string;
+};

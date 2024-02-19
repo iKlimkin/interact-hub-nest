@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { UpdateBlogModel } from '../api/models/input.blog.models/UpdateBlogModel';
+import { UpdateBlogModel } from '../api/models/input.blog.models/update-blog-models';
 import { BlogDBType } from '../api/models/output.blog.models/blog.models';
 import {
   Blog,

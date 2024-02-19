@@ -34,6 +34,8 @@ import { BlogsQueryRepo } from '../query-repositories/blogs.query.repo';
 import { DeleteBlogCommand } from '../../application/use-case/delete-blog-use-case';
 import { CreateBlogSqlCommand } from '../../application/use-case/commands/create-blog-sql.command';
 import { BlogsSqlQueryRepo } from '../query-repositories/blogs.query.sql-repo';
+import { UpdateBlogSqlUseCase } from '../../application/use-case/update-blog-sql.use-case';
+import { UpdateBlogSqlCommand } from '../../application/use-case/commands/update-blog-sql.command';
 
 @Controller('blogs')
 export class BlogsSqlController {
@@ -92,9 +94,9 @@ export class BlogsSqlController {
   @UseGuards(BasicSAAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async createBlog(
-    @Body() createBlogDto: InputBlogModel,
+    @Body() createBlogModel: InputBlogModel,
   ): Promise<BlogViewModelType> {
-    const command = new CreateBlogSqlCommand(createBlogDto);
+    const command = new CreateBlogSqlCommand(createBlogModel);
 
     const blog = await this.commandBus.execute<CreateBlogSqlCommand, OutputId>(
       command,
@@ -133,15 +135,15 @@ export class BlogsSqlController {
   @UseGuards(BasicSAAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateBlog(
-    @Param('id', ObjectIdPipe) blogId: string,
+    @Param('id') blogId: string,
     @Body() inputBlogDto: InputBlogModel,
   ) {
-    const updatedBlog = await this.commandBus.execute(
-      new UpdateBlogCommand({ blogId, ...inputBlogDto }),
+    const result = await this.commandBus.execute(
+      new UpdateBlogSqlCommand({...inputBlogDto,  blogId }),
     );
 
-    if (!updatedBlog) {
-      throw new NotFoundException('blog not found');
+    if (!result) {
+      throw new NotFoundException();
     }
   }
 

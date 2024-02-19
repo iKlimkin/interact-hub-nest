@@ -1,6 +1,9 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { UpdateBlogModel } from '../api/models/input.blog.models/UpdateBlogModel';
+import {
+  UpdateBlogCommandType,
+  UpdateBlogModel,
+} from '../api/models/input.blog.models/update-blog-models';
 import {
   BlogDBType,
   BlogsSqlDbType,
@@ -70,27 +73,24 @@ export class BlogsSqlRepository {
   //   }
   // }
 
-  // async updateBlog(
-  //   blogId: string,
-  //   updateData: UpdateBlogModel,
-  // ): Promise<boolean> {
-  //   try {
-  //     const result = await this.BlogModel.updateOne(
-  //       { _id: new ObjectId(blogId) },
-  //       {
-  //         $set: {
-  //           name: updateData.name,
-  //           description: updateData.description,
-  //           websiteUrl: updateData.websiteUrl,
-  //         },
-  //       },
-  //     );
-  //     return result.matchedCount === 1;
-  //   } catch (e) {
-  //     console.error(`Database fails operate during the upgrade blog`, e);
-  //     return false;
-  //   }
-  // }
+  async updateBlog(updateBlogDto: UpdateBlogCommandType): Promise<boolean> {
+    try {
+      const updateQuery = `
+        UPDATE blogs
+        SET title = $1, description = $2, website_url = $3
+        WHERE id = $4
+      `;
+      const result = await this.dataSource.query(
+        updateQuery,
+        Object.values(updateBlogDto),
+      );
+
+      return result[1] > 0;
+    } catch (e) {
+      console.error(`Database fails operate during the upgrade blog`, e);
+      return false;
+    }
+  }
 
   // async deleteBlog(blogId: string): Promise<BlogDBType> {
   //   try {

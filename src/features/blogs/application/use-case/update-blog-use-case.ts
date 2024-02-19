@@ -1,17 +1,11 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BlogModelType } from '../../domain/entities/blog.schema';
 import { BlogsRepository } from '../../infrastructure/blogs.repository';
+import { UpdateBlogCommandType } from '../../api/models/input.blog.models/update-blog-models';
 
 export class UpdateBlogCommand {
   constructor(public updateBlogDto: UpdateBlogCommandType) {}
 }
-
-type UpdateBlogCommandType = {
-  name: string;
-  description: string;
-  websiteUrl: string;
-  blogId: string;
-};
 
 @CommandHandler(UpdateBlogCommand)
 export class UpdateBlogUseCase implements ICommandHandler<UpdateBlogCommand> {
