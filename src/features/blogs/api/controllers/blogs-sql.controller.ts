@@ -36,6 +36,7 @@ import { CreateBlogSqlCommand } from '../../application/use-case/commands/create
 import { BlogsSqlQueryRepo } from '../query-repositories/blogs.query.sql-repo';
 import { UpdateBlogSqlUseCase } from '../../application/use-case/update-blog-sql.use-case';
 import { UpdateBlogSqlCommand } from '../../application/use-case/commands/update-blog-sql.command';
+import { DeleteBlogSqlCommand } from '../../application/use-case/commands/delete-blog-sql.command';
 
 @Controller('blogs')
 export class BlogsSqlController {
@@ -139,7 +140,7 @@ export class BlogsSqlController {
     @Body() inputBlogDto: InputBlogModel,
   ) {
     const result = await this.commandBus.execute(
-      new UpdateBlogSqlCommand({...inputBlogDto,  blogId }),
+      new UpdateBlogSqlCommand({ ...inputBlogDto, blogId }),
     );
 
     if (!result) {
@@ -151,12 +152,11 @@ export class BlogsSqlController {
   @UseGuards(BasicSAAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(@Param('id', ObjectIdPipe) blogId: string) {
-    const deleteBlog = await this.commandBus.execute(
-      new DeleteBlogCommand(blogId),
-    );
+    const command = new DeleteBlogSqlCommand(blogId);
+    const result = await this.commandBus.execute(command);
 
-    if (!deleteBlog) {
-      throw new NotFoundException('blog not found');
+    if (!result) {
+      throw new NotFoundException();
     }
   }
 }

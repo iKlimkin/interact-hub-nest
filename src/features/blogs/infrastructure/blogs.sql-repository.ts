@@ -92,13 +92,22 @@ export class BlogsSqlRepository {
     }
   }
 
-  // async deleteBlog(blogId: string): Promise<BlogDBType> {
-  //   try {
-  //     return this.BlogModel.findByIdAndDelete(new ObjectId(blogId)).lean();
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(
-  //       'Database fails operate during removal operation',
-  //     );
-  //   }
-  // }
+  async deleteBlog(blogId: string): Promise<boolean> {
+    try {
+      const deleteQuery = `
+        DELETE
+        FROM blogs
+        WHERE id = $1
+      `;
+
+      const result = await this.dataSource.query(deleteQuery, [
+        blogId,
+      ]);
+
+      return result[1] > 0;
+    } catch (error) {
+      console.error(`Database fails operate during the delete blog`, error);
+      return false;
+    }
+  }
 }

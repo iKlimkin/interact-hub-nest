@@ -25,6 +25,7 @@ import { BlogsSqlRepository } from '../features/blogs/infrastructure/blogs.sql-r
 import { BlogsSqlQueryRepo } from '../features/blogs/api/query-repositories/blogs.query.sql-repo';
 import { CreateBlogSqlUseCase } from '../features/blogs/application/use-case/create-blog-sql.use-case';
 import { UpdateBlogSqlUseCase } from '../features/blogs/application/use-case/update-blog-sql.use-case';
+import { DeleteBlogSqlUseCase } from '../features/blogs/application/use-case/delete-blog-sql.use-case';
 
 const blogsProviders: Provider[] = [
   BlogsQueryRepo,
@@ -55,6 +56,7 @@ const useCases: Provider[] = [
   UpdateBlogUseCase,
   UpdateBlogSqlUseCase,
   DeleteBlogUseCase,
+  DeleteBlogSqlUseCase,
 
   UpdateCommentUseCase,
   CreateCommentUseCase,
