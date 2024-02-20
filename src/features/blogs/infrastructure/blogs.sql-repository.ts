@@ -1,23 +1,10 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import {
-  UpdateBlogCommandType,
-  UpdateBlogModel,
-} from '../api/models/input.blog.models/update-blog-models';
-import {
-  BlogDBType,
-  BlogsSqlDbType,
-} from '../api/models/output.blog.models/blog.models';
-import {
-  Blog,
-  BlogDocument,
-  BlogModelType,
-} from '../domain/entities/blog.schema';
-import { OutputId } from '../../../domain/likes.types';
-import { ObjectId } from 'mongodb';
+import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { BlogDBSqlType } from '../api/models/blog-sql.model';
+import { OutputId } from '../../../domain/likes.types';
+import { BlogDtoSqlType } from '../api/models/blog-sql.model';
+import { UpdateBlogCommandType } from '../api/models/input.blog.models/update-blog-models';
+import { BlogsSqlDbType } from '../api/models/output.blog.models/blog.models';
 
 // export interface IBlogsRepository {
 //   save(smartBlogModel: BlogDocument): Promise<OutputId>;
@@ -32,9 +19,9 @@ import { BlogDBSqlType } from '../api/models/blog-sql.model';
 export class BlogsSqlRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-  async save(blogDto: BlogDBSqlType): Promise<OutputId | null> {
+  async save(blogDto: BlogDtoSqlType): Promise<OutputId | null> {
     try {
-      const query = `
+      const createQuery = `
         INSERT INTO blogs
         (title, description, website_url)
         VALUES ($1, $2, $3)
@@ -42,7 +29,7 @@ export class BlogsSqlRepository {
       `;
 
       const result = await this.dataSource.query<BlogsSqlDbType>(
-        query,
+        createQuery,
         Object.values(blogDto),
       );
 
@@ -55,23 +42,26 @@ export class BlogsSqlRepository {
     }
   }
 
-  // async getBlogById(blogId: string): Promise<BlogDBType | null> {
-  //   try {
-  //     const foundedBlog = await this.BlogModel.findById(
-  //       new ObjectId(blogId),
-  //     ).lean();
+  async getBlogById(blogId: string): Promise<BlogsSqlDbType | null> {
+    try {
+      const findQuery = `
+        SELECT *
+        FROM blogs
+        WHERE id = $1
+      `;
 
-  //     if (!foundedBlog) return null;
+      const result = await this.dataSource.query<BlogsSqlDbType[]>(findQuery, [
+        blogId,
+      ]);
 
-  //     return {
-  //       ...foundedBlog,
-  //     };
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(
-  //       'Database fails operate during the find blog',
-  //     );
-  //   }
-  // }
+      if (!result) return null;
+
+      return result[0];
+    } catch (error) {
+      console.error(`Database fails operate during get blog by id ${error}`);
+      return null;
+    }
+  }
 
   async updateBlog(updateBlogDto: UpdateBlogCommandType): Promise<boolean> {
     try {
@@ -100,9 +90,7 @@ export class BlogsSqlRepository {
         WHERE id = $1
       `;
 
-      const result = await this.dataSource.query(deleteQuery, [
-        blogId,
-      ]);
+      const result = await this.dataSource.query(deleteQuery, [blogId]);
 
       return result[1] > 0;
     } catch (error) {

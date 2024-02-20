@@ -1,4 +1,4 @@
-export class BlogDBSqlType {
+export class BlogDtoSqlType {
   constructor(
     public title: string,
     public description: string,

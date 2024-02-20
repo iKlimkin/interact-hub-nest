@@ -38,6 +38,7 @@ import { BlogsSqlQueryRepo } from '../query-repositories/blogs.query.sql-repo';
 import { UpdateBlogSqlUseCase } from '../../application/use-case/update-blog-sql.use-case';
 import { UpdateBlogSqlCommand } from '../../application/use-case/commands/update-blog-sql.command';
 import { DeleteBlogSqlCommand } from '../../application/use-case/commands/delete-blog-sql.command';
+import { CreatePostSqlCommand } from '../../../posts/application/use-cases/commands/create-post-sql.command';
 
 @Controller('blogs')
 export class BlogsSqlController {
@@ -52,7 +53,6 @@ export class BlogsSqlController {
   async getBlogs(
     @Query() query: BlogsQueryFilter,
   ): Promise<PaginationViewModel<BlogViewModelType>> {
-    // const result = await this.blogsSqlQueryRepo.getBlogsByQuery(query);
     const result = await this.blogsSqlQueryRepo.getAllBlogs(query);
 
     if (!result) {
@@ -123,16 +123,20 @@ export class BlogsSqlController {
     @Param('id', ObjectIdPipe) blogId: string,
     @Body() body: InputPostModelByBlogId,
   ): Promise<PostViewModel> {
-    const command = new CreatePostCommand({ ...body, blogId });
+    const command = new CreatePostSqlCommand({ ...body, blogId });
 
-    const createdPost = await this.commandBus.execute(command);
+    const post = await this.commandBus.execute<CreatePostSqlCommand, OutputId | null>(command);
+
+    if (!post) {
+      throw new NotFoundException('Post not created');
+    }
 
     const newlyCreatedPost = await this.postsQueryRepo.getPostById(
-      createdPost.id,
+      post.id,
     );
 
     if (!newlyCreatedPost) {
-      throw new NotFoundException('Newest post not found');
+      throw new Error('Newest post not found');
     }
 
     return newlyCreatedPost;

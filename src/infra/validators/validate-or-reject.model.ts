@@ -2,7 +2,7 @@ import { validateOrReject } from 'class-validator';
 
 export const validateOrRejectModel = async (
   model: any,
-  ctor: new (args?: any) => any
+  ctor: new (args?: any) => any,
 ) => {
   if (model instanceof ctor === false) {
     throw new Error('Incorrect input data');
