@@ -28,6 +28,7 @@ import { UpdateBlogSqlUseCase } from '../features/blogs/application/use-case/upd
 import { DeleteBlogSqlUseCase } from '../features/blogs/application/use-case/delete-blog-sql.use-case';
 import { CreatePostSqlUseCase } from '../features/posts/application/use-cases/create-post-sql.use-case';
 import { PostsSqlRepository } from '../features/posts/infrastructure/posts.sql-repository';
+import { PostsSqlQueryRepo } from '../features/posts/api/query-repositories/posts-query.sql-repo';
 
 const blogsProviders: Provider[] = [
   BlogsQueryRepo,
@@ -39,6 +40,7 @@ const blogsProviders: Provider[] = [
 const postsProviders: Provider[] = [
   PostsService,
   PostsQueryRepository,
+  PostsSqlQueryRepo,
   PostsRepository,
   PostsSqlRepository,
 ];

@@ -39,10 +39,7 @@ export class UsersQueryRepository {
       !0,
     );
 
-    const { pageNumber, pageSize, skip, sort } = await getPagination(
-      inputData,
-      !0,
-    );
+    const { pageNumber, pageSize, skip, sort } = getPagination(inputData, !0);
 
     try {
       const users = await this.UserAccountModel.find(filter)
@@ -79,7 +76,6 @@ export class UsersQueryRepository {
       //   FROM user_accounts
       //   WHERE "id" = $1
       // `, [userId])
-
 
       if (!user) return null;
 

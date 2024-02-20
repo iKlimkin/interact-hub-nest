@@ -2,7 +2,7 @@ import { HttpStatus, INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { CreatePostModel } from '../../../src/features/posts/api/models/input.posts.models/create.post.model';
 import { RouterPaths } from '../utils/routing';
-import { PostViewModel } from '../../../src/features/posts/api/models/post.view.models/PostViewModel';
+import { PostViewModelType } from '../../../src/features/posts/api/models/post.view.models/post-view-model.type';
 import { ErrorsMessages } from '../../../src/infra/utils/error-handler';
 import { LikeStatusType, likesStatus } from '../../../src/domain/likes.types';
 
@@ -43,7 +43,7 @@ export class PostsTestManager {
   async createPost(
     inputData: CreatePostModel,
     expectedStatus: number = HttpStatus.CREATED,
-  ): Promise<PostViewModel> {
+  ): Promise<PostViewModelType> {
     const res = await request(this.application)
       .post(RouterPaths.posts)
       .set('Authorization', 'Basic YWRtaW46cXdlcnR5')
@@ -86,7 +86,7 @@ export class PostsTestManager {
       .auth(token || 'any', { type: 'bearer' })
       .expect(expectStatus);
 
-    const post: PostViewModel = response.body;
+    const post: PostViewModelType = response.body;
 
     expect(post.extendedLikesInfo.myStatus).toBe(status);
 
@@ -95,11 +95,11 @@ export class PostsTestManager {
 
   checkPostData(
     responseModel:
-      | PostViewModel
+      | PostViewModelType
       | { errorsMessages: ErrorsMessages[] }
       | string,
     expectedResult:
-      | PostViewModel
+      | PostViewModelType
       | { errorsMessages: ErrorsMessages[] }
       | string,
   ) {

@@ -21,7 +21,7 @@ import { ObjectIdPipe } from '../../../../infra/pipes/valid-objectId.pipe';
 import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth.guard';
 import { InputPostModelByBlogId } from '../../../posts/api/models/input.posts.models/create.post.model';
 import { PostsQueryFilter } from '../../../posts/api/models/output.post.models/posts-query.filter';
-import { PostViewModel } from '../../../posts/api/models/post.view.models/PostViewModel';
+import { PostViewModelType } from '../../../posts/api/models/post.view.models/post-view-model.type';
 import { PostsQueryRepository } from '../../../posts/api/query-repositories/posts.query.repo';
 import { CreatePostCommand } from '../../../posts/application/use-cases/create-post-use-case';
 import { CreateBlogCommand } from '../../application/use-case/create-blog-use-case';
@@ -69,7 +69,7 @@ export class BlogsController {
     @CurrentUserId() userId: string,
     @Param('id', ObjectIdPipe) blogId: string,
     @Query() query: PostsQueryFilter,
-  ): Promise<PaginationViewModel<PostViewModel>> {
+  ): Promise<PaginationViewModel<PostViewModelType>> {
     const blog = await this.blogsQueryRepo.getBlogById(blogId);
 
     if (!blog) {
@@ -112,7 +112,7 @@ export class BlogsController {
   async createPostByBlogId(
     @Param('id', ObjectIdPipe) blogId: string,
     @Body() body: InputPostModelByBlogId,
-  ): Promise<PostViewModel> {
+  ): Promise<PostViewModelType> {
     const command = new CreatePostCommand({ ...body, blogId });
 
     const createdPost = await this.commandBus.execute(command);

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { likeUserInfo } from '../../../domain/likes.types';
-import { PostDBType } from '../api/models/post.view.models/getPostViewModel';
+import { PostDBType } from '../api/models/post.view.models/post-view.model';
 import { PostsRepository } from '../infrastructure/posts.repository';
 
 @Injectable()

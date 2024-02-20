@@ -5,7 +5,7 @@ import {
 } from '../../../../../domain/likes.types';
 import { getLikeStatus } from '../../../../../infra/utils/get-like-status';
 import { PostType } from '../output.post.models/output.post.models';
-import { PostStatusInfo, PostViewModel } from './PostViewModel';
+import { PostStatusInfo, PostViewModelType } from './post-view-model.type';
 
 export type PostDBType = WithId<PostType>;
 
@@ -25,7 +25,7 @@ const transformLikesUserInfo = (
 export const getPostViewModel = (
   post: PostDBType,
   userId?: string,
-): PostViewModel => {
+): PostViewModelType => {
   const [status] = getLikeStatus(post.likesUserInfo, userId);
 
   return {

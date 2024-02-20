@@ -6,7 +6,7 @@ export type PostStatusInfo = {
   login: string;
 };
 
-export type PostViewModel = {
+export type PostViewModelType = {
   /**
    * id of the existing post
    */

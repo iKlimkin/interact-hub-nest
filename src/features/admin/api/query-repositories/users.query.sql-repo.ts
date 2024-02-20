@@ -19,8 +19,11 @@ export class UsersSqlQueryRepository {
   ): Promise<PaginationViewModel<SAViewModel>> {
     const { searchEmailTerm, searchLoginTerm } = queryOptions;
 
-    const { pageNumber, pageSize, skip, sortBy, sortDirection } =
-      await getPagination(queryOptions, false, !0);
+    const { pageNumber, pageSize, skip, sortBy, sortDirection } = getPagination(
+      queryOptions,
+      false,
+      !0,
+    );
 
     const searchTerms = [
       `%${searchLoginTerm ? searchLoginTerm : ''}%`,

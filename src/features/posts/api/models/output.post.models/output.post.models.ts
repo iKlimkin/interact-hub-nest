@@ -15,3 +15,13 @@ export type PostType = {
 
   likesCountInfo: LikesCountType;
 };
+
+export type PostsSqlDbType = {
+  id: string;
+  blog_id: string;
+  blog_title: string;
+  title: string;
+  short_description: string;
+  content: string;
+  created_at: Date;
+};

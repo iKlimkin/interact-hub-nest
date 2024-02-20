@@ -1,4 +1,7 @@
-import { BaseFilter, PaginationViewModel } from '../../domain/sorting-base-filter';
+import {
+  BaseFilter,
+  PaginationViewModel,
+} from '../../domain/sorting-base-filter';
 import { getPagination } from './pagination';
 import { Model } from 'mongoose';
 
@@ -8,7 +11,7 @@ export class BaseModel {
     getViewModel: any,
     inputData: BaseFilter,
   ): Promise<PaginationViewModel<U>> {
-    const { pageNumber, pageSize, sort, skip } = await getPagination(inputData);
+    const { pageNumber, pageSize, sort, skip } = getPagination(inputData);
 
     try {
       const items = await query.find().sort(sort).skip(skip).limit(pageSize);

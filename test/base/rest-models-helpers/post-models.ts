@@ -1,4 +1,4 @@
-import { PostViewModel } from '../../../src/features/posts/api/models/post.view.models/PostViewModel';
+import { PostViewModelType } from '../../../src/features/posts/api/models/post.view.models/post-view-model.type';
 
 export const postConstants = {
   postEqualTo: {
@@ -14,8 +14,8 @@ export const postConstants = {
       likesCount: expect.any(Number),
       myStatus: expect.any(String),
       newestLikes: expect.any(Array),
-    }
-  } as PostViewModel,
+    },
+  } as PostViewModelType,
 
   postValidationErrors: {
     errorsMessages: expect.arrayContaining([

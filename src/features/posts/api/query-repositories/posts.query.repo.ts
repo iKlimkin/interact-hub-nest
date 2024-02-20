@@ -7,8 +7,8 @@ import { getPagination } from '../../../../infra/utils/pagination';
 import { getSearchTerm } from '../../../../infra/utils/search-term-finder';
 import { Post, PostModelType } from '../../domain/entities/posts.schema';
 import { PostsQueryFilter } from '../models/output.post.models/posts-query.filter';
-import { PostViewModel } from '../models/post.view.models/PostViewModel';
-import { getPostViewModel } from '../models/post.view.models/getPostViewModel';
+import { PostViewModelType } from '../models/post.view.models/post-view-model.type';
+import { getPostViewModel } from '../models/post.view.models/post-view.model';
 
 @Injectable()
 export class PostsQueryRepository {
@@ -17,8 +17,8 @@ export class PostsQueryRepository {
   async getAllPosts(
     inputData: PostsQueryFilter,
     userId?: string,
-  ): Promise<PaginationViewModel<PostViewModel>> {
-    const { pageNumber, pageSize, sort, skip } = await getPagination(inputData);
+  ): Promise<PaginationViewModel<PostViewModelType>> {
+    const { pageNumber, pageSize, sort, skip } = getPagination(inputData);
     const { searchContentTerm } = inputData;
 
     const filter = getSearchTerm({ searchContentTerm });
@@ -52,8 +52,8 @@ export class PostsQueryRepository {
     blogId: string,
     inputData: PostsQueryFilter,
     userId?: string,
-  ): Promise<PaginationViewModel<PostViewModel>> {
-    const { pageNumber, pageSize, sort, skip } = await getPagination(inputData);
+  ): Promise<PaginationViewModel<PostViewModelType>> {
+    const { pageNumber, pageSize, sort, skip } = getPagination(inputData);
     const filter = getSearchTerm({
       searchContentTerm: inputData.searchContentTerm,
     });
@@ -116,7 +116,7 @@ export class PostsQueryRepository {
   async getPostById(
     postId: string,
     userId?: string,
-  ): Promise<PostViewModel | null> {
+  ): Promise<PostViewModelType | null> {
     try {
       const foundedPost = await this.PostModel.findById(new ObjectId(postId));
 

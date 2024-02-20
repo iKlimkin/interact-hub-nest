@@ -24,11 +24,11 @@ export type SortOptions = {
 
 type SortDirections = SortDirection | SortDirectionsType;
 
-export const getPagination = async (
+export const getPagination = (
   inputData: BaseFilter,
   userAccountOptions?: boolean,
   sqlOptions: boolean = false,
-): Promise<PaginationType> => {
+): PaginationType => {
   let sortDirection: SortDirections;
   let sortBy: string;
 

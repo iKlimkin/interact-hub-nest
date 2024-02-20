@@ -1,12 +1,11 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { CommentsViewModel } from '../../../src/features/comments/api/models/comments.view.models/comments.view.model';
-import { PostViewModel } from '../../../src/features/posts/api/models/post.view.models/PostViewModel';
+import { PostViewModelType } from '../../../src/features/posts/api/models/post.view.models/post-view-model.type';
 import { likesStatus } from '../../../src/domain/likes.types';
 import { RouterPaths } from '../utils/routing';
 import request from 'supertest';
 import { PaginationViewModel } from '../../../src/domain/sorting-base-filter';
 import { SAViewModel } from '../../../src/features/admin/api/models/userAdmin.view.models/userAdmin.view.model';
-
 
 type InputCommentsAndPaginationType = {
   searchNameTerm: string;
@@ -57,7 +56,7 @@ export class FeedbacksTestManager {
     inputData: {
       user: SAViewModel;
       token: string;
-      post: PostViewModel;
+      post: PostViewModelType;
     },
     content: string,
     expectedStatus: number = HttpStatus.CREATED,

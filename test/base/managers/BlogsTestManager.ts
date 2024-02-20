@@ -12,7 +12,7 @@ import {
   CreatePostModel,
   InputPostModelByBlogId,
 } from '../../../src/features/posts/api/models/input.posts.models/create.post.model';
-import { PostViewModel } from '../../../src/features/posts/api/models/post.view.models/PostViewModel';
+import { PostViewModelType } from '../../../src/features/posts/api/models/post.view.models/post-view-model.type';
 import { LikeStatusType, likesStatus } from '../../../src/domain/likes.types';
 
 export class BlogsTestManager {
@@ -80,7 +80,7 @@ export class BlogsTestManager {
     inputData: InputPostModelByBlogId,
     blog: BlogViewModelType,
     expectedStatus: number = HttpStatus.CREATED,
-  ): Promise<PostViewModel> {
+  ): Promise<PostViewModelType> {
     const response = await request(this.application)
       .post(`${RouterPaths.blogs}/${blog.id}/posts`)
       .set('Authorization', 'Basic YWRtaW46cXdlcnR5')
@@ -102,7 +102,7 @@ export class BlogsTestManager {
           myStatus: likesStatus.None,
           newestLikes: expect.any(Array),
         },
-      } as PostViewModel);
+      } as PostViewModelType);
     }
     const post = response.body;
 
@@ -127,7 +127,7 @@ export class BlogsTestManager {
     responceModel:
       | BlogType
       | BlogsTypeWithId
-      | PostViewModel
+      | PostViewModelType
       | { errorsMessages: ErrorsMessages[] },
     expectedResult:
       | BlogType
@@ -157,7 +157,7 @@ export class BlogsTestManager {
       .auth(token || 'any', { type: 'bearer' })
       .expect(expectStatus);
 
-    const postViewModel: PostViewModel = body.items;
+    const postViewModel: PostViewModelType = body.items;
 
     expect(postViewModel).toEqual([
       {
@@ -174,7 +174,7 @@ export class BlogsTestManager {
           myStatus: status,
           newestLikes: expect.any(Array),
         },
-      } as PostViewModel,
+      } as PostViewModelType,
     ]);
   }
 

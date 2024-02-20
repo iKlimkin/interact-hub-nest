@@ -49,7 +49,7 @@ export class BlogsQueryRepo {
     inputData: BlogsQueryFilter,
   ): Promise<PaginationViewModel<BlogViewModelType>> {
     const { searchNameTerm } = inputData;
-    const { pageNumber, pageSize, sort, skip } = await getPagination(inputData);
+    const { pageNumber, pageSize, sort, skip } = getPagination(inputData);
 
     const filter = getSearchTerm({ searchNameTerm });
 

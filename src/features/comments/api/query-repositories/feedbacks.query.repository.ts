@@ -28,8 +28,7 @@ export class FeedbacksQueryRepository {
     try {
       const { searchContentTerm } = inputData;
 
-      const { pageNumber, pageSize, sort, skip } =
-        await getPagination(inputData);
+      const { pageNumber, pageSize, sort, skip } = getPagination(inputData);
 
       const filter = getSearchTerm({ searchContentTerm });
 
@@ -115,8 +114,7 @@ export class FeedbacksQueryRepository {
     inputData: CommentsQueryFilter,
   ): Promise<PaginationViewModel<CommentsViewModel>> {
     try {
-      const { pageNumber, pageSize, sort, skip } =
-        await getPagination(inputData);
+      const { pageNumber, pageSize, sort, skip } = getPagination(inputData);
 
       const searchBy = { 'commentatorInfo.userId': userId };
 

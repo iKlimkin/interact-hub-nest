@@ -13,10 +13,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 
-import {
-  OutputId,
-  likesStatus
-} from '../../../../domain/likes.types';
+import { OutputId, likesStatus } from '../../../../domain/likes.types';
 import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
 import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
 import { SetUserIdGuard } from '../../../../infra/guards/set-user-id.guard';
@@ -28,9 +25,7 @@ import { CurrentUserInfo } from '../../../auth/infrastructure/decorators/current
 import { AccessTokenGuard } from '../../../auth/infrastructure/guards/accessToken.guard';
 import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth.guard';
 import { CommentsViewModel } from '../../../comments/api/models/comments.view.models/comments.view.model';
-import {
-  InputContentModel
-} from '../../../comments/api/models/input.comment.models';
+import { InputContentModel } from '../../../comments/api/models/input.comment.models';
 import { FeedbacksQueryRepository } from '../../../comments/api/query-repositories/feedbacks.query.repository';
 import { CreateCommentCommand } from '../../../comments/application/use-cases/commands/create-comment.command';
 import { CommentDocument } from '../../../comments/domain/entities/comment.schema';
@@ -41,7 +36,7 @@ import { UpdatePostCommand } from '../../application/use-cases/update-post-use-c
 import { InputPostModel } from '../models/input.posts.models/create.post.model';
 import { InputLikeStatusModel } from '../models/input.posts.models/input-post..model';
 import { PostsQueryFilter } from '../models/output.post.models/posts-query.filter';
-import { PostViewModel } from '../models/post.view.models/PostViewModel';
+import { PostViewModelType } from '../models/post.view.models/post-view-model.type';
 import { PostsQueryRepository } from '../query-repositories/posts.query.repo';
 import { CommandBus } from '@nestjs/cqrs';
 
@@ -61,7 +56,7 @@ export class PostsController {
   async getPosts(
     @Query() query: PostsQueryFilter,
     @CurrentUserId() userId: string,
-  ): Promise<PaginationViewModel<PostViewModel>> {
+  ): Promise<PaginationViewModel<PostViewModelType>> {
     return this.postsQueryRepo.getAllPosts(query, userId);
   }
 
@@ -70,7 +65,7 @@ export class PostsController {
   async getPostById(
     @Param('id', ObjectIdPipe) postId: string,
     @CurrentUserId() userId: string,
-  ): Promise<PostViewModel> {
+  ): Promise<PostViewModelType> {
     const foundPost = await this.postsQueryRepo.getPostById(postId, userId);
 
     if (!foundPost) {
@@ -195,7 +190,7 @@ export class PostsController {
   @HttpCode(HttpStatus.CREATED)
   async createPost(
     @Body() createPostDto: InputPostModel,
-  ): Promise<PostViewModel> {
+  ): Promise<PostViewModelType> {
     const command = new CreatePostCommand(createPostDto);
 
     const post = await this.commandBus.execute<CreatePostCommand, OutputId>(

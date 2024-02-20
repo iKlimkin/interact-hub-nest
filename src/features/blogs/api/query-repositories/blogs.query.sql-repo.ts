@@ -19,7 +19,7 @@ export class BlogsSqlQueryRepo {
       const { searchNameTerm } = queryOptions;
 
       const { pageNumber, pageSize, skip, sortBy, sortDirection } =
-        await getPagination(queryOptions, !!0, !0);
+        getPagination(queryOptions, !!0, !0);
 
       const searchTerm = `%${searchNameTerm ? searchNameTerm : ''}%`;
 
