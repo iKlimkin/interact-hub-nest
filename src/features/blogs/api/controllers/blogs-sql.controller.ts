@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  InternalServerErrorException,
   NotFoundException,
   Param,
   Post,
@@ -48,19 +49,24 @@ export class BlogsSqlController {
   ) {}
 
   @Get()
-  @HttpCode(HttpStatus.OK)
   async getBlogs(
     @Query() query: BlogsQueryFilter,
-  ): Promise<PaginationViewModel<BlogType>> {
-    return this.blogsQueryRepo.getBlogsByQuery(query);
+  ): Promise<PaginationViewModel<BlogViewModelType>> {
+    // const result = await this.blogsSqlQueryRepo.getBlogsByQuery(query);
+    const result = await this.blogsSqlQueryRepo.getAllBlogs(query);
+
+    if (!result) {
+      throw new InternalServerErrorException();
+    }
+
+    return result
   }
 
   @Get(':id')
-  @HttpCode(HttpStatus.OK)
   async getBlogById(
     @Param('id', ObjectIdPipe) blogId: string,
   ): Promise<BlogViewModelType> {
-    const foundBlog = await this.blogsQueryRepo.getBlogById(blogId);
+    const foundBlog = await this.blogsSqlQueryRepo.getBlogById(blogId);
 
     if (!foundBlog) {
       throw new NotFoundException('blog not found');

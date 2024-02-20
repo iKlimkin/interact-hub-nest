@@ -22,29 +22,53 @@ import { getBlogSqlViewModel } from '../models/output.blog.models/blog-sql.view.
 export class BlogsSqlQueryRepo {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-  // async getAllBlogs(
-  //   inputData: BlogsQueryFilter,
-  // ): Promise<PaginationViewModel<BlogType>> {
-  //   try {
+  async getAllBlogs(
+    queryOptions: BlogsQueryFilter,
+  ): Promise<PaginationViewModel<BlogViewModelType> | null> {
+    try {
+      const { searchNameTerm } = queryOptions;
 
-  //     const result = await this.dataSource.query<UserSqlSession>(
-  //       query,
-  //       Object.values(sessionDto),
-  //     );
+      const { pageNumber, pageSize, skip, sortBy, sortDirection } =
+        await getPagination(queryOptions, !!0, !0);
 
-  //     return getBlogSqlViewModel(result[0]);
-  //     // const blogModel = new this.BlogModel();
-  //     // return BaseModel.paginateAndTransform<BlogDBType, BlogViewModelType>(
-  //     //   this.BlogModel,
-  //     //   blogModel.getBlogsViewModel,
-  //     //   inputData,
-  //     // );
-  //   } catch (e) {
-  //     throw new Error(
-  //       `There're something problems with find blogs by query: ${e}`,
-  //     );
-  //   }
-  // }
+      const searchTerm = `%${searchNameTerm ? searchNameTerm : ''}%`;
+
+      const query = `
+      SELECT *
+        FROM blogs
+        WHERE title ILIKE $1
+        ORDER BY ${sortBy} ${sortDirection}
+        LIMIT $2 OFFSET $3
+      `;
+
+      const result = await this.dataSource.query(query, [
+        searchTerm,
+        pageSize,
+        skip,
+      ]);
+
+      const [countResult] = await this.dataSource.query(
+        `
+          SELECT COUNT(*)
+          FROM blogs
+          WHERE title ILIKE $1
+        `,
+        [searchTerm],
+      );
+
+      const blogsViewModel = new PaginationViewModel<BlogViewModelType>(
+        result.map(getBlogSqlViewModel),
+        pageNumber,
+        pageSize,
+        countResult.count,
+      );
+
+      return blogsViewModel;
+    } catch (e) {
+      console.error(`Some troubles occurred during find blogs: ${e}`);
+      return null;
+    }
+  }
 
   async getBlogById(blogId: string): Promise<BlogViewModelType | null> {
     try {

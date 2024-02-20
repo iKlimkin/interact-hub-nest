@@ -19,10 +19,8 @@ export class UsersSqlQueryRepository {
   ): Promise<PaginationViewModel<SAViewModel>> {
     const { searchEmailTerm, searchLoginTerm } = queryOptions;
 
-    const { pageNumber, pageSize, skip, sortBySQL, sortSQLDirection } =
-      await getPagination(queryOptions, !0);
-    const data = await getPagination(queryOptions, !0);
-    console.log({ data });
+    const { pageNumber, pageSize, skip, sortBy, sortDirection } =
+      await getPagination(queryOptions, false, !0);
 
     const searchTerms = [
       `%${searchLoginTerm ? searchLoginTerm : ''}%`,
@@ -33,7 +31,7 @@ export class UsersSqlQueryRepository {
     SELECT *
       FROM user_accounts
       WHERE login ILIKE $1 OR email ILIKE $2
-      ORDER BY ${sortBySQL} ${sortSQLDirection}
+      ORDER BY ${sortBy} ${sortDirection}
       LIMIT $3 OFFSET $4
     `;
 

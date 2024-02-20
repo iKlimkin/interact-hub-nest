@@ -1,13 +1,20 @@
 import { SortDirection } from 'mongodb';
 import { BaseFilter } from '../../domain/sorting-base-filter';
 
+enum sortDirections {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}
+
+type SortDirectionsType = keyof typeof sortDirections;
+
 export type PaginationType = {
   sort: Record<string, SortDirection>;
   pageNumber: number;
   pageSize: number;
   skip: number;
-  sortBySQL: string;
-  sortSQLDirection: string;
+  sortBy: string;
+  sortDirection: SortDirectionsType;
 };
 
 export type SortOptions = {
@@ -15,15 +22,23 @@ export type SortOptions = {
   sortBy: string;
 };
 
+type SortDirections = SortDirection | SortDirectionsType;
+
 export const getPagination = async (
   inputData: BaseFilter,
-  option?: boolean,
+  userAccountOptions?: boolean,
+  sqlOptions: boolean = false,
 ): Promise<PaginationType> => {
-  const sortDirection: SortDirection =
-    inputData.sortDirection === 'asc' ? 1 : -1;
+  let sortDirection: SortDirections;
+  let sortBy: string;
 
-  const sortSQLDirection: SortDirection =
-    inputData.sortDirection === 'asc' ? 'asc' : 'desc';
+  if (sqlOptions) {
+    sortDirection = inputData.sortDirection === 'asc' ? 'ASC' : 'DESC';
+    sortBy = inputData.sortBy || 'created_at';
+  } else {
+    sortDirection = inputData.sortDirection === 'asc' ? 1 : -1;
+    sortBy = inputData.sortBy || 'createdAt';
+  }
 
   const pageNumber: number = inputData.pageNumber
     ? Math.min(+inputData.pageNumber, 50)
@@ -36,7 +51,7 @@ export const getPagination = async (
   const skip: number = (pageNumber - 1) * pageSize;
 
   const getDefaultSort = (sortBy: string): Record<string, SortDirection> => ({
-    [sortBy]: sortDirection,
+    [sortBy]: sortDirection as SortDirection,
   });
 
   const getUserAccountSort = (
@@ -50,15 +65,11 @@ export const getPagination = async (
     const sortingKey: string = sortingKeyMap[sortBy] || `accountData.createdAt`;
 
     return {
-      [sortingKey]: sortDirection,
+      [sortingKey]: sortDirection as SortDirection,
     };
   };
 
-  const sortBy: string = inputData.sortBy || 'createdAt';
-
-  const sortBySQL: string = inputData.sortBy || 'created_at';
-
-  const sort: Record<string, SortDirection> = option
+  const sort: Record<string, SortDirection> = userAccountOptions
     ? getUserAccountSort(sortBy)
     : getDefaultSort(sortBy);
 
@@ -67,7 +78,7 @@ export const getPagination = async (
     pageNumber,
     pageSize,
     skip,
-    sortBySQL,
-    sortSQLDirection: sortSQLDirection.toUpperCase(),
+    sortBy,
+    sortDirection: sortDirection as SortDirectionsType,
   };
 };
