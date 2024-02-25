@@ -30,8 +30,17 @@ export class UsersSqlQueryRepository {
       `%${searchEmailTerm ? searchEmailTerm : ''}%`,
     ];
 
-    const query = `
-    SELECT *
+    const query =
+      sortBy !== 'created_at'
+        ? `
+      SELECT *
+      FROM user_accounts
+      WHERE login ILIKE $1 OR email ILIKE $2
+      ORDER BY ${sortBy} COLLATE "C" ${sortDirection}
+      LIMIT $3 OFFSET $4
+    `
+        : `
+      SELECT *
       FROM user_accounts
       WHERE login ILIKE $1 OR email ILIKE $2
       ORDER BY ${sortBy} ${sortDirection}
