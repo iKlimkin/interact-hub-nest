@@ -36,19 +36,27 @@ export class TestDatabaseRepo {
   ) {}
 
   async deleteAllData() {
-    const sqlDataSource = this.dataSource.query(`
+    try {
+      const sqlDataSource = this.dataSource.query(`
+      DELETE FROM post_reactions;
+      DELETE FROM post_reaction_counts;
       DELETE FROM user_sessions;
       DELETE FROM user_accounts;
       DELETE FROM api_requests;
+      DELETE FROM posts;
+      DELETE FROM blogs;
     `);
 
-    await Promise.all([
-      this.BlogModel.deleteMany(),
-      this.PostModel.deleteMany(),
-      this.CommentModel.deleteMany(),
-      this.UserAccountModel.deleteMany(),
-      this.SecurityModel.deleteMany(),
-      sqlDataSource,
-    ]);
+      await Promise.all([
+        this.BlogModel.deleteMany(),
+        this.PostModel.deleteMany(),
+        this.CommentModel.deleteMany(),
+        this.UserAccountModel.deleteMany(),
+        this.SecurityModel.deleteMany(),
+        sqlDataSource,
+      ]);
+    } catch (error) {
+      console.error('Error executing SQL queries:', error);
+    }
   }
 }

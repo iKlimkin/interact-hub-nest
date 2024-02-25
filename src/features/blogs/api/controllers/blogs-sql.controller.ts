@@ -80,15 +80,15 @@ export class BlogsSqlController {
       throw new NotFoundException('blog not found');
     }
 
-    const post = await this.postsSqlQueryRepo.getPostsByBlogId(
+    const posts = await this.postsSqlQueryRepo.getPostsByBlogId(
       blogId,
       query,
       userId,
     );
 
-    if (!post) throw new Error();
+    if (!posts) throw new Error();
 
-    return post;
+    return posts;
   }
 
   @Post()

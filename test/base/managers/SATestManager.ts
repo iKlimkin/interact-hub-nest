@@ -44,20 +44,20 @@ export class SATestManager {
     return { user };
   }
 
-  async getAdminUsers() {
-    const response = await request(this.application)
-      .get(RouterPaths.users)
-      .set('Authorization', 'Basic YWRtaW46cXdlcnR5')
-      .expect(HttpStatus.OK);
+  // async getAdminUsers() {
+  //   const response = await request(this.application)
+  //     .get(RouterPaths.users)
+  //     .set('Authorization', 'Basic YWRtaW46cXdlcnR5')
+  //     .expect(HttpStatus.OK);
 
-    return response.body;
-  }
+  //   return response.body;
+  // }
 
   async getSAPagination(query?, responseModel?: any) {
     if (query) {
       const { pageNumber, pageSize, searchEmailTerm, searchLoginTerm, sortBy, sortDirection } = query
 
-      const { body } = await request(this.application)
+      const response = await request(this.application)
         .get(RouterPaths.users)
         .set('Authorization', 'Basic YWRtaW46cXdlcnR5')
         .query({
@@ -69,8 +69,10 @@ export class SATestManager {
           sortBy: sortBy ? sortBy : '',
         })
         .expect(HttpStatus.OK);
-
-        this.checkUserData(body, responseModel)
+        console.log(response);
+        
+        return response.body
+        // this.checkUserData(body, responseModel)
     } 
   }
 

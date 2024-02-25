@@ -8,16 +8,15 @@ export type LikeUserType = {
   status: likesStatus;
 };
 
+export type UpdateReactionModelType = {
+  postId: string;
+  userId: string;
+  login: string;
+  inputStatus: likesStatus;
+};
+
 export type likeUserInfo = LikesCountType &
   LikeUserType & { commentId?: string; login?: string; postId?: string };
-
-export type ReactionType = {
-  commentId: string;
-  userId: string;
-  inputStatus: LikeStatusType;
-  likesCount: number;
-  dislikesCount: number;
-};
 
 export enum likesStatus {
   None = 'None',
@@ -30,6 +29,30 @@ export type LikesUserInfoType = {
   login: string;
   status: likesStatus;
   addedAt: string;
+};
+
+export type ReactionCommentType = {
+  commentId: string;
+  userId: string;
+  inputStatus: LikeStatusType;
+  currentStatus: LikeStatusType | null;
+};
+
+export type ReactionPostDtoType = Omit<ReactionPostCountType, 'currentStatus'>;
+
+export type ReactionCommentDto = Omit<ReactionCommentType, 'currentStatus'> & {
+  likesCount: number;
+  dislikesCount: number;
+};
+
+export type ReactionPostCountType = ReactionPostType & {
+  likesCount: number;
+  dislikesCount: number;
+};
+
+export type ReactionPostType = Omit<ReactionCommentType, 'commentId'> & {
+  postId: string;
+  userLogin: string;
 };
 
 export type LikeStatusType = keyof typeof likesStatus;

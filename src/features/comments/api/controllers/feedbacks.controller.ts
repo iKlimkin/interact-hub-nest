@@ -22,8 +22,8 @@ import { AccessTokenGuard } from '../../../auth/infrastructure/guards/accessToke
 import { InputLikeStatusModel } from '../../../posts/api/models/input.posts.models/input-post..model';
 import { DeleteCommentCommand } from '../../application/use-cases/commands/delete-comment.command';
 import { UpdateCommentCommand } from '../../application/use-cases/commands/update-comment.command';
-import { UpdateUserReactionCommand } from '../../application/use-cases/commands/update-user-reaction.command';
-import { InputContentModel } from '../models/input.comment.models';
+import { UpdateCommentReactionCommand } from '../../application/use-cases/commands/update-user-reaction.command';
+import { InputContentModel, ReactionDataModel } from '../models/input.comment.models';
 import { FeedbacksQueryRepository } from '../query-repositories/feedbacks.query.repository';
 import { ObjectIdPipe } from '../../../../infra/pipes/valid-objectId.pipe';
 import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
@@ -105,9 +105,9 @@ export class FeedbacksController {
   async updateLikesStatus(
     @Param('id', ObjectIdPipe) commentId: string,
     @CurrentUserInfo() userInfo: UserInfoType,
-    @Body() inputStatus: InputLikeStatusModel,
+    @Body() inputStatusModel: InputLikeStatusModel,
   ) {
-    const { likeStatus } = inputStatus;
+    const { likeStatus } = inputStatusModel;
     const { userId } = userInfo;
 
     const foundComment = await this.feedbacksQueryRepo.getCommentById(
@@ -123,13 +123,13 @@ export class FeedbacksController {
 
     if (myStatus === likeStatus) return;
 
-    const reactionData = {
+    const reactionData: ReactionDataModel = {
       commentId,
       userId,
       inputStatus: likeStatus,
     };
 
-    const command = new UpdateUserReactionCommand(reactionData);
+    const command = new UpdateCommentReactionCommand(reactionData);
 
     await this.commandBus.execute(command);
   }

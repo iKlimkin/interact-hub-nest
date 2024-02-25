@@ -1,8 +1,14 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { OutputId } from '../../../domain/likes.types';
+import {
+  OutputId,
+  ReactionPostDtoType,
+  likesStatus,
+} from '../../../domain/likes.types';
 import { PostDtoSqlType } from '../api/models/post-sql.model';
+import { UpdatePostModel } from '../api/models/input.posts.models/create.post.model';
+import { PostReactionsSqlDbType } from '../api/models/output.post.models/post-reactions-db-sql.model';
 
 @Injectable()
 export class PostsSqlRepository {
@@ -30,103 +36,104 @@ export class PostsSqlRepository {
     }
   }
 
-  // async updatePost(
-  //   postId: string,
-  //   updateData: UpdatePostModel,
-  // ): Promise<boolean> {
-  //   try {
-  //     const post = await this.PostModel.updateOne(
-  //       {
-  //         $and: [
-  //           { _id: this.getObjectId(postId) },
-  //           { blogId: updateData.blogId },
-  //         ],
-  //       },
-  //       {
-  //         $set: {
-  //           title: updateData.title,
-  //           shortDescription: updateData.shortDescription,
-  //           content: updateData.content,
-  //           blogId: updateData.blogId,
-  //         },
-  //       },
-  //     );
+  async getUserReaction(
+    userId: string,
+    postId: string,
+  ): Promise<likesStatus | null> {
+    try {
+      const findQuery = `
+      SELECT *
+        FROM post_reactions
+        WHERE user_id = $1 AND post_id = $2
+      `;
 
-  //     return post.matchedCount === 1;
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(
-  //       'Database fails during update operate',
-  //     );
-  //   }
-  // }
+      const result = await this.dataSource.query<PostReactionsSqlDbType[]>(
+        findQuery,
+        [userId, postId],
+      );
 
-  // private getObjectId(id: string) {
-  //   return new ObjectId(id);
-  // }
+      if (!result) return null;
 
-  // async createLikeStatus(likeInfo: likeUserInfo): Promise<boolean> {
-  //   try {
-  //     const createdLikeStatus = await this.PostModel.findByIdAndUpdate(
-  //       new ObjectId(likeInfo.postId),
-  //       {
-  //         $addToSet: {
-  //           likesUserInfo: {
-  //             userId: likeInfo.userId,
-  //             status: likeInfo.status,
-  //             login: likeInfo.login,
-  //             addedAt: new Date().toISOString(),
-  //           },
-  //         },
-  //         $inc: {
-  //           'likesCountInfo.likesCount': likeInfo.likesCount,
-  //           'likesCountInfo.dislikesCount': likeInfo.dislikesCount,
-  //         },
-  //       },
-  //       { new: true },
-  //     );
+      return result[0].reaction_type;
+    } catch (error) {
+      console.error(
+        `Database fails operate with find user's reactions on post`,
+      );
+      return null;
+    }
+  }
 
-  //     return createdLikeStatus !== null;
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(
-  //       'Database fails during create like-status operate',
-  //     );
-  //   }
-  // }
+  async updatePost(
+    postId: string,
+    updateData: UpdatePostModel,
+  ): Promise<boolean> {
+    try {
+      const updateQuery = `
+      UPDATE posts
+        SET title = $1, short_description = $2, content = $3, blog_id = $4
+        WHERE id = $5
+      `;
 
-  // async updateLikeStatus(likeInfo: likeUserInfo): Promise<PostDBType | null> {
-  //   try {
-  //     return this.PostModel.findOneAndUpdate(
-  //       {
-  //         _id: likeInfo.postId,
-  //         likesUserInfo: { $elemMatch: { userId: likeInfo.userId } },
-  //       },
-  //       {
-  //         $set: {
-  //           'likesUserInfo.$.status': likeInfo.status,
-  //         },
+      const result = await this.dataSource.query(updateQuery, [
+        ...Object.values(updateData.inputPostDto),
+        postId,
+      ]);
 
-  //         $inc: {
-  //           'likesCountInfo.likesCount': likeInfo.likesCount,
-  //           'likesCountInfo.dislikesCount': likeInfo.dislikesCount,
-  //         },
-  //       },
+      return result[1] > 0;
+    } catch (error) {
+      console.error(`Database fails during update post sql operate ${error}`);
+      return false;
+    }
+  }
 
-  //       { new: true },
-  //     );
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(
-  //       'Database fails during update operate',
-  //     );
-  //   }
-  // }
+  async createLikeStatus(reactionDto: ReactionPostDtoType) {
+    try {
+      const updateReactionQuery = `
+      INSERT INTO post_reactions (user_id, user_login, post_id, reaction_type)
+      VALUES ($1, $2, $3, $4)
+      ON CONFLICT (user_id, post_id) DO UPDATE SET reaction_type = EXCLUDED.reaction_type
+    `;
 
-  // async deletePost(searchId: string): Promise<boolean> {
-  //   try {
-  //     return this.PostModel.findByIdAndDelete(new ObjectId(searchId)).lean();
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(
-  //       'Database fails during delete operate',
-  //     );
-  //   }
-  // }
+      const updatedReaction = await this.dataSource.query(updateReactionQuery, [
+        reactionDto.userId,
+        reactionDto.userLogin,
+        reactionDto.postId,
+        reactionDto.inputStatus,
+      ]);
+
+      const updateCounterQuery = `
+      INSERT INTO post_reaction_counts (post_id, likes_count, dislikes_count)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (post_id) DO UPDATE SET
+        likes_count = post_reaction_counts.likes_count + EXCLUDED.likes_count,
+        dislikes_count = post_reaction_counts.dislikes_count + EXCLUDED.dislikes_count
+    `;
+
+      const updatedReactionCounter = await this.dataSource.query(
+        updateCounterQuery,
+        [reactionDto.postId, reactionDto.likesCount, reactionDto.dislikesCount],
+      );
+    } catch (error) {
+      console.error(
+        `Database fails during create post reaction operate ${error}`,
+      );
+    }
+  }
+
+  async deletePost(postId: string): Promise<boolean> {
+    try {
+      const deleteQuery = `
+      DELETE
+        FROM posts
+        WHERE id = $1
+      `;
+
+      const result = await this.dataSource.query(deleteQuery, [postId]);
+
+      return result[1] > 0;
+    } catch (error) {
+      console.error(`Database fails during delete post sql operate ${error}`);
+      return false;
+    }
+  }
 }

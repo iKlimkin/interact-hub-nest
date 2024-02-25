@@ -275,12 +275,12 @@ aDescribe(skipSettings.for('blogs'))('BlogsController (e2e)', () => {
       blogTestManager.checkBlogData(result, errors);
     });
 
-    it(`/blogs/:blogId/posts (POST) - should create post`, async () => {
+    it(`/blogs/:blogId/posts (POST) - should create post for blog`, async () => {
       const { blogPost } = expect.getState();
 
       const inputCreatePostData = blogTestManager.createPostInputData({});
 
-      const postByBlogId = await blogTestManager.createPost(
+      const newestPost = await blogTestManager.createPost(
         inputCreatePostData,
         blogPost,
       );

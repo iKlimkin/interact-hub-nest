@@ -1,13 +1,13 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { ReactionType, likesStatus } from '../../../domain/likes.types';
+import { ObjectId } from 'mongodb';
+import { ReactionCommentDto, likesStatus } from '../../../domain/likes.types';
 import { getLikeStatus } from '../../../infra/utils/get-like-status';
 import {
   Comment,
   CommentDocument,
   CommentModelType,
 } from '../domain/entities/comment.schema';
-import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class FeedbacksRepository {
@@ -54,7 +54,9 @@ export class FeedbacksRepository {
     }
   }
 
-  async createLikeStatus(inputReactionData: ReactionType): Promise<boolean> {
+  async createLikeStatus(
+    inputReactionData: ReactionCommentDto,
+  ): Promise<boolean> {
     try {
       const createdLikeStatus = await this.CommentModel.findByIdAndUpdate(
         new ObjectId(inputReactionData.commentId),
@@ -82,7 +84,9 @@ export class FeedbacksRepository {
     }
   }
 
-  async updateLikeStatus(inputReactionData: ReactionType): Promise<boolean> {
+  async updateLikeStatus(
+    inputReactionData: ReactionCommentDto,
+  ): Promise<boolean> {
     try {
       const updatedLike = await this.CommentModel.findOneAndUpdate(
         {

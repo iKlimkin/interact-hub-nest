@@ -5,6 +5,7 @@ import { RouterPaths } from '../utils/routing';
 import { PostViewModelType } from '../../../src/features/posts/api/models/post.view.models/post-view-model.type';
 import { ErrorsMessages } from '../../../src/infra/utils/error-handler';
 import { LikeStatusType, likesStatus } from '../../../src/domain/likes.types';
+import { wait } from '../utils/wait';
 
 export class PostsTestManager {
   constructor(protected readonly app: INestApplication) {}
@@ -53,6 +54,28 @@ export class PostsTestManager {
     return res.body;
   }
 
+  async createPosts(
+    blogId: string,
+    numberOfPosts: number = 1,
+  ): Promise<PostViewModelType[]> {
+    let posts: PostViewModelType[] = [];
+
+    for (let i = 0; i < numberOfPosts; i++) {
+      const postData = {
+        blogId,
+        title: `title${i}`,
+        content: `content${i}`,
+        shortDescription: `shortDescription${i}`,
+      };
+
+      const post = await this.createPost(this.createInputData(postData));
+
+      posts.push(post);
+    }
+
+    return posts;
+  }
+
   async updatePost(
     inputData: CreatePostModel,
     postId: string,
@@ -93,15 +116,41 @@ export class PostsTestManager {
     return post;
   }
 
+  async likeStatusOperations(
+    postId: string | PostViewModelType[],
+    token: string,
+    status: LikeStatusType | string = likesStatus.None,
+    expectStatus: number = HttpStatus.NO_CONTENT,
+  ) {
+    if (Array.isArray(postId)) {
+      for (const post of postId) {
+
+        await request(this.application)
+          .put(`${RouterPaths.posts}/${post.id}/like-status`)
+          .auth(token, { type: 'bearer' })
+          .send({ likeStatus: status })
+          .expect(expectStatus);
+      }
+    } else {
+      await request(this.application)
+        .put(`${RouterPaths.posts}/${postId}/like-status`)
+        .auth(token, { type: 'bearer' })
+        .send({ likeStatus: status })
+        .expect(expectStatus);
+    }
+  }
+
   checkPostData(
     responseModel:
       | PostViewModelType
       | { errorsMessages: ErrorsMessages[] }
-      | string,
+      | string
+      | any,
     expectedResult:
       | PostViewModelType
       | { errorsMessages: ErrorsMessages[] }
-      | string,
+      | string
+      | any,
   ) {
     expect(responseModel).toEqual(expectedResult);
   }

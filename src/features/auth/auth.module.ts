@@ -28,6 +28,7 @@ import {
   usersProviders,
 } from './infrastructure/settings/auth-providers';
 import { mongooseModels } from './infrastructure/settings/mongoose-models';
+import { UsersSqlQueryRepository } from '../admin/api/query-repositories/users.query.sql-repo';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { mongooseModels } from './infrastructure/settings/mongoose-models';
     BcryptAdapter,
     UsersRepository,
     UsersQueryRepository,
+    UsersSqlQueryRepository,
     SecurityService,
     SecurityQueryRepo,
     CqrsModule,

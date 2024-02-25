@@ -6,6 +6,7 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
+import { error } from 'console';
 import { Request, Response } from 'express';
 
 type ErrorsMessageType = {
@@ -29,7 +30,7 @@ export class ErrorsExceptionFilter implements ExceptionFilter {
         .status(500)
         .send({ error: exception.toString(), stack: exception.stack });
     } else {
-      response.status(500).send('occured some problems');
+      response.status(500).send('occurred some problems');
     }
   }
 }
@@ -61,6 +62,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       response.status(status).json({
         statusCode: status,
         timestamp: new Date().toISOString(),
+        error: exception.message,
         path: request.url,
       });
     }

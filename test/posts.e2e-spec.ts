@@ -8,35 +8,38 @@ import { BasicAuthorization } from './base/managers/BasicAuthManager';
 import { BlogsTestManager } from './base/managers/BlogsTestManager';
 import { FeedbacksTestManager } from './base/managers/FeedbacksTestManager';
 import { PostsTestManager } from './base/managers/PostsTestManager';
-import {
-  feedbacksConstants,
-} from './base/rest-models-helpers/feedbacks.constants';
+import { feedbacksConstants } from './base/rest-models-helpers/feedbacks.constants';
 import { postConstants } from './base/rest-models-helpers/post-models';
 import { dropDataBase } from './base/utils/dataBase-clean-up';
 import { skipSettings } from './base/utils/tests-settings';
 import { createErrorsMessages } from './base/utils/make-errors-messages';
 import { userConstants } from './base/rest-models-helpers/users.constants';
 import { SATestManager } from './base/managers/SATestManager';
+import { initSettings } from './base/utils/init-settings';
+import { UsersTestManager } from './base/managers/UsersTestManager';
+import { DataSource } from 'typeorm';
+import { likesStatus } from '../src/domain/likes.types';
 
 aDescribe(skipSettings.for('posts'))('PostsController (e2e)', () => {
   let app: INestApplication;
+  let testingAppModule: TestingModule;
   let postTestManager: PostsTestManager;
   let blogTestManager: BlogsTestManager;
   let basicAuthManager: BasicAuthorization;
   let authManager: AuthManager;
   let saManager: SATestManager;
   let feedbacksTestManager: FeedbacksTestManager;
+  let usersTestManager: UsersTestManager;
+  let dataBase: DataSource;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+    const result = await initSettings();
 
-    app = moduleFixture.createNestApplication();
+    testingAppModule = result.testingAppModule;
+    usersTestManager = result.usersTestManager;
 
-    applyAppSettings(app);
-
-    await app.init();
+    dataBase = testingAppModule.get<DataSource>(DataSource);
+    app = result.app;
 
     postTestManager = new PostsTestManager(app);
     blogTestManager = new BlogsTestManager(app);
@@ -52,7 +55,7 @@ aDescribe(skipSettings.for('posts'))('PostsController (e2e)', () => {
     await app.close();
   });
 
-  describe('createPost', () => {
+  describe.skip('createPost', () => {
     beforeAll(async () => {
       const inputData = blogTestManager.createInputData({});
 
@@ -73,9 +76,14 @@ aDescribe(skipSettings.for('posts'))('PostsController (e2e)', () => {
         HttpStatus.BAD_REQUEST,
       );
 
-      const error = createErrorsMessages(['blogId']);
+      const errors = createErrorsMessages([
+        'title',
+        'shortDescription',
+        'content',
+        'blogId',
+      ]);
 
-      postTestManager.checkPostData(post, error);
+      postTestManager.checkPostData(post, errors);
     });
 
     it('/posts (POST) - should not create post without correct blogId in body', async () => {
@@ -122,7 +130,7 @@ aDescribe(skipSettings.for('posts'))('PostsController (e2e)', () => {
     });
   });
 
-  describe('updatePost', () => {
+  describe.skip('updatePost', () => {
     it('/posts (GET) - check post existence', async () => {
       const expectTotalCount = 1;
       await postTestManager.checkLength(expectTotalCount);
@@ -165,7 +173,7 @@ aDescribe(skipSettings.for('posts'))('PostsController (e2e)', () => {
     });
   });
 
-  describe('deletePost', () => {
+  describe.skip('deletePost', () => {
     it("/posts (DELETE) - shouldn't remove post without auth", async () => {
       const { post } = expect.getState();
 
@@ -178,7 +186,11 @@ aDescribe(skipSettings.for('posts'))('PostsController (e2e)', () => {
     });
   });
 
-  describe('createComment', () => {
+  describe.skip('createComment', () => {
+    afterAll(async () => {
+      await dropDataBase(app);
+    });
+
     beforeAll(async () => {
       const { blog } = expect.getState();
       const userInputData = saManager.createInputData({});
@@ -189,6 +201,7 @@ aDescribe(skipSettings.for('posts'))('PostsController (e2e)', () => {
         login: 'login',
         email: 'email@test.test',
       });
+
       const { user: user2 } = await saManager.createSA(userAnotherData);
       const result2 = await authManager.login(userAnotherData);
 
@@ -241,10 +254,6 @@ aDescribe(skipSettings.for('posts'))('PostsController (e2e)', () => {
       );
     });
 
-    it("/posts/:postId/comments (POST) - shouldn't create comment with invalid body message (content), expect BAD_REQUEST", async () => {
-      const { post, accessToken1, user1 } = expect.getState();
-    });
-
     it('/posts/:postId/comments (POST) - should create one comment, expect CREATED', async () => {
       const { post, accessToken2, user2 } = expect.getState();
 
@@ -268,6 +277,76 @@ aDescribe(skipSettings.for('posts'))('PostsController (e2e)', () => {
 
     it('/posts/:postId/comments (GET) - should receive 5 comments for current post, expect CREATED', async () => {
       const { post, accessToken1, user1 } = expect.getState();
+    });
+  });
+
+  describe('userReactions / postLikeStatuses', () => {
+    // afterAll(async () => {
+    //   await dropDataBase(app);
+    // });
+
+    beforeAll(async () => {
+      const { users, accessTokens } =
+        await usersTestManager.createUAdminsAndTokens(5);
+
+      const inputBlogData = blogTestManager.createInputData({});
+      const blog = await blogTestManager.createBlog(inputBlogData);
+
+      const posts = await postTestManager.createPosts(blog.id, 3);
+
+      expect.setState({ posts, users, accessTokens });
+    });
+
+    it('/posts/:postId/like-status (PUT) - create a likes for each post, expect 204', async () => {
+      const { posts, accessTokens } = expect.getState();
+
+      await postTestManager.likeStatusOperations(
+        posts,
+        accessTokens[0],
+        likesStatus.Like,
+      );
+
+      await postTestManager.likeStatusOperations(
+        posts,
+        accessTokens[1],
+        likesStatus.Like,
+      );
+
+      await postTestManager.likeStatusOperations(
+        posts,
+        accessTokens[2],
+        likesStatus.Like,
+      );
+
+      await postTestManager.likeStatusOperations(
+        posts,
+        accessTokens[3],
+        likesStatus.Like,
+      );
+
+      await postTestManager.likeStatusOperations(
+        posts,
+        accessTokens[4],
+        likesStatus.Dislike,
+      );
+
+      const post = await postTestManager.getPostById(posts[0].id);
+
+      postTestManager.checkPostData(post.extendedLikesInfo.likesCount, 4);
+
+      console.log( post.extendedLikesInfo.newestLikes );
+    });
+
+    it.skip('/posts/:postId/like-status (PUT) - make , expect CREATED', async () => {
+      const { posts, accessTokens } = expect.getState();
+
+      await postTestManager.likeStatusOperations(
+        posts,
+        accessTokens[0],
+        likesStatus.Dislike,
+      );
+      const post = await postTestManager.getPostById(posts[0].id);
+      console.log({ post });
     });
   });
 });

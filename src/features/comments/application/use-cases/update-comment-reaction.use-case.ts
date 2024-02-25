@@ -1,30 +1,24 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { FeedbacksRepository } from '../../infrastructure/feedbacks.repository';
-import { UpdateUserReactionCommand } from './commands/update-user-reaction.command';
 import { getStatusCounting } from '../../../../infra/utils/status-counter';
-import { LikeStatusType, ReactionType } from '../../../../domain/likes.types';
+import { FeedbacksRepository } from '../../infrastructure/feedbacks.repository';
+import { UpdateCommentReactionCommand } from './commands/update-user-reaction.command';
+import { ReactionCommentDto, ReactionCommentType } from '../../../../domain/likes.types';
 
-type ReactionDataType = {
-  commentId: string;
-  userId: string;
-  inputStatus: LikeStatusType;
-  currentStatus: LikeStatusType | null;
-};
 
-@CommandHandler(UpdateUserReactionCommand)
-export class UpdateUserReactionUseCase
-  implements ICommandHandler<UpdateUserReactionCommand>
+@CommandHandler(UpdateCommentReactionCommand)
+export class UpdateCommentReactionUseCase
+  implements ICommandHandler<UpdateCommentReactionCommand>
 {
   constructor(private feedbacksRepository: FeedbacksRepository) {}
 
-  async execute(command: UpdateUserReactionCommand) {
+  async execute(command: UpdateCommentReactionCommand) {
     const { commentId, userId, inputStatus } = command.inputData;
 
     const existingReaction = await this.feedbacksRepository.getUserReaction(
       userId,
       commentId,
     );
-      
+
     await this.handleReaction({
       commentId,
       userId,
@@ -33,7 +27,7 @@ export class UpdateUserReactionUseCase
     });
   }
 
-  private async handleReaction(reactionDto: ReactionDataType) {
+  private async handleReaction(reactionDto: ReactionCommentType) {
     const { commentId, currentStatus, inputStatus, userId } = reactionDto;
 
     const { likesCount, dislikesCount } = getStatusCounting(
@@ -41,7 +35,7 @@ export class UpdateUserReactionUseCase
       currentStatus || 'None',
     );
 
-    const reactionData: ReactionType = {
+    const reactionData: ReactionCommentDto = {
       commentId,
       userId,
       inputStatus,

@@ -45,6 +45,29 @@ export class UsersTestManager {
     return result.body;
   }
 
+  async createUAdminsAndTokens(
+    numberOfUsers: number,
+  ): Promise<{ users: AuthUserType[]; accessTokens: string[] }> {
+    const users: AuthUserType[] = [];
+    const accessTokens: string[] = [];
+
+    for (let i = 0; i < numberOfUsers; i++) {
+      const userData = {
+        login: `login${i}`,
+        email: `email${i}@test.test`,
+      };
+
+      const userInputData = this.createInputData(userData);
+      const sa = await this.createSA(userInputData);
+      const { accessToken } = await this.authLogin(userInputData);
+
+      users.push(sa);
+      accessTokens.push(accessToken);
+    }
+
+    return { users, accessTokens };
+  }
+
   async registration(
     inputData: AuthUserType,
     expectedStatus: number = HttpStatus.NO_CONTENT,
@@ -66,18 +89,18 @@ export class UsersTestManager {
       .send({ email })
       .expect(expectedStatus);
 
-      return response.body
+    return response.body;
   }
 
-  async registrationConfirmation (
+  async registrationConfirmation(
     code: string | null,
-    expectedStatus: number = HttpStatus.NO_CONTENT
-) { 
-  await request(this.application)
-    .post(`${RouterPaths.auth}/registration-confirmation`)
-    .send({code})
-    .expect(expectedStatus)
-}
+    expectedStatus: number = HttpStatus.NO_CONTENT,
+  ) {
+    await request(this.application)
+      .post(`${RouterPaths.auth}/registration-confirmation`)
+      .send({ code })
+      .expect(expectedStatus);
+  }
 
   async updateUser(adminAccessToken: string, updateModel: any) {
     return request(this.application)
@@ -157,7 +180,7 @@ export class UsersTestManager {
         userId: expect.any(String),
       });
 
-      return res.body as UserProfileType
+    return res.body as UserProfileType;
   }
 
   async logout(
@@ -170,7 +193,7 @@ export class UsersTestManager {
       .expect(expectedStatus);
   }
 
-  async deleteUser (userId: number) {
+  async deleteUser(userId: number) {
     await request(this.application)
       .delete(`${RouterPaths.users}/${userId}`)
       .set('Authorization', 'Basic YWRtaW46cXdlcnR5')

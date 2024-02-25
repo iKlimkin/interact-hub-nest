@@ -8,14 +8,16 @@ export class PaginationModel<T> {
     data: PaginationModelData<T>,
     query?: BaseFilter,
   ): PaginationModelData<T> {
-    let { pagesCount, page, pageSize, totalCount, items } = data;
+    const { pagesCount, page, pageSize, totalCount, items } = data;
+
+    let cItems = [...items]
 
     if (query?.searchEmailTerm || query?.searchLoginTerm) {
-      items = this.filterQueryTerms(items, query);
+      cItems = this.filterQueryTerms(cItems, query);
     }
 
     if (query?.sortBy || query?.sortDirection) {
-      items = this.sortingEntities(items, {
+      cItems = this.sortingEntities(cItems, {
         sortBy: query.sortBy,
         sortDirection: query.sortDirection,
       });
@@ -26,7 +28,7 @@ export class PaginationModel<T> {
       page: page ? page : 1,
       pageSize: pageSize ? pageSize : 10,
       totalCount: totalCount ? totalCount : 0,
-      items: items ? items : [],
+      items: cItems ? cItems : [],
     };
   }
 

@@ -3,8 +3,9 @@ import { RouterPaths } from './routing';
 import request from 'supertest';
 import { Connection } from 'mongoose';
 
-export const dropDataBase = async (app: INestApplication) =>
-  await request(app.getHttpServer()).delete(`${RouterPaths.test}`);
+export const dropDataBase = async (app: INestApplication) => {
+  await request(app.getHttpServer()).delete(`${RouterPaths.test}`)
+}
 
 export const deleteAllData = async (databaseConnection: Connection) => {
   await databaseConnection.collection('users').deleteMany();

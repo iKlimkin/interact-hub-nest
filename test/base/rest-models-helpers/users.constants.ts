@@ -92,7 +92,7 @@ export const defaultSA = {
   ],
 };
 
-function createSADataForTest() {
+export function createSADataForTest() {
   let data: any[] = [];
   let i = 1;
 

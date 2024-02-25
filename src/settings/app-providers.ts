@@ -11,7 +11,7 @@ import { FeedbacksService } from '../features/comments/application/feedbacks.ser
 import { CreateCommentUseCase } from '../features/comments/application/use-cases/create-comment.use-case';
 import { DeleteCommentUseCase } from '../features/comments/application/use-cases/delete-comment.use-case';
 import { UpdateCommentUseCase } from '../features/comments/application/use-cases/update-comment.use-case';
-import { UpdateUserReactionUseCase } from '../features/comments/application/use-cases/update-user-reaction.use-case';
+import { UpdateCommentReactionUseCase } from '../features/comments/application/use-cases/update-comment-reaction.use-case';
 import { FeedbacksRepository } from '../features/comments/infrastructure/feedbacks.repository';
 import { PostsQueryRepository } from '../features/posts/api/query-repositories/posts.query.repo';
 import { PostsService } from '../features/posts/application/posts.service';
@@ -29,6 +29,9 @@ import { DeleteBlogSqlUseCase } from '../features/blogs/application/use-case/del
 import { CreatePostSqlUseCase } from '../features/posts/application/use-cases/create-post-sql.use-case';
 import { PostsSqlRepository } from '../features/posts/infrastructure/posts.sql-repository';
 import { PostsSqlQueryRepo } from '../features/posts/api/query-repositories/posts-query.sql-repo';
+import { UpdatePostSqlUseCase } from '../features/posts/application/use-cases/update-post-sql.use-case';
+import { DeletePostSqlUseCase } from '../features/posts/application/use-cases/delete-post-sql.use-case';
+import { UpdatePostReactionSqlUseCase } from '../features/posts/application/use-cases/update-post-reaction-sql.use-case';
 
 const blogsProviders: Provider[] = [
   BlogsQueryRepo,
@@ -55,7 +58,10 @@ const useCases: Provider[] = [
   CreatePostUseCase,
   CreatePostSqlUseCase,
   UpdatePostUseCase,
+  UpdatePostSqlUseCase,
+  UpdatePostReactionSqlUseCase,
   DeletePostUseCase,
+  DeletePostSqlUseCase,
 
   CreateBlogUseCase,
   CreateBlogSqlUseCase,
@@ -67,7 +73,7 @@ const useCases: Provider[] = [
   UpdateCommentUseCase,
   CreateCommentUseCase,
   DeleteCommentUseCase,
-  UpdateUserReactionUseCase,
+  UpdateCommentReactionUseCase,
 ];
 
 export const providers = [

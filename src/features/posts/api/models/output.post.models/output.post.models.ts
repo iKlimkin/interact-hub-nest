@@ -1,6 +1,7 @@
 import {
   LikesUserInfoType,
   LikesCountType,
+  likesStatus,
 } from '../../../../../domain/likes.types';
 
 export type PostType = {
@@ -25,3 +26,19 @@ export type PostsSqlDbType = {
   content: string;
   created_at: Date;
 };
+
+export type PostReactionCounterType = {
+  post_id: string;
+  likes_count: number;
+  dislikes_count: number;
+};
+
+export type UserReactionsType = {
+  liked_at: string;
+  user_login: string;
+  user_id: string;
+  post_id: string;
+  reaction_type: likesStatus;
+};
+
+export type UserReactionsOutType = Pick<UserReactionsType, 'reaction_type'> & {post_id?: string}

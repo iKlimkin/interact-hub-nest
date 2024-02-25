@@ -41,7 +41,7 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
       tracker,
       ttl,
     };
-    console.log(throttleDetail);
+    // console.log(throttleDetail);
 
     if (totalHits > limit) {
       res.header('Retry-After', timeToExpire);

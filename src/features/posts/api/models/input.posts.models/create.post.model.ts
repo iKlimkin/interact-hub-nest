@@ -7,6 +7,7 @@ import {
   contentLength,
   blogIdLength,
 } from '../../../../../domain/validation.constants';
+import { string } from 'joi';
 
 export type CreatePostByBlog = Omit<CreatePostModel, 'blogId'>;
 
@@ -85,3 +86,4 @@ export class UpdatePostModel {
   @IsString()
   postId: string;
 }
+

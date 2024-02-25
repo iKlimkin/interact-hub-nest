@@ -1,5 +1,5 @@
 import { ReactionDataModel } from "../../../api/models/input.comment.models";
 
-export class UpdateUserReactionCommand {
+export class UpdateCommentReactionCommand {
     constructor(public inputData: ReactionDataModel) {}
 }
