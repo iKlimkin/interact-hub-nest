@@ -9,31 +9,60 @@ import {
 } from '../../domain/entities/comment.schema';
 import { FeedbacksRepository } from '../../infrastructure/feedbacks.repository';
 import { CreateCommentSqlCommand } from './commands/create-comment-sql.command';
+import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
+import { CommentDtoSqlModel } from '../../api/models/comment-dto-sql.model';
+import { UsersSQLRepository } from '../../../admin/infrastructure/users.sql-repository';
+import { LayerNoticeInterceptor } from '../../../../infra/utils/interlayer-error-handler.ts/error-layer-interceptor';
+import { OutputId } from '../../../../domain/likes.types';
+import { FeedbacksSqlRepo } from '../../infrastructure/feedbacks.sql-repository';
+import { GetErrors } from '../../../../infra/utils/interlayer-error-handler.ts/user-errors';
+import { nextThursday } from 'date-fns';
+import { not } from 'joi';
 
 @CommandHandler(CreateCommentSqlCommand)
 export class CreateCommentSqlUseCase
   implements ICommandHandler<CreateCommentSqlCommand>
 {
   constructor(
-    @InjectModel(Comment.name) private CommentModel: CommentModelType,
-    private feedbacksRepository: FeedbacksRepository,
-    private usersRepository: UsersRepository,
+    private feedbacksSqlRepo: FeedbacksSqlRepo,
+    private usersSqlRepository: UsersSQLRepository,
   ) {}
 
-  async execute(command: CreateCommentSqlCommand): Promise<CommentDocument> {
+  async execute(
+    command: CreateCommentSqlCommand,
+  ): Promise<LayerNoticeInterceptor<OutputId>> {
+    const notice = new LayerNoticeInterceptor<OutputId>();
+
+    try {
+      await validateOrRejectModel(command, CreateCommentSqlCommand);
+    } catch (e) {
+      notice.addError('incorrect model', 'validator', GetErrors.IncorrectModel);
+    }
+
     const { userId, content, postId } = command.inputData;
 
-    const user = await this.usersRepository.getUserById(userId);
+    const user = await this.usersSqlRepository.getUserById(userId);
 
-    const commentSmartModel = await this.CommentModel.makeInstance({
-      commentatorInfo: {
-        userId: userId,
-        userLogin: user!.accountData.login,
-      },
-      content: content,
-      postId: postId,
+    if (!user) {
+      notice.addError('User not found', 'db', GetErrors.NotFound);
+      return notice;
+    }
+
+    const commentDto = new CommentDtoSqlModel({
+      postId,
+      userId,
+      userlogin: user.login,
+      content,
     });
 
-    return this.feedbacksRepository.save(commentSmartModel);
+    const result = await this.feedbacksSqlRepo.save(commentDto);
+
+    if (result) {
+      notice.addData(result);
+    } else {
+      notice.addError('Post not created', 'db', GetErrors.DatabaseFail);
+    }
+
+    return notice;
   }
 }

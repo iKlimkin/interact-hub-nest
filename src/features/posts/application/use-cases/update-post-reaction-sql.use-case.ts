@@ -14,7 +14,8 @@ export class UpdatePostReactionSqlUseCase
   constructor(private postsSqlRepository: PostsSqlRepository) {}
 
   async execute(command: UpdatePostReactionSqlCommand) {
-    const { postId, userId, inputStatus, login } = command.updatePostReactionDto;
+    const { postId, userId, inputStatus, login } =
+      command.updatePostReactionDto;
 
     const currentStatus = await this.postsSqlRepository.getUserReaction(
       userId,
@@ -31,7 +32,8 @@ export class UpdatePostReactionSqlUseCase
   }
 
   private async handleReaction(reactionPostModel: ReactionPostType) {
-    const { postId, currentStatus, inputStatus, userId, userLogin } = reactionPostModel;
+    const { postId, currentStatus, inputStatus, userId, userLogin } =
+      reactionPostModel;
 
     const { likesCount, dislikesCount } = getStatusCounting(
       inputStatus,
@@ -47,10 +49,6 @@ export class UpdatePostReactionSqlUseCase
       likesCount,
     };
 
-    if (!currentStatus || currentStatus) {
-      await this.postsSqlRepository.createLikeStatus(reactionData);
-    } else {
-      // await this.postsSqlRepository.updateLikeStatus(reactionData);
-    }
+    await this.postsSqlRepository.updateReactionType(reactionData);
   }
 }

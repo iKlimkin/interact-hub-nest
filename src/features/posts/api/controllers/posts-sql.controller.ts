@@ -1,10 +1,12 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
   HttpCode,
   HttpStatus,
+  InternalServerErrorException,
   NotFoundException,
   Param,
   Post,
@@ -21,6 +23,7 @@ import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
 import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
 import { SetUserIdGuard } from '../../../../infra/guards/set-user-id.guard';
 import { ObjectIdPipe } from '../../../../infra/pipes/valid-objectId.pipe';
+import { LayerNoticeInterceptor } from '../../../../infra/utils/interlayer-error-handler.ts/error-layer-interceptor';
 import { UsersSqlQueryRepository } from '../../../admin/api/query-repositories/users.query.sql-repo';
 import { UserInfoType } from '../../../auth/api/models/user-models';
 import { CurrentUserInfo } from '../../../auth/infrastructure/decorators/current-user-info.decorator';
@@ -29,8 +32,8 @@ import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth
 import { CommentsViewModel } from '../../../comments/api/models/comments.view.models/comments.view.model';
 import { InputContentModel } from '../../../comments/api/models/input.comment.models';
 import { FeedbacksQueryRepository } from '../../../comments/api/query-repositories/feedbacks.query.repository';
-import { CreateCommentCommand } from '../../../comments/application/use-cases/commands/create-comment.command';
-import { CommentDocument } from '../../../comments/domain/entities/comment.schema';
+import { FeedbacksQuerySqlRepo } from '../../../comments/api/query-repositories/feedbacks.query.sql-repository';
+import { CreateCommentSqlCommand } from '../../../comments/application/use-cases/commands/create-comment-sql.command';
 import { CreatePostSqlCommand } from '../../application/use-cases/commands/create-post-sql.command';
 import { UpdatePostReactionSqlCommand } from '../../application/use-cases/commands/update-post-reaction-sql.use-case';
 import { UpdatePostSqlCommand } from '../../application/use-cases/commands/update-post-sql.command';
@@ -41,11 +44,13 @@ import { PostsQueryFilter } from '../models/output.post.models/posts-query.filte
 import { PostViewModelType } from '../models/post.view.models/post-view-model.type';
 import { PostsSqlQueryRepo } from '../query-repositories/posts-query.sql-repo';
 import { PostsQueryRepository } from '../query-repositories/posts.query.repo';
+import { GetErrors } from '../../../../infra/utils/interlayer-error-handler.ts/user-errors';
 
 @Controller('posts')
 export class PostsSqlController {
   constructor(
     private feedbacksQueryRepo: FeedbacksQueryRepository,
+    private feedbacksQuerySqlRepo: FeedbacksQuerySqlRepo,
     private postsQueryRepo: PostsQueryRepository,
     private postsSqlQueryRepo: PostsSqlQueryRepo,
     private usersSqlQueryRepository: UsersSqlQueryRepository,
@@ -146,7 +151,7 @@ export class PostsSqlController {
     const { content } = body;
     const { userId } = userInfo;
 
-    const existPost = await this.postsQueryRepo.getPostById(postId);
+    const existPost = await this.postsSqlQueryRepo.getPostById(postId);
 
     if (!existPost) {
       throw new NotFoundException('Post not found');
@@ -158,15 +163,28 @@ export class PostsSqlController {
       postId,
     };
 
-    const command = new CreateCommentCommand(createCommentData);
+    const command = new CreateCommentSqlCommand(createCommentData);
 
-    const { _id } = await this.commandBus.execute<
-      CreateCommentCommand,
-      CommentDocument
+    const result = await this.commandBus.execute<
+      CreateCommentSqlCommand,
+      LayerNoticeInterceptor<OutputId>
     >(command);
 
-    const foundNewComment = await this.feedbacksQueryRepo.getCommentById(
-      _id.toString(),
+    if (result.hasError()) {
+      if (result.code === GetErrors.DatabaseFail) {
+        throw new InternalServerErrorException(result.extensions);
+      }
+      if (result.code === GetErrors.NotFound) {
+        throw new NotFoundException(result.extensions)
+      }
+      if (result.code === GetErrors.IncorrectModel) {
+        throw new BadRequestException(result.extensions)
+      }
+    }
+
+    const foundNewComment = await this.feedbacksQuerySqlRepo.getCommentById(
+      result.data!.id,
+      userId,
     );
 
     return foundNewComment!;
@@ -182,12 +200,16 @@ export class PostsSqlController {
 
     const post = await this.commandBus.execute<
       CreatePostSqlCommand,
-      OutputId | null
+      LayerNoticeInterceptor<OutputId | null>
     >(command);
 
-    if (!post) throw new Error();
+    if (post.hasError()) {
+      throw new Error(`${post.extensions}`);
+    }
 
-    const newlyCreatedPost = await this.postsSqlQueryRepo.getPostById(post.id);
+    const newlyCreatedPost = await this.postsSqlQueryRepo.getPostById(
+      post.data!.id,
+    );
 
     if (!newlyCreatedPost) {
       throw new Error();

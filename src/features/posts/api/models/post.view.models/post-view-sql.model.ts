@@ -1,30 +1,25 @@
-import { array } from 'joi';
-import { likesStatus } from '../../../../../domain/likes.types';
 import {
-  PostReactionCounterType,
+  likesStatus,
+  ReactionsCounter,
+} from '../../../../../domain/likes.types';
+import {
+  PostReactionCounter,
   PostsSqlDbType,
+  UserPostReactionsType,
   UserReactionsOutType,
-  UserReactionsType,
 } from '../output.post.models/output.post.models';
 import { PostViewModelType } from './post-view-model.type';
 
-type PostReactionCounterOutType = {
-  likesCount: number;
-  dislikesCount: number;
-};
-
 const calculateLikesDislikesCount = (
-  reactionCounters: PostReactionCounterType[],
+  reactionCounters: PostReactionCounter[],
   postId: string,
-): PostReactionCounterOutType => {
-  console.log({ reactionCounters });
-
+): ReactionsCounter => {
   const likesCount = +reactionCounters
     .map((counter) => (counter.post_id === postId ? counter.likes_count : 0))
     .filter(Number);
 
   const dislikesCount = +reactionCounters
-    .map((element) => (element.post_id === postId ? element.dislikes_count : 0))
+    .map((counter) => (counter.post_id === postId ? counter.dislikes_count : 0))
     .filter(Number);
 
   return {
@@ -37,7 +32,7 @@ const convertStatus = (
   myReactions: UserReactionsOutType[] | likesStatus,
   rawPost: PostsSqlDbType,
 ): likesStatus => {
-  let result: likesStatus;
+  let result: likesStatus = likesStatus.None;
   if (Array.isArray(myReactions)) {
     result = myReactions
       .map((r) =>
@@ -45,7 +40,7 @@ const convertStatus = (
       )
       .join('') as likesStatus;
   } else {
-    result = myReactions as likesStatus;
+    result = myReactions;
   }
 
   return result;
@@ -53,8 +48,8 @@ const convertStatus = (
 
 export const getPostSqlViewModel = (
   rawPost: PostsSqlDbType,
-  userReactions: UserReactionsType[],
-  reactionCounter: PostReactionCounterType[],
+  userReactions: UserPostReactionsType[],
+  reactionCounter: PostReactionCounter[],
   myReactions: UserReactionsOutType[] | likesStatus = [],
 ): PostViewModelType => {
   const { likesCount, dislikesCount } = calculateLikesDislikesCount(
@@ -73,7 +68,7 @@ export const getPostSqlViewModel = (
     extendedLikesInfo: {
       likesCount,
       dislikesCount,
-      myStatus: convertStatus(myReactions, rawPost) || likesStatus.None,
+      myStatus: convertStatus(myReactions, rawPost),
       newestLikes: userReactions.map((like) => ({
         addedAt: like.liked_at,
         userId: like.user_id,

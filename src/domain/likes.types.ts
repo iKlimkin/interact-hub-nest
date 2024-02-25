@@ -40,15 +40,15 @@ export type ReactionCommentType = {
 
 export type ReactionPostDtoType = Omit<ReactionPostCountType, 'currentStatus'>;
 
-export type ReactionCommentDto = Omit<ReactionCommentType, 'currentStatus'> & {
+export type ReactionsCounter = {
   likesCount: number;
   dislikesCount: number;
 };
 
-export type ReactionPostCountType = ReactionPostType & {
-  likesCount: number;
-  dislikesCount: number;
-};
+export type ReactionCommentDto = Omit<ReactionCommentType, 'currentStatus'> &
+  ReactionsCounter;
+
+export type ReactionPostCountType = ReactionPostType & ReactionsCounter;
 
 export type ReactionPostType = Omit<ReactionCommentType, 'commentId'> & {
   postId: string;
@@ -61,8 +61,11 @@ export type InputLikeStatus = {
   likeStatus: likesStatus;
 };
 
-export type LikesCountType = {
-  likesCount: number;
-  dislikesCount: number;
+export type LikesCountType = ReactionsCounter & {
   status?: likesStatus;
 };
+
+export abstract class ReactionsSqlCounter {
+  abstract likes_count: number;
+  abstract dislikes_count: number;
+}

@@ -6,7 +6,7 @@ import {
   ReactionPostDtoType,
   likesStatus,
 } from '../../../domain/likes.types';
-import { PostDtoSqlType } from '../api/models/post-sql.model';
+import { PostDtoSqlModel } from '../api/models/post-sql.model';
 import { UpdatePostModel } from '../api/models/input.posts.models/create.post.model';
 import { PostReactionsSqlDbType } from '../api/models/output.post.models/post-reactions-db-sql.model';
 
@@ -14,7 +14,7 @@ import { PostReactionsSqlDbType } from '../api/models/output.post.models/post-re
 export class PostsSqlRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-  async save(postDto: Readonly<PostDtoSqlType>): Promise<OutputId | null> {
+  async save(postDto: Readonly<PostDtoSqlModel>): Promise<OutputId | null> {
     try {
       const createQuery = `
         INSERT INTO posts (title, short_description, content, blog_id, blog_title)
@@ -86,7 +86,7 @@ export class PostsSqlRepository {
     }
   }
 
-  async createLikeStatus(reactionDto: ReactionPostDtoType) {
+  async updateReactionType(reactionDto: ReactionPostDtoType) {
     try {
       const updateReactionQuery = `
       INSERT INTO post_reactions (user_id, user_login, post_id, reaction_type)

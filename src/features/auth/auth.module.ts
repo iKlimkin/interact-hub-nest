@@ -29,6 +29,8 @@ import {
 } from './infrastructure/settings/auth-providers';
 import { mongooseModels } from './infrastructure/settings/mongoose-models';
 import { UsersSqlQueryRepository } from '../admin/api/query-repositories/users.query.sql-repo';
+import { UsersSQLRepository } from '../admin/infrastructure/users.sql-repository';
+import { SecuritySqlQueryRepo } from '../security/api/query-repositories/security.query.sql-repo';
 
 @Module({
   imports: [
@@ -69,10 +71,12 @@ import { UsersSqlQueryRepository } from '../admin/api/query-repositories/users.q
     JwtModule,
     BcryptAdapter,
     UsersRepository,
+    UsersSQLRepository,
     UsersQueryRepository,
     UsersSqlQueryRepository,
     SecurityService,
     SecurityQueryRepo,
+    SecuritySqlQueryRepo,
     CqrsModule,
   ],
 })

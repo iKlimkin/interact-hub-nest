@@ -33,6 +33,8 @@ import { UpdatePostSqlUseCase } from '../features/posts/application/use-cases/up
 import { DeletePostSqlUseCase } from '../features/posts/application/use-cases/delete-post-sql.use-case';
 import { UpdatePostReactionSqlUseCase } from '../features/posts/application/use-cases/update-post-reaction-sql.use-case';
 import { CreateCommentSqlUseCase } from '../features/comments/application/use-cases/create-comment-sql.use-case';
+import { FeedbacksSqlRepo } from '../features/comments/infrastructure/feedbacks.sql-repository';
+import { FeedbacksQuerySqlRepo } from '../features/comments/api/query-repositories/feedbacks.query.sql-repository';
 
 const blogsProviders: Provider[] = [
   BlogsQueryRepo,
@@ -52,7 +54,9 @@ const postsProviders: Provider[] = [
 const feedbacksProviders: Provider[] = [
   FeedbacksService,
   FeedbacksQueryRepository,
+  FeedbacksQuerySqlRepo,
   FeedbacksRepository,
+  FeedbacksSqlRepo,
 ];
 
 const useCases: Provider[] = [

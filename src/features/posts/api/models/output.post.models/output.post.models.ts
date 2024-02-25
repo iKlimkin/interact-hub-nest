@@ -2,6 +2,7 @@ import {
   LikesUserInfoType,
   LikesCountType,
   likesStatus,
+  ReactionsSqlCounter,
 } from '../../../../../domain/likes.types';
 
 export type PostType = {
@@ -27,13 +28,13 @@ export type PostsSqlDbType = {
   created_at: Date;
 };
 
-export type PostReactionCounterType = {
+export class PostReactionCounter extends ReactionsSqlCounter {
   post_id: string;
-  likes_count: number;
   dislikes_count: number;
-};
+  likes_count: number;
+}
 
-export type UserReactionsType = {
+export type UserPostReactionsType = {
   liked_at: string;
   user_login: string;
   user_id: string;
@@ -41,4 +42,5 @@ export type UserReactionsType = {
   reaction_type: likesStatus;
 };
 
-export type UserReactionsOutType = Pick<UserReactionsType, 'reaction_type'> & {post_id?: string}
+export type UserReactionsOutType = Pick<UserPostReactionsType, 'reaction_type'> & {post_id?: string}
+

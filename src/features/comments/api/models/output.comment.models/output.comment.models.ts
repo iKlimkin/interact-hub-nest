@@ -1,8 +1,9 @@
-import { Types } from 'mongoose';
 import {
   LikeUserType,
   LikesCountType,
+  ReactionsSqlCounter,
 } from '../../../../../domain/likes.types';
+import { UserPostReactionsType } from '../../../../posts/api/models/output.post.models/output.post.models';
 
 export type CreateCommentType = Omit<
   CommentType,
@@ -44,3 +45,25 @@ export type CommentType = {
 
   likesCountInfo: LikesCountType;
 };
+
+export type CommentSqlDbType = {
+  id: string;
+  post_id: string;
+  user_id: string;
+  user_login: string;
+  content: string;
+  created_at: Date;
+};
+
+export type UserCommentReactionsType = Omit<
+  UserPostReactionsType,
+  'post_id'
+> & { comment_id: string };
+
+export class CommentReactionCounter extends ReactionsSqlCounter {
+  dislikes_count: number;
+  likes_count: number;
+  comment_id: string;
+}
+
+export type UserCommentReactionsOutType = Pick<UserCommentReactionsType, 'reaction_type'> & {comment_id?: string}

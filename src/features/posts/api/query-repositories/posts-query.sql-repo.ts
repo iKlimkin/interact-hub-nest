@@ -4,7 +4,7 @@ import { DataSource } from 'typeorm';
 import {
   PostsSqlDbType,
   UserReactionsOutType,
-  UserReactionsType,
+  UserPostReactionsType,
 } from '../models/output.post.models/output.post.models';
 import { PostViewModelType } from '../models/post.view.models/post-view-model.type';
 import { getPostSqlViewModel } from '../models/post.view.models/post-view-sql.model';
@@ -252,7 +252,9 @@ export class PostsSqlQueryRepo {
           [postId, userId],
         );
 
-        myReaction = reactionResult.reaction_type;
+        myReaction = reactionResult
+          ? reactionResult.reaction_type
+          : likesStatus.None;
       }
 
       const reactionCounter = await this.dataSource.query(
@@ -264,7 +266,7 @@ export class PostsSqlQueryRepo {
         [postId],
       );
 
-      const reactionsQuery = `
+      const latestReactionsQuery = `
           SELECT user_id, reaction_type, user_login, liked_at
           FROM post_reactions
           WHERE post_id = $1 AND reaction_type = 'Like'
@@ -272,9 +274,10 @@ export class PostsSqlQueryRepo {
           LIMIT 3
         `;
 
-      const latestReactions = await this.dataSource.query(reactionsQuery, [
-        postId,
-      ]);
+      const latestReactions = await this.dataSource.query(
+        latestReactionsQuery,
+        [postId],
+      );
 
       const findQuery = `
         SELECT *

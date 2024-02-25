@@ -32,6 +32,7 @@ import { BlogsQueryFilter } from '../models/input.blog.models/blogs-query.filter
 import { InputBlogModel } from '../models/input.blog.models/create.blog.model';
 import { BlogViewModelType } from '../models/output.blog.models/blog.view.model-type';
 import { BlogsSqlQueryRepo } from '../query-repositories/blogs.query.sql-repo';
+import { LayerNoticeInterceptor } from '../../../../infra/utils/interlayer-error-handler.ts/error-layer-interceptor';
 
 @Controller('blogs')
 export class BlogsSqlController {
@@ -119,16 +120,13 @@ export class BlogsSqlController {
   ): Promise<PostViewModelType> {
     const command = new CreatePostSqlCommand({ ...body, blogId });
 
-    const post = await this.commandBus.execute<
-      CreatePostSqlCommand,
-      OutputId | null
-    >(command);
+    const post = await this.commandBus.execute<CreatePostSqlCommand, LayerNoticeInterceptor<OutputId | null>>(command);
 
-    if (!post) {
-      throw new NotFoundException('Post not created');
+    if (post.hasError()) {
+      throw new InternalServerErrorException('Post not created');
     }
 
-    const newlyCreatedPost = await this.postsSqlQueryRepo.getPostById(post.id);
+    const newlyCreatedPost = await this.postsSqlQueryRepo.getPostById(post.data!.id);
 
     if (!newlyCreatedPost) {
       throw new Error('Newest post not found');
