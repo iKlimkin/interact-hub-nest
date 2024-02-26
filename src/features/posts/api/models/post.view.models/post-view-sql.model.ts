@@ -38,9 +38,9 @@ const convertStatus = (
       .map((r) =>
         r.post_id === rawPost.id ? r.reaction_type : likesStatus.None,
       )
-      .join('') as likesStatus;
+      .join('') as likesStatus || likesStatus.None;
   } else {
-    result = myReactions;
+    result = myReactions || likesStatus.None;
   }
 
   return result;

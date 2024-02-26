@@ -42,5 +42,6 @@ export type UserPostReactionsType = {
   reaction_type: likesStatus;
 };
 
-export type UserReactionsOutType = Pick<UserPostReactionsType, 'reaction_type'> & {post_id?: string}
+export type UserReactionsOutType = Pick<UserPostReactionsType, 'reaction_type'> & {post_id: string}
+
 

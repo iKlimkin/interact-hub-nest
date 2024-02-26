@@ -1,23 +1,12 @@
-import { NotFoundException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { InjectModel } from '@nestjs/mongoose';
-import { UsersRepository } from '../../../admin/infrastructure/users.repository';
-import {
-  CommentModelType,
-  CommentDocument,
-  Comment,
-} from '../../domain/entities/comment.schema';
-import { FeedbacksRepository } from '../../infrastructure/feedbacks.repository';
-import { CreateCommentSqlCommand } from './commands/create-comment-sql.command';
-import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
-import { CommentDtoSqlModel } from '../../api/models/comment-dto-sql.model';
-import { UsersSQLRepository } from '../../../admin/infrastructure/users.sql-repository';
-import { LayerNoticeInterceptor } from '../../../../infra/utils/interlayer-error-handler.ts/error-layer-interceptor';
 import { OutputId } from '../../../../domain/likes.types';
-import { FeedbacksSqlRepo } from '../../infrastructure/feedbacks.sql-repository';
+import { LayerNoticeInterceptor } from '../../../../infra/utils/interlayer-error-handler.ts/error-layer-interceptor';
 import { GetErrors } from '../../../../infra/utils/interlayer-error-handler.ts/user-errors';
-import { nextThursday } from 'date-fns';
-import { not } from 'joi';
+import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
+import { UsersSQLRepository } from '../../../admin/infrastructure/users.sql-repository';
+import { CommentDtoSqlModel } from '../../api/models/comment-dto-sql.model';
+import { FeedbacksSqlRepo } from '../../infrastructure/feedbacks.sql-repository';
+import { CreateCommentSqlCommand } from './commands/create-comment-sql.command';
 
 @CommandHandler(CreateCommentSqlCommand)
 export class CreateCommentSqlUseCase
@@ -32,7 +21,6 @@ export class CreateCommentSqlUseCase
     command: CreateCommentSqlCommand,
   ): Promise<LayerNoticeInterceptor<OutputId>> {
     const notice = new LayerNoticeInterceptor<OutputId>();
-
     try {
       await validateOrRejectModel(command, CreateCommentSqlCommand);
     } catch (e) {
@@ -51,7 +39,7 @@ export class CreateCommentSqlUseCase
     const commentDto = new CommentDtoSqlModel({
       postId,
       userId,
-      userlogin: user.login,
+      userlogin: user!.login,
       content,
     });
 

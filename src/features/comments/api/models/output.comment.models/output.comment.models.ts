@@ -2,6 +2,7 @@ import {
   LikeUserType,
   LikesCountType,
   ReactionsSqlCounter,
+  likesStatus,
 } from '../../../../../domain/likes.types';
 import { UserPostReactionsType } from '../../../../posts/api/models/output.post.models/output.post.models';
 
@@ -48,11 +49,13 @@ export type CommentType = {
 
 export type CommentSqlDbType = {
   id: string;
-  post_id: string;
+  content: string;
   user_id: string;
   user_login: string;
-  content: string;
   created_at: Date;
+  likes_count: number | null;
+  dislikes_count: number | null;
+  reaction_type: likesStatus | null;
 };
 
 export type UserCommentReactionsType = Omit<
@@ -66,4 +69,8 @@ export class CommentReactionCounter extends ReactionsSqlCounter {
   comment_id: string;
 }
 
-export type UserCommentReactionsOutType = Pick<UserCommentReactionsType, 'reaction_type'> & {comment_id?: string}
+export type CommentReactionsType = Pick<
+  UserCommentReactionsType,
+  'reaction_type'
+> & { comment_id: string };
+

@@ -152,29 +152,33 @@ export class PostsSqlQueryRepo {
           [userId],
         );
 
-        myReactions = reactionsResult.reaction_type;
+        myReactions = reactionsResult;
       }
 
-      const findReactionsQuery = `
+      const latestReactionsQuery = `
         SELECT pr.user_id, pr.reaction_type, pr.user_login, pr.liked_at
         FROM post_reactions pr
-        LEFT JOIN post_reaction_counts
-        ON pr.post_id = post_reaction_counts.post_id
-        WHERE pr.post_id = $1 AND reaction_type = 'Like'
+        LEFT JOIN post_reaction_counts prc
+        USING(post_id)
+        LEFT JOIN posts ON pr.post_id = posts.id
+        WHERE reaction_type = 'Like' AND blog_id = $1
         ORDER BY liked_at DESC
         LIMIT 3
       `;
 
       const latestReactions = await this.dataSource.query(
-        findReactionsQuery,
-        result.id,
+        latestReactionsQuery,
+        [blogId],
       );
 
       const reactionCounter = await this.dataSource.query(
         `
         SELECT likes_count, dislikes_count, post_id
         FROM post_reaction_counts
+        LEFT JOIN posts ON post_reaction_counts.post_id = posts.id
+        WHERE blog_id = $1
         `,
+        [blogId],
       );
 
       const [postsCounter] = await this.dataSource.query(

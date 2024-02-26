@@ -4,8 +4,8 @@ import {
 } from '../../../../../domain/likes.types';
 import {
   CommentReactionCounter,
+  CommentReactionsType,
   CommentSqlDbType,
-  UserCommentReactionsOutType,
 } from '../output.comment.models/output.comment.models';
 import { CommentsViewModel } from './comments.view.model';
 
@@ -32,7 +32,7 @@ const calculateLikesDislikesCount = (
 };
 
 const convertStatus = (
-  myReactions: UserCommentReactionsOutType[] | likesStatus,
+  myReactions: CommentReactionsType[] | likesStatus,
   comment: CommentSqlDbType,
 ): likesStatus => {
   let result: likesStatus = likesStatus.None;
@@ -42,9 +42,9 @@ const convertStatus = (
       .map((r) =>
         r.comment_id === comment.id ? r.reaction_type : likesStatus.None,
       )
-      .join('') as likesStatus;
+      .join('') as likesStatus || likesStatus.None;
   } else {
-    result = myReactions;
+    result = myReactions || likesStatus.None;
   }
 
   return result;
@@ -53,7 +53,7 @@ const convertStatus = (
 export const getCommentsSqlViewModel = (
   comment: CommentSqlDbType,
   reactionCounter: CommentReactionCounter[],
-  myReactions: UserCommentReactionsOutType[] | likesStatus = [],
+  myReactions: CommentReactionsType[] | likesStatus = [],
 ): CommentsViewModel => {
   const { likesCount, dislikesCount } = calculateLikesDislikesCount(
     reactionCounter,

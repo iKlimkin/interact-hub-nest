@@ -1,18 +1,16 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
   HttpCode,
   HttpStatus,
-  InternalServerErrorException,
   NotFoundException,
   Param,
   Post,
   Put,
   Query,
-  UseGuards,
+  UseGuards
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import {
@@ -23,6 +21,7 @@ import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
 import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
 import { SetUserIdGuard } from '../../../../infra/guards/set-user-id.guard';
 import { ObjectIdPipe } from '../../../../infra/pipes/valid-objectId.pipe';
+import { handleErrors } from '../../../../infra/utils/interlayer-error-handler.ts/error-handler';
 import { LayerNoticeInterceptor } from '../../../../infra/utils/interlayer-error-handler.ts/error-layer-interceptor';
 import { UsersSqlQueryRepository } from '../../../admin/api/query-repositories/users.query.sql-repo';
 import { UserInfoType } from '../../../auth/api/models/user-models';
@@ -44,7 +43,6 @@ import { PostsQueryFilter } from '../models/output.post.models/posts-query.filte
 import { PostViewModelType } from '../models/post.view.models/post-view-model.type';
 import { PostsSqlQueryRepo } from '../query-repositories/posts-query.sql-repo';
 import { PostsQueryRepository } from '../query-repositories/posts.query.repo';
-import { GetErrors } from '../../../../infra/utils/interlayer-error-handler.ts/user-errors';
 
 @Controller('posts')
 export class PostsSqlController {
@@ -121,13 +119,13 @@ export class PostsSqlController {
     @CurrentUserId() userId: string,
     @Query() query: PostsQueryFilter,
   ): Promise<PaginationViewModel<CommentsViewModel>> {
-    const post = await this.postsQueryRepo.getPostById(postId);
+    const post = await this.postsSqlQueryRepo.getPostById(postId);
 
     if (!post) {
       throw new NotFoundException('Post not found');
     }
 
-    const comments = await this.feedbacksQueryRepo.getCommentsByPostId(
+    const comments = await this.feedbacksQuerySqlRepo.getCommentsByPostId(
       postId,
       query,
       userId,
@@ -170,16 +168,10 @@ export class PostsSqlController {
       LayerNoticeInterceptor<OutputId>
     >(command);
 
+
     if (result.hasError()) {
-      if (result.code === GetErrors.DatabaseFail) {
-        throw new InternalServerErrorException(result.extensions);
-      }
-      if (result.code === GetErrors.NotFound) {
-        throw new NotFoundException(result.extensions)
-      }
-      if (result.code === GetErrors.IncorrectModel) {
-        throw new BadRequestException(result.extensions)
-      }
+      const errors = handleErrors(result.code, result.extensions)
+      throw errors.error
     }
 
     const foundNewComment = await this.feedbacksQuerySqlRepo.getCommentById(
@@ -198,17 +190,18 @@ export class PostsSqlController {
   ): Promise<PostViewModelType> {
     const command = new CreatePostSqlCommand(inputPostModel);
 
-    const post = await this.commandBus.execute<
+    const result = await this.commandBus.execute<
       CreatePostSqlCommand,
       LayerNoticeInterceptor<OutputId | null>
     >(command);
 
-    if (post.hasError()) {
-      throw new Error(`${post.extensions}`);
+    if (result.hasError()) {
+      const errors = handleErrors(result.code, result.extensions)
+      throw errors.error
     }
 
     const newlyCreatedPost = await this.postsSqlQueryRepo.getPostById(
-      post.data!.id,
+      result.data!.id,
     );
 
     if (!newlyCreatedPost) {
