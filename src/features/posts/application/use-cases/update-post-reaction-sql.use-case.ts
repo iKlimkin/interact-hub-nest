@@ -5,7 +5,7 @@ import {
 } from '../../../../domain/likes.types';
 import { getStatusCounting } from '../../../../infra/utils/status-counter';
 import { PostsSqlRepository } from '../../infrastructure/posts.sql-repository';
-import { UpdatePostReactionSqlCommand } from './commands/update-post-reaction-sql.use-case';
+import { UpdatePostReactionSqlCommand } from './commands/update-post-reaction-sql.command';
 
 @CommandHandler(UpdatePostReactionSqlCommand)
 export class UpdatePostReactionSqlUseCase

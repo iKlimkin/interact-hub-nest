@@ -1,8 +1,16 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { OutputId } from '../../../domain/likes.types';
+import {
+  OutputId,
+  ReactionCommentDto,
+  likesStatus,
+} from '../../../domain/likes.types';
 import { CommentDtoSqlModel } from '../api/models/comment-dto-sql.model';
+import {
+  CommentReactionsType,
+  ReactionType,
+} from '../api/models/output.comment.models/output.comment.models';
 
 @Injectable()
 export class FeedbacksSqlRepo {
@@ -30,122 +38,102 @@ export class FeedbacksSqlRepo {
     }
   }
 
-  // async updateComment(commentId: string, content: string): Promise<boolean> {
-  //   try {
-  //     const comment = await this.CommentModel.findByIdAndUpdate(commentId, {
-  //       $set: {
-  //         content,
-  //       },
-  //     });
+  async updateComment(commentId: string, content: string): Promise<boolean> {
+    try {
+      const updateQuery = `
+        UPDATE comments
+        SET content = $1
+        WHERE id = $2
+      `;
 
-  //     return !!comment;
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(
-  //       'Database fails during update comment operation',
-  //       error,
-  //     );
-  //   }
-  // }
+      const result = await this.dataSource.query(updateQuery, [
+        content,
+        commentId,
+      ]);
 
-  // async deleteComment(commentId: string): Promise<boolean> {
-  //   try {
-  //     return this.CommentModel.findByIdAndDelete(commentId).lean();
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(
-  //       'Database fails during delete comment operation',
-  //       error,
-  //     );
-  //   }
-  // }
+      return result[1] > 0;
+    } catch (error) {
+      console.error(`Database fails during update comment operation ${error}`);
+      return false;
+    }
+  }
 
-  // async createLikeStatus(
-  //   inputReactionData: ReactionCommentDto,
-  // ): Promise<boolean> {
-  //   try {
-  //     const createdLikeStatus = await this.CommentModel.findByIdAndUpdate(
-  //       new ObjectId(inputReactionData.commentId),
-  //       {
-  //         $addToSet: {
-  //           likesUserInfo: {
-  //             userId: inputReactionData.userId,
-  //             status: inputReactionData.inputStatus,
-  //           },
-  //         },
-  //         $inc: {
-  //           'likesCountInfo.likesCount': inputReactionData.likesCount,
-  //           'likesCountInfo.dislikesCount': inputReactionData.dislikesCount,
-  //         },
-  //       },
-  //       { new: true },
-  //     );
+  async deleteComment(commentId: string): Promise<boolean> {
+    try {
+      const deleteQuery = `
+        DELETE FROM comments
+        WHERE id = $1
+      `;
 
-  //     return !!createdLikeStatus;
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(
-  //       'Database fails during make likeStatus in comment operation',
-  //       error,
-  //     );
-  //   }
-  // }
+      const result = await this.dataSource.query(deleteQuery, [commentId]);
 
-  // async updateLikeStatus(
-  //   inputReactionData: ReactionCommentDto,
-  // ): Promise<boolean> {
-  //   try {
-  //     const updatedLike = await this.CommentModel.findOneAndUpdate(
-  //       {
-  //         _id: new ObjectId(inputReactionData.commentId),
-  //         likesUserInfo: { $elemMatch: { userId: inputReactionData.userId } },
-  //       },
-  //       {
-  //         $set: {
-  //           'likesUserInfo.$.status': inputReactionData.inputStatus,
-  //         },
+      return result[1] > 0;
+    } catch (error) {
+      console.error(`Database fails during delete comment operation ${error}`);
+      return false;
+    }
+  }
 
-  //         $inc: {
-  //           'likesCountInfo.likesCount': inputReactionData.likesCount,
-  //           'likesCountInfo.dislikesCount': inputReactionData.dislikesCount,
-  //         },
-  //       },
-  //       { new: true },
-  //     );
+  async updateReactionType(reactionDto: ReactionCommentDto): Promise<void> {
+    try {
+      const updateReactionQuery = `
+      INSERT INTO comment_reactions (user_id, comment_id, reaction_type)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (user_id, comment_id) DO UPDATE SET reaction_type = EXCLUDED.reaction_type
+    `;
 
-  //     return !!updatedLike;
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(
-  //       'Database fails during update likeStatus in comment operation',
-  //       error,
-  //     );
-  //   }
-  // }
+      const updatedReaction = await this.dataSource.query(updateReactionQuery, [
+        reactionDto.userId,
+        reactionDto.commentId,
+        reactionDto.inputStatus,
+      ]);
 
-  // async getUserReaction(
-  //   userId: string,
-  //   commentId: string,
-  // ): Promise<likesStatus | null> {
-  //   try {
-  //     const foundedUserReaction = await this.CommentModel.findById(
-  //       new ObjectId(commentId),
-  //       {
-  //         likesUserInfo: {
-  //           $elemMatch: {
-  //             userId,
-  //             status: { $exists: true },
-  //           },
-  //         },
-  //       },
-  //     );
+      const updateCounterQuery = `
+      INSERT INTO comment_reaction_counts (comment_id, likes_count, dislikes_count)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (comment_id) DO UPDATE SET
+        likes_count = comment_reaction_counts.likes_count + EXCLUDED.likes_count,
+        dislikes_count = comment_reaction_counts.dislikes_count + EXCLUDED.dislikes_count
+    `;
 
-  //     if (!foundedUserReaction) return null;
+      const updatedReactionCounter = await this.dataSource.query(
+        updateCounterQuery,
+        [reactionDto.commentId, reactionDto.likesCount, reactionDto.dislikesCount],
+      );
+        console.log({updatedReactionCounter});
 
-  //     const [status] = getLikeStatus(foundedUserReaction.likesUserInfo, userId);
+    } catch (error) {
+      console.error(
+        `Database fails during update likeStatus in comment operation ${error}`,
+      );
+    }
+  }
 
-  //     return status;
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(
-  //       "Database fails during get user's likes operation in feedback",
-  //       error,
-  //     );
-  //   }
-  // }
+  async getUserReaction(
+    userId: string,
+    commentId: string,
+  ): Promise<likesStatus | null> {
+    try {
+      const findQuery = `
+      SELECT *
+        FROM comment_reactions
+        WHERE user_id = $1 AND comment_id = $2
+      `;
+
+      const result = (
+        await this.dataSource.query<ReactionType>(findQuery, [
+          userId,
+          commentId,
+        ])
+      )[0];
+
+      if (!result) return null;
+
+      return result.reaction_type;
+    } catch (error) {
+      console.error(`Database fails during get user's reaction in feedback",
+      ${error}`);
+      return null;
+    }
+  }
 }

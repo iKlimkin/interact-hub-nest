@@ -26,7 +26,7 @@ export class AccessTokenStrategy extends PassportStrategy(
     const userSession = await this.securityQueryRepo.getUserSession(
       payload.deviceId,
     );
-
+      
     const userSqlSession = await this.securitySqlQueryRepo.getUserSession(
       payload.deviceId,
     );

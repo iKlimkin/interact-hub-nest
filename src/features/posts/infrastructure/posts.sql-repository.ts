@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import {
@@ -6,9 +6,10 @@ import {
   ReactionPostDtoType,
   likesStatus,
 } from '../../../domain/likes.types';
-import { PostDtoSqlModel } from '../api/models/post-sql.model';
 import { UpdatePostModel } from '../api/models/input.posts.models/create.post.model';
 import { PostReactionsSqlDbType } from '../api/models/output.post.models/post-reactions-db-sql.model';
+import { PostDtoSqlModel } from '../api/models/post-sql.model';
+import { ReactionType } from '../../comments/api/models/output.comment.models/output.comment.models';
 
 @Injectable()
 export class PostsSqlRepository {
@@ -47,7 +48,7 @@ export class PostsSqlRepository {
         WHERE user_id = $1 AND post_id = $2
       `;
 
-      const result = await this.dataSource.query<PostReactionsSqlDbType[]>(
+      const result = await this.dataSource.query<ReactionType>(
         findQuery,
         [userId, postId],
       );

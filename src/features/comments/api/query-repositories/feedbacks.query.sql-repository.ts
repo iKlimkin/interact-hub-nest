@@ -44,7 +44,7 @@ export class FeedbacksQuerySqlRepo {
         pageSize,
         skip,
       ]);
-      
+
       let myReactions: CommentReactionsType[];
 
       if (userId) {
@@ -54,7 +54,7 @@ export class FeedbacksQuerySqlRepo {
           FROM posts p
           INNER JOIN comments c ON p.id = c.post_id
           INNER JOIN comment_reactions cr ON c.id = cr.comment_id
-          WHERE user_id = $1
+          WHERE c.user_id = $1
         `,
           [userId],
         );
@@ -92,10 +92,10 @@ export class FeedbacksQuerySqlRepo {
 
       return commentsViewModel;
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Database fails during find comments by postId operation',
-        error,
+      console.error(
+        `Database fails during find comments by postId operation ${error}`,
       );
+      return null;
     }
   }
 
@@ -175,37 +175,75 @@ export class FeedbacksQuerySqlRepo {
   //   }
   // }
 
-  // async getCommentsByUserId(
-  //   userId: string,
-  //   inputData: CommentsQueryFilter,
-  // ): Promise<PaginationViewModel<CommentsViewModel>> {
-  //   try {
-  //     const { pageNumber, pageSize, sort, skip } = getPagination(inputData);
+  async getCommentsByUserId(
+    userId: string,
+    queryOptions: CommentsQueryFilter,
+  ): Promise<PaginationViewModel<CommentsViewModel>> {
+    try {
+      const { pageNumber, pageSize, sortBy, skip, sortDirection } =
+        getPagination(queryOptions, !!0, !0);
+      console.log({ userId });
 
-  //     const searchBy = { 'commentatorInfo.userId': userId };
+      const reactionsResult = await this.dataSource.query(
+        `
+          SELECT reaction_type, comment_id
+            FROM comment_reactions cr
+            WHERE user_id = $1
+        `,
+        [userId],
+      );
+      console.log({ reactionsResult });
 
-  //     const userComments = await this.CommentModel.find(searchBy)
-  //       .sort(sort)
-  //       .skip(skip)
-  //       .limit(pageSize);
+      const userReactions: CommentReactionsType[] = reactionsResult;
 
-  //     const totalCount = await this.CommentModel.countDocuments(searchBy);
-  //     const pagesCount = Math.ceil(totalCount / pageSize);
+      const reactionCounter = await this.dataSource.query(
+        `
+        SELECT likes_count, dislikes_count, comment_id
+        FROM comment_reactions cr
+        INNER JOIN comment_reaction_counts USING(comment_id)
+        WHERE user_id = $1
+        `,
+        [userId],
+      );
 
-  //     return {
-  //       pagesCount: pagesCount,
-  //       page: pageNumber,
-  //       pageSize: pageSize,
-  //       totalCount: totalCount,
-  //       items: userComments.map((comment) =>
-  //         getCommentsViewModel(comment, userId),
-  //       ),
-  //     };
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(
-  //       'Database fails during find comment by userId operation',
-  //       error,
-  //     );
-  //   }
-  // }
+      const [commentsCounter] = await this.dataSource.query(
+        `
+          SELECT COUNT(id)
+          FROM comments
+          WHERE user_id = $1
+        `,
+        [userId],
+      );
+
+      const sortQuery = `
+          SELECT *
+            FROM comments
+            WHERE user_id = $1
+            ORDER BY ${sortBy} ${sortDirection}
+            LIMIT $2 OFFSET $3
+        `;
+
+      const result = await this.dataSource.query(sortQuery, [
+        userId,
+        pageSize,
+        skip,
+      ]);
+
+      const commentsViewModel = new PaginationViewModel<CommentsViewModel>(
+        result.map((comment: CommentSqlDbType) =>
+          getCommentsSqlViewModel(comment, reactionCounter, userReactions),
+        ),
+        pageNumber,
+        pageSize,
+        commentsCounter.count,
+      );
+
+      return commentsViewModel;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Database fails during find comment by userId operation',
+        error,
+      );
+    }
+  }
 }

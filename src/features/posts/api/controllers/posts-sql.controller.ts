@@ -10,7 +10,7 @@ import {
   Post,
   Put,
   Query,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import {
@@ -30,26 +30,22 @@ import { AccessTokenGuard } from '../../../auth/infrastructure/guards/accessToke
 import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth.guard';
 import { CommentsViewModel } from '../../../comments/api/models/comments.view.models/comments.view.model';
 import { InputContentModel } from '../../../comments/api/models/input.comment.models';
-import { FeedbacksQueryRepository } from '../../../comments/api/query-repositories/feedbacks.query.repository';
 import { FeedbacksQuerySqlRepo } from '../../../comments/api/query-repositories/feedbacks.query.sql-repository';
 import { CreateCommentSqlCommand } from '../../../comments/application/use-cases/commands/create-comment-sql.command';
 import { CreatePostSqlCommand } from '../../application/use-cases/commands/create-post-sql.command';
-import { UpdatePostReactionSqlCommand } from '../../application/use-cases/commands/update-post-reaction-sql.use-case';
+import { DeletePostSqlCommand } from '../../application/use-cases/commands/delete-post-sql.command';
+import { UpdatePostReactionSqlCommand } from '../../application/use-cases/commands/update-post-reaction-sql.command';
 import { UpdatePostSqlCommand } from '../../application/use-cases/commands/update-post-sql.command';
-import { DeletePostCommand } from '../../application/use-cases/delete-post-use-case';
 import { InputPostModel } from '../models/input.posts.models/create.post.model';
 import { InputLikeStatusModel } from '../models/input.posts.models/input-post..model';
 import { PostsQueryFilter } from '../models/output.post.models/posts-query.filter';
 import { PostViewModelType } from '../models/post.view.models/post-view-model.type';
 import { PostsSqlQueryRepo } from '../query-repositories/posts-query.sql-repo';
-import { PostsQueryRepository } from '../query-repositories/posts.query.repo';
 
 @Controller('posts')
 export class PostsSqlController {
   constructor(
-    private feedbacksQueryRepo: FeedbacksQueryRepository,
     private feedbacksQuerySqlRepo: FeedbacksQuerySqlRepo,
-    private postsQueryRepo: PostsQueryRepository,
     private postsSqlQueryRepo: PostsSqlQueryRepo,
     private usersSqlQueryRepository: UsersSqlQueryRepository,
     private commandBus: CommandBus,
@@ -168,10 +164,9 @@ export class PostsSqlController {
       LayerNoticeInterceptor<OutputId>
     >(command);
 
-
     if (result.hasError()) {
-      const errors = handleErrors(result.code, result.extensions)
-      throw errors.error
+      const errors = handleErrors(result.code, result.extensions);
+      throw errors.error;
     }
 
     const foundNewComment = await this.feedbacksQuerySqlRepo.getCommentById(
@@ -196,8 +191,8 @@ export class PostsSqlController {
     >(command);
 
     if (result.hasError()) {
-      const errors = handleErrors(result.code, result.extensions)
-      throw errors.error
+      const errors = handleErrors(result.code, result.extensions);
+      throw errors.error;
     }
 
     const newlyCreatedPost = await this.postsSqlQueryRepo.getPostById(
@@ -234,13 +229,12 @@ export class PostsSqlController {
   @UseGuards(BasicSAAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePost(@Param('id') postId: string) {
-    const command = new DeletePostCommand(postId);
-    const deletedPost = await this.commandBus.execute<
-      DeletePostCommand,
-      boolean
-    >(command);
+    const command = new DeletePostSqlCommand(postId);
+    const result = await this.commandBus.execute<DeletePostSqlCommand, boolean>(
+      command,
+    );
 
-    if (!deletedPost) {
+    if (!result) {
       throw new NotFoundException('Post not found');
     }
   }

@@ -74,3 +74,4 @@ export type CommentReactionsType = Pick<
   'reaction_type'
 > & { comment_id: string };
 
+export type ReactionType = { reaction_type: likesStatus }[]
