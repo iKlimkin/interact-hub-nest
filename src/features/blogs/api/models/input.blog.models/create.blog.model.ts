@@ -1,6 +1,8 @@
 import { IsNotEmpty, Length, Matches } from 'class-validator';
 import {
   descriptionLength,
+  loginLength,
+  loginMatch,
   nameLength,
   urlLength,
   urlMatching,
@@ -44,4 +46,11 @@ export class InputBlogModel {
   @IsNotEmpty()
   @Length(urlLength.min, urlLength.max)
   websiteUrl: string;
+}
+
+export class InputBlogSAModel extends InputBlogModel {
+  userId: string;
+
+  // @iSValidField(loginLength, loginMatch)
+  // userLogin: string;
 }

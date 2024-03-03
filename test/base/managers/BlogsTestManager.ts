@@ -1,7 +1,7 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { InputBlogModel } from '../../../src/features/blogs/api/models/input.blog.models/create.blog.model';
 import request from 'supertest';
-import { RouterPaths } from '../utils/routing';
+import { PathMappings, RouterPaths } from '../utils/routing';
 import {
   BlogType,
   BlogsTypeWithId,
@@ -14,10 +14,15 @@ import {
 } from '../../../src/features/posts/api/models/input.posts.models/create.post.model';
 import { PostViewModelType } from '../../../src/features/posts/api/models/post.view.models/post-view-model.type';
 import { LikeStatusType, likesStatus } from '../../../src/domain/likes.types';
+import { number } from 'joi';
 
 export class BlogsTestManager {
-  constructor(protected readonly app: INestApplication) {}
+  constructor(
+    protected readonly app: INestApplication,
+    protected path: PathMappings,
+  ) {}
   private application = this.app.getHttpServer();
+  private routing = RouterPaths[this.path];
 
   createInputData(field?: any): InputBlogModel {
     if (!field) {
@@ -52,25 +57,47 @@ export class BlogsTestManager {
     }
   }
 
-  checkBlogsBeforeTests = async () =>
-    await request(this.application)
-      .get(RouterPaths.blogs)
-      .auth('admin', 'qwerty', { type: 'basic' })
-      .expect(HttpStatus.OK, {
-        pagesCount: 0,
-        page: 1,
-        pageSize: 10,
-        totalCount: 0,
-        items: [],
-      });
+  checkBlogsBeforeTests = async (
+    accessToken: string,
+    expectedCount?: number,
+  ) => {
+    const response = await request(this.application)
+      .get(this.routing)
+      .auth(accessToken, { type: 'bearer' })
+      .expect(HttpStatus.OK);
+
+    const expectedResponse = {
+      pagesCount: expect.any(Number),
+      page: 1,
+      pageSize: 10,
+      totalCount: expectedCount ? expectedCount : 1,
+      items: expectedCount ? expect.any(Array) : [],
+    };
+
+    expect(response.body).toEqual(expectedResponse);
+  };
 
   async createBlog(
     inputData: InputBlogModel,
     expectedStatus: number = HttpStatus.CREATED,
   ): Promise<BlogsTypeWithId> {
     const res = await request(this.application)
-      .post(RouterPaths.blogs)
+      .post(this.routing)
       .set('Authorization', 'Basic YWRtaW46cXdlcnR5')
+      .send(inputData)
+      .expect(expectedStatus);
+
+    return res.body;
+  }
+
+  async createSABlog(
+    inputData: InputBlogModel,
+    accessToken: string,
+    expectedStatus: number = HttpStatus.CREATED,
+  ): Promise<BlogsTypeWithId> {
+    const res = await request(this.application)
+      .post(this.routing)
+      .auth(accessToken, { type: 'bearer' })
       .send(inputData)
       .expect(expectedStatus);
 
@@ -82,7 +109,7 @@ export class BlogsTestManager {
     expectedStatus: number = HttpStatus.CREATED,
   ): Promise<PostViewModelType> {
     const response = await request(this.application)
-      .post(`${RouterPaths.blogs}/${blog.id}/posts`)
+      .post(`${this.routing}/${blog.id}/posts`)
       .set('Authorization', 'Basic YWRtaW46cXdlcnR5')
       .send(inputData)
       .expect(expectedStatus);
@@ -109,38 +136,87 @@ export class BlogsTestManager {
     return post;
   }
 
+  async createSAPost(
+    inputData: InputPostModelByBlogId,
+    blog: BlogViewModelType,
+    accessToken: string,
+    expectedStatus: number = HttpStatus.CREATED,
+  ): Promise<PostViewModelType> {
+    const response = await request(this.application)
+      .post(`${this.routing}/${blog.id}/posts`)
+      .auth(accessToken || 'any', { type: 'bearer' })
+      .send(inputData)
+      .expect(expectedStatus);
+
+    if (response.status === HttpStatus.CREATED) {
+      const expectResponseModel = {
+        id: expect.any(String),
+        title: inputData.title,
+        shortDescription: inputData.shortDescription,
+        content: inputData.content,
+        blogId: blog ? blog.id : expect.any(String),
+        blogName: blog ? blog.name : expect.any(String),
+        createdAt: expect.any(String),
+        extendedLikesInfo: {
+          likesCount: 0,
+          dislikesCount: 0,
+          myStatus: likesStatus.None,
+          newestLikes: expect.any(Array),
+        },
+      } as PostViewModelType;
+      
+      expect(response.body).toEqual(expectResponseModel);
+    }
+    const post = response.body;
+
+    return post;
+  }
+
   async updateBlog(
     inputData: InputBlogModel,
     blogId: string,
+    accessToken: string | null = null,
     expectStatus: number = HttpStatus.NO_CONTENT,
   ) {
-    const res = await request(this.application)
-      .put(`${RouterPaths.blogs}/${blogId}`)
-      .set('Authorization', 'Basic YWRtaW46cXdlcnR5')
+    if (!accessToken) {
+      return request(this.application)
+        .put(`${this.routing}/${blogId}`)
+        .set('Authorization', 'Basic YWRtaW46cXdlcnR5')
+        .send(inputData)
+        .expect(expectStatus);
+    }
+
+    return request(this.application)
+      .put(`${this.routing}/${blogId}`)
+      .auth(accessToken, { type: 'bearer' })
       .send(inputData)
       .expect(expectStatus);
-
-    return { result: res.body };
   }
 
-  checkBlogData(
-    responceModel:
+  checkBlogModel(
+    responseModel:
       | BlogType
       | BlogsTypeWithId
       | PostViewModelType
-      | { errorsMessages: ErrorsMessages[] },
+      | { errorsMessages: ErrorsMessages[] }
+      | any,
     expectedResult:
       | BlogType
       | BlogsTypeWithId
       | { errorsMessages: ErrorsMessages[] }
+      | any
       | string,
   ) {
-    expect(responceModel).toEqual(expectedResult);
+    expect(responseModel).toEqual(expectedResult);
+  }
+
+  checkBlogData(responseData: any, expectedResult: any) {
+    expect(responseData).toEqual(expectedResult);
   }
 
   async getBlogById(blogId: string, expectedStatus: number = HttpStatus.OK) {
     const response = await request(this.application)
-      .get(`${RouterPaths.blogs}/${blogId}`)
+      .get(`${this.routing}/${blogId}`)
       .expect(expectedStatus);
 
     return { blog: response.body };
@@ -153,7 +229,7 @@ export class BlogsTestManager {
     expectStatus: number = HttpStatus.OK,
   ) {
     const { body } = await request(this.application)
-      .get(`${RouterPaths.blogs}/${blogId}/posts`)
+      .get(`${this.routing}/${blogId}/posts`)
       .auth(token || 'any', { type: 'bearer' })
       .expect(expectStatus);
 
@@ -180,32 +256,39 @@ export class BlogsTestManager {
 
   async checkStatusOptionId(
     blogId?: string,
+    accessToken?: string,
     expectedStatus: number = HttpStatus.OK,
   ) {
-    if (blogId) {
+    if (blogId && !accessToken) {
       const getById = await request(this.application)
-        .get(`${RouterPaths.blogs}/${blogId}`)
+        .get(`${this.routing}/${blogId}`)
         .expect(expectedStatus);
-      return { blog: getById.body.items };
+      return { blog: getById.body };
+    } else if (accessToken) {
+      const getById = await request(this.application)
+        .get(`${this.routing}/${blogId}`)
+        .auth(accessToken, { type: 'bearer' })
+        .expect(expectedStatus);
+      return { blog: getById.body };
     } else {
       const check = await request(this.application)
-        .get(`${RouterPaths.blogs}`)
+        .get(`${this.routing}`)
         .expect(expectedStatus);
       return { blogs: check.body.items };
     }
   }
 
-  async expectLength(expectLength: number) {
-    const { body } = await request(this.application).get(
-      `${RouterPaths.blogs}`,
-    );
+  async expectLength(expectLength: number, accessToken?: string) {
+    const { body } = await request(this.application)
+      .get(`${this.routing}`)
+      .auth(accessToken || '', { type: 'bearer' });
 
     expect(body.items).toHaveLength(expectLength);
   }
 
-  async deleteBlog(blogId: string) {
+  async deleteBlog(blogId: string, accessToken?: string) {
     const beforeDelete = await request(this.application).get(
-      `${RouterPaths.blogs}/${blogId}`,
+      `${this.routing}/${blogId}`,
     );
 
     const blog = beforeDelete.body;
@@ -213,12 +296,42 @@ export class BlogsTestManager {
     expect(blog).toBeDefined();
 
     await request(this.application)
-      .delete(`${RouterPaths.blogs}/${blog.id}`)
+      .delete(`${this.routing}/${blog.id}`)
       .set('Authorization', 'Basic YWRtaW46cXdlcnR5')
       .expect(HttpStatus.NO_CONTENT);
 
     const afterDelete = await request(this.application)
-      .get(`${RouterPaths.blogs}/${blog.id}`)
+      .get(`${this.routing}/${blog.id}`)
       .expect(HttpStatus.NOT_FOUND);
+  }
+
+  async deleteSABlog(
+    blogId: string,
+    accessToken: string,
+    expectedStatus: number = HttpStatus.NO_CONTENT,
+  ) {
+    const beforeDelete = await request(this.application)
+      .get(`${this.routing}/${blogId}`)
+      .auth(accessToken, { type: 'bearer' });
+
+    const blog = beforeDelete.body;
+
+    expect(blog).toBeDefined();
+
+    const res = await request(this.application)
+      .delete(`${this.routing}/${blog.id}`)
+      .auth(accessToken, { type: 'bearer' })
+      .expect(expectedStatus);
+
+    const afterDelete = await request(this.application)
+      .get(`${this.routing}/${blog.id}`)
+      .auth(accessToken, { type: 'bearer' })
+      .expect(
+        res.status === HttpStatus.NO_CONTENT
+          ? HttpStatus.NOT_FOUND
+          : blog.statusCode !== 404
+          ? HttpStatus.OK
+          : HttpStatus.NOT_FOUND,
+      );
   }
 }

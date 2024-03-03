@@ -1,7 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { PostsRepository } from '../../infrastructure/posts.repository';
-import { DeletePostSqlCommand } from './commands/delete-post-sql.command';
 import { PostsSqlRepository } from '../../infrastructure/posts.sql-repository';
+import { DeletePostSqlCommand } from './commands/delete-post-sql.command';
 
 @CommandHandler(DeletePostSqlCommand)
 export class DeletePostSqlUseCase
@@ -9,7 +8,7 @@ export class DeletePostSqlUseCase
 {
   constructor(private postsSqlRepository: PostsSqlRepository) {}
 
-  async execute(command: DeletePostSqlCommand): Promise<boolean> {
-    return this.postsSqlRepository.deletePost(command.postId);
+  async execute(command: DeletePostSqlCommand): Promise<void> {
+    this.postsSqlRepository.deletePost(command.postId);
   }
 }

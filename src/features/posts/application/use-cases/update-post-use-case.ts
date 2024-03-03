@@ -16,7 +16,7 @@ export class UpdatePostUseCase implements ICommandHandler<UpdatePostCommand> {
 
     return this.postsRepository.updatePost(
       command.updatePostDto.postId,
-      command.updatePostDto.inputPostDto,
+      command.updatePostDto.inputPostModel,
     );
   }
 }

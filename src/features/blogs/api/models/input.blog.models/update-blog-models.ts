@@ -18,3 +18,4 @@ export type UpdateBlogModel = {
 export type UpdateBlogCommandType = UpdateBlogModel & {
   blogId: string;
 };
+

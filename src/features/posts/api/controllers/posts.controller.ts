@@ -211,9 +211,9 @@ export class PostsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePost(
     @Param('id', ObjectIdPipe) postId: string,
-    @Body() inputPostDto: InputPostModel,
+    @Body() inputPostModel: InputPostModel,
   ) {
-    const command = new UpdatePostCommand({ inputPostDto, postId });
+    const command = new UpdatePostCommand({ inputPostModel, postId });
 
     const updatedPost = await this.commandBus.execute<
       UpdatePostCommand,

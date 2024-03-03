@@ -30,8 +30,7 @@ export class TestDatabaseRepo {
     @InjectModel(Blog.name) private BlogModel: BlogModelType,
     @InjectModel(Post.name) private PostModel: PostModelType,
     @InjectModel(Comment.name) private CommentModel: CommentModelType,
-    @InjectModel(UserAccount.name)
-    private UserAccountModel: UserAccountModelType,
+    @InjectModel(UserAccount.name) private UserAccountModel: UserAccountModelType,
     @InjectModel(Security.name) private SecurityModel: SecurityModelType,
   ) {}
 
@@ -40,11 +39,14 @@ export class TestDatabaseRepo {
       const sqlDataSource = this.dataSource.query(`
       DELETE FROM post_reactions;
       DELETE FROM post_reaction_counts;
+      DELETE FROM comment_reactions;
+      DELETE FROM comment_reaction_counts;
+      DELETE FROM comments;
+      DELETE FROM posts;
+      DELETE FROM blogs;
       DELETE FROM user_sessions;
       DELETE FROM user_accounts;
       DELETE FROM api_requests;
-      DELETE FROM posts;
-      DELETE FROM blogs;
     `);
 
       await Promise.all([

@@ -10,6 +10,7 @@ import { UserProfileType } from '../../../src/features/auth/api/models/auth.outp
 export class UsersTestManager {
   constructor(protected readonly app: INestApplication) {}
   private application = this.app.getHttpServer();
+  
 
   createInputData(field?: AuthUserType | any): AuthUserType {
     if (!field) {

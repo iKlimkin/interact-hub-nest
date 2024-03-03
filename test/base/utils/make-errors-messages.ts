@@ -2,13 +2,16 @@ import { ErrorsMessages } from '../../../src/infra/utils/error-handler';
 
 enum errors {
   title = 'title',
+  name = 'name',
   login = 'login',
   shortDescription = 'shortDescription',
+  description = 'description',
   blogId = 'blogId',
   content = 'content',
   postId = 'postId',
   email = 'email',
   loginOrEmail = 'loginOrEmail',
+  websiteUrl = 'websiteUrl',
   password = 'password',
 }
 

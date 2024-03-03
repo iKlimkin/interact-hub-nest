@@ -100,7 +100,6 @@ export class FeedbacksSqlRepo {
         updateCounterQuery,
         [reactionDto.commentId, reactionDto.likesCount, reactionDto.dislikesCount],
       );
-        console.log({updatedReactionCounter});
 
     } catch (error) {
       console.error(

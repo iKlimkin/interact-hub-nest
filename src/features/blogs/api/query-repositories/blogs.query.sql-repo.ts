@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
@@ -6,7 +6,11 @@ import { getPagination } from '../../../../infra/utils/pagination';
 import { BlogsQueryFilter } from '../models/input.blog.models/blogs-query.filter';
 import { getBlogSqlViewModel } from '../models/output.blog.models/blog-sql.view.model';
 import { BlogsSqlDbType } from '../models/output.blog.models/blog.models';
-import { BlogViewModelType } from '../models/output.blog.models/blog.view.model-type';
+import {
+  BlogViewModelType,
+  SABlogViewModelType,
+} from '../models/output.blog.models/blog.view.model-type';
+import { getSABlogSqlViewModel } from '../models/output.blog.models/sa-blog-sql.view.model';
 
 @Injectable()
 export class BlogsSqlQueryRepo {
@@ -14,7 +18,7 @@ export class BlogsSqlQueryRepo {
 
   async getAllBlogs(
     queryOptions: BlogsQueryFilter,
-  ): Promise<PaginationViewModel<BlogViewModelType> | null> {
+  ): Promise<PaginationViewModel<BlogViewModelType>> {
     try {
       const { searchNameTerm } = queryOptions;
 
@@ -55,12 +59,33 @@ export class BlogsSqlQueryRepo {
 
       return blogsViewModel;
     } catch (e) {
-      console.error(`Some troubles occurred during find blogs: ${e}`);
-      return null;
+      throw new InternalServerErrorException(`Some troubles occurred during find blogs: ${e}`)
     }
   }
 
   async getBlogById(blogId: string): Promise<BlogViewModelType | null> {
+    try {
+      const findQuery = `
+          SELECT *
+          FROM blogs
+          WHERE id = $1
+        `;
+
+
+      const result = await this.dataSource.query<BlogsSqlDbType[]>(findQuery, [
+        blogId,
+      ]);
+
+      if (!result.length) return null;
+
+      return getBlogSqlViewModel(result[0]);
+    } catch (error) {
+      console.error(`Some troubles occurred during find blog by id${error}`);
+      return null;
+    }
+  }
+
+  async getSABlogById(blogId: string): Promise<SABlogViewModelType | null> {
     try {
       const findQuery = `
           SELECT *
@@ -74,7 +99,7 @@ export class BlogsSqlQueryRepo {
 
       if (!result) return null;
 
-      return getBlogSqlViewModel(result[0]);
+      return getSABlogSqlViewModel(result[0]);
     } catch (error) {
       console.error(`Some troubles occurred during find blog by id${error}`);
       return null;

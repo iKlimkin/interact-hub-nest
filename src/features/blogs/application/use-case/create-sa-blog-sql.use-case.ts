@@ -3,19 +3,19 @@ import { OutputId } from '../../../../domain/likes.types';
 import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
 import { BlogDtoSqlModel } from '../../api/models/blog-sql.model';
 import { BlogsSqlRepository } from '../../infrastructure/blogs.sql-repository';
-import { CreateBlogSqlCommand } from './commands/create-blog-sql.command';
+import { CreateSABlogSqlCommand } from './commands/create-sa-blog-sql.command';
 
-@CommandHandler(CreateBlogSqlCommand)
-export class CreateBlogSqlUseCase
-  implements ICommandHandler<CreateBlogSqlCommand>
+@CommandHandler(CreateSABlogSqlCommand)
+export class CreateBlogSASqlUseCase
+  implements ICommandHandler<CreateSABlogSqlCommand>
 {
   constructor(private blogsSqlRepository: BlogsSqlRepository) {}
 
-  async execute(command: CreateBlogSqlCommand): Promise<OutputId | null> {
-    await validateOrRejectModel(command, CreateBlogSqlCommand);
+  async execute(command: CreateSABlogSqlCommand): Promise<OutputId | null> {
+    await validateOrRejectModel(command, CreateSABlogSqlCommand);
 
-    const { description, name, websiteUrl } = command.createBlogDto;
-    const userId = '123'
+    const { description, name, websiteUrl, userId } = command.createBlogDto;
+
     const blogDto = new BlogDtoSqlModel(name, description, websiteUrl, userId);
 
     return this.blogsSqlRepository.save(blogDto);

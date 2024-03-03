@@ -3,8 +3,9 @@ export const skipSettings = {
 
   userAuth: true,
   sa: true,
+  sa_blogs: false,
   userAuthSql: true,
-  posts: false,
+  posts: true,
   appTests: true,
   blogs: true,
   security: true,
@@ -30,6 +31,7 @@ enum TestsNames {
   blogs = 'blogs',
   security = 'security',
   sa = 'sa',
+  sa_blogs = 'sa_blogs'
 }
 
 type TestsName = keyof typeof TestsNames;

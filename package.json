@@ -66,6 +66,7 @@
     "@types/nodemailer": "6.4.14",
     "@types/passport-http": "0.3.11",
     "@types/passport-local": "1.0.38",
+    "@types/pg": "^8.11.2",
     "@types/superagent": "8.1.1",
     "@types/supertest": "6.0.2",
     "@types/uuid": "9.0.7",

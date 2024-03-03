@@ -23,7 +23,7 @@ import { AccessTokenGuard } from '../../../auth/infrastructure/guards/accessToke
 import { InputLikeStatusModel } from '../../../posts/api/models/input.posts.models/input-post..model';
 import { DeleteCommentSqlCommand } from '../../application/use-cases/commands/delete-comment-sql.command';
 import { UpdateCommentSqlCommand } from '../../application/use-cases/commands/update-comment-sql.command';
-import { UpdateCommentReactionCommand } from '../../application/use-cases/commands/update-user-reaction.command';
+import { UpdateCommentReactionSqlCommand } from '../../application/use-cases/commands/update-user-reaction-sql.command';
 import { CommentsViewModel } from '../models/comments.view.models/comments.view.model';
 import {
   InputContentModel,
@@ -31,7 +31,6 @@ import {
 } from '../models/input.comment.models';
 import { CommentsQueryFilter } from '../models/output.comment.models/comment-query.filter';
 import { FeedbacksQuerySqlRepo } from '../query-repositories/feedbacks.query.sql-repository';
-import { UpdateCommentReactionSqlCommand } from '../../application/use-cases/commands/update-user-reaction-sql.command';
 
 @Controller('comments')
 export class FeedbacksSqlController {

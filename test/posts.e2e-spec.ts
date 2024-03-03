@@ -42,7 +42,7 @@ aDescribe(skipSettings.for('posts'))('PostsController (e2e)', () => {
     app = result.app;
 
     postTestManager = new PostsTestManager(app);
-    blogTestManager = new BlogsTestManager(app);
+    blogTestManager = new BlogsTestManager(app, 'blogs');
     basicAuthManager = new BasicAuthorization(app);
     authManager = new AuthManager(app);
     saManager = new SATestManager(app);
@@ -346,7 +346,6 @@ aDescribe(skipSettings.for('posts'))('PostsController (e2e)', () => {
         likesStatus.Dislike,
       );
       const post = await postTestManager.getPostById(posts[0].id);
-      console.log({ post });
     });
   });
 });

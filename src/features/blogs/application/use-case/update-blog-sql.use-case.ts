@@ -1,8 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { BlogModelType } from '../../domain/entities/blog.schema';
-import { BlogsRepository } from '../../infrastructure/blogs.repository';
-import { UpdateBlogSqlCommand } from './commands/update-blog-sql.command';
 import { BlogsSqlRepository } from '../../infrastructure/blogs.sql-repository';
+import { UpdateBlogSqlCommand } from './commands/update-blog-sql.command';
 
 @CommandHandler(UpdateBlogSqlCommand)
 export class UpdateBlogSqlUseCase

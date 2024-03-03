@@ -69,7 +69,6 @@ export class SATestManager {
           sortBy: sortBy ? sortBy : '',
         })
         .expect(HttpStatus.OK);
-        console.log(response);
         
         return response.body
         // this.checkUserData(body, responseModel)

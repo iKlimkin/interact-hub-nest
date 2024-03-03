@@ -10,7 +10,7 @@ import { wait } from '../utils/wait';
 export class PostsTestManager {
   constructor(protected readonly app: INestApplication) {}
   private application = this.app.getHttpServer();
-
+  
   createInputData(field?: CreatePostModel | any): CreatePostModel {
     if (!field) {
       return {

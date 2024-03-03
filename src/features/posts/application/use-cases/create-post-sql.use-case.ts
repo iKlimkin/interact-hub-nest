@@ -14,22 +14,21 @@ export class CreatePostSqlUseCase
 {
   constructor(
     private postsSqlRepository: PostsSqlRepository,
-    private blogsSqlRepository: BlogsSqlRepository,
+    private blogsSqlRepository: BlogsSqlRepository
   ) {}
 
   async execute(
     command: CreatePostSqlCommand,
   ): Promise<LayerNoticeInterceptor<OutputId | null>> {
     await validateOrRejectModel(command, CreatePostSqlCommand);
-
     const notice = new LayerNoticeInterceptor<OutputId>();
 
     const { title, shortDescription, content, blogId } = command.createDataDto;
 
-    const blog = await this.blogsSqlRepository.getBlogById(blogId);
+    const blog = await this.blogsSqlRepository.getBlogById(blogId)
 
     if (!blog) {
-      notice.addError('Blog not found', 'blog', GetErrors.NotFound);
+      notice.addError('Blog not found', 'db', GetErrors.NotFound);
       return notice;
     }
 
@@ -37,7 +36,7 @@ export class CreatePostSqlUseCase
       title,
       short_description: shortDescription,
       content,
-      blog_id: blog.id,
+      blog_id: command.createDataDto.blogId,
       blog_title: blog.title,
     });
 

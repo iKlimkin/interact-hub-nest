@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { OutputId } from '../../../domain/likes.types';
-import { BlogDtoSqlType } from '../api/models/blog-sql.model';
+import { BlogDtoSqlModel } from '../api/models/blog-sql.model';
 import { UpdateBlogCommandType } from '../api/models/input.blog.models/update-blog-models';
 import { BlogsSqlDbType } from '../api/models/output.blog.models/blog.models';
 
@@ -19,12 +19,12 @@ import { BlogsSqlDbType } from '../api/models/output.blog.models/blog.models';
 export class BlogsSqlRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
-  async save(blogDto: BlogDtoSqlType): Promise<OutputId | null> {
+  async save(blogDto: BlogDtoSqlModel): Promise<OutputId | null> {
     try {
       const createQuery = `
         INSERT INTO blogs
-        (title, description, website_url)
-        VALUES ($1, $2, $3)
+        (title, description, website_url, user_id, is_membership)
+        VALUES ($1, $2, $3, $4, $5)
         RETURNING *
       `;
 

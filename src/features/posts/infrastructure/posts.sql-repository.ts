@@ -6,10 +6,9 @@ import {
   ReactionPostDtoType,
   likesStatus,
 } from '../../../domain/likes.types';
-import { UpdatePostModel } from '../api/models/input.posts.models/create.post.model';
-import { PostReactionsSqlDbType } from '../api/models/output.post.models/post-reactions-db-sql.model';
-import { PostDtoSqlModel } from '../api/models/post-sql.model';
 import { ReactionType } from '../../comments/api/models/output.comment.models/output.comment.models';
+import { UpdatePostModel } from '../api/models/input.posts.models/create.post.model';
+import { PostDtoSqlModel } from '../api/models/post-sql.model';
 
 @Injectable()
 export class PostsSqlRepository {
@@ -48,10 +47,10 @@ export class PostsSqlRepository {
         WHERE user_id = $1 AND post_id = $2
       `;
 
-      const result = await this.dataSource.query<ReactionType>(
-        findQuery,
-        [userId, postId],
-      );
+      const result = await this.dataSource.query<ReactionType>(findQuery, [
+        userId,
+        postId,
+      ]);
 
       if (!result) return null;
 
@@ -76,7 +75,7 @@ export class PostsSqlRepository {
       `;
 
       const result = await this.dataSource.query(updateQuery, [
-        ...Object.values(updateData.inputPostDto),
+        ...Object.values(updateData.inputPostModel),
         postId,
       ]);
 

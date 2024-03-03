@@ -195,15 +195,15 @@ export class PostsSqlController {
       throw errors.error;
     }
 
-    const newlyCreatedPost = await this.postsSqlQueryRepo.getPostById(
+    const post = await this.postsSqlQueryRepo.getPostById(
       result.data!.id,
     );
 
-    if (!newlyCreatedPost) {
+    if (!post) {
       throw new Error();
     }
 
-    return newlyCreatedPost;
+    return post;
   }
 
   @Put(':id')
@@ -211,18 +211,15 @@ export class PostsSqlController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async updatePost(
     @Param('id') postId: string,
-    @Body() inputPostDto: InputPostModel,
+    @Body() inputPostModel: InputPostModel,
   ) {
-    const command = new UpdatePostSqlCommand({ inputPostDto, postId });
+    const post = await this.postsSqlQueryRepo.getPostById(postId);
 
-    const updatedPost = await this.commandBus.execute<
-      UpdatePostSqlCommand,
-      boolean
-    >(command);
+    if (!post) throw new NotFoundException();
 
-    if (!updatedPost) {
-      throw new NotFoundException('Post or blog not found');
-    }
+    const command = new UpdatePostSqlCommand({ inputPostModel, postId });
+
+    await this.commandBus.execute(command);
   }
 
   @Delete(':id')

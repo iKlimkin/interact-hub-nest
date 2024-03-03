@@ -33,6 +33,7 @@ import { InputBlogModel } from '../models/input.blog.models/create.blog.model';
 import { BlogViewModelType } from '../models/output.blog.models/blog.view.model-type';
 import { BlogsSqlQueryRepo } from '../query-repositories/blogs.query.sql-repo';
 import { LayerNoticeInterceptor } from '../../../../infra/utils/interlayer-error-handler.ts/error-layer-interceptor';
+import { FindEntityById } from '../../../auth/infrastructure/decorators/find-entity-by-id.decorator';
 
 @Controller('blogs')
 export class BlogsSqlController {

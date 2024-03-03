@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { iSValidField } from '../../../../../infra/decorators/transform/is-valid-string';
 import { BlogIdIsExist } from '../../../../../infra/decorators/validate/valid-blogId';
 import {
@@ -60,6 +60,15 @@ export class InputPostModel {
   blogId: string;
 }
 
+export class CreatePostByBlogIdModel {
+  @IsString()
+  blogId: string;
+  @IsString()
+  blogTitle: string;
+
+  inputPostModel: InputPostModelByBlogId;
+}
+
 export class InputPostModelByBlogId {
   /**
    *  post's title
@@ -81,9 +90,8 @@ export class InputPostModelByBlogId {
 }
 
 export class UpdatePostModel {
-  inputPostDto: InputPostModel;
+  inputPostModel: InputPostModel;
 
   @IsString()
   postId: string;
 }
-

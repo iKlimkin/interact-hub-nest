@@ -38,6 +38,8 @@ import { FeedbacksQuerySqlRepo } from '../features/comments/api/query-repositori
 import { UpdateCommentSqlUseCase } from '../features/comments/application/use-cases/update-comment-sql.use-case';
 import { DeleteCommentSqlUseCase } from '../features/comments/application/use-cases/delete-comment-sql.use-case';
 import { UpdateCommentReactionSqlUseCase } from '../features/comments/application/use-cases/update-comment-reaction-sql.use-case';
+import { CreateBlogSASqlUseCase } from '../features/blogs/application/use-case/create-sa-blog-sql.use-case';
+import { UpdateSABlogSqlUseCase } from '../features/blogs/application/use-case/update-sa-blog-sql.use-case';
 
 const blogsProviders: Provider[] = [
   BlogsQueryRepo,
@@ -73,8 +75,10 @@ const useCases: Provider[] = [
 
   CreateBlogUseCase,
   CreateBlogSqlUseCase,
+  CreateBlogSASqlUseCase,
   UpdateBlogUseCase,
   UpdateBlogSqlUseCase,
+  UpdateSABlogSqlUseCase,
   DeleteBlogUseCase,
   DeleteBlogSqlUseCase,
 

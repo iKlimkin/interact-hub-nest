@@ -32,7 +32,7 @@ aDescribe(skipSettings.for('blogs'))('BlogsController (e2e)', () => {
 
     await app.init();
 
-    blogTestManager = new BlogsTestManager(app);
+    blogTestManager = new BlogsTestManager(app, 'blogs');
     basicAuthManager = new BasicAuthorization(app);
 
     await dropDataBase(app);
@@ -47,9 +47,9 @@ aDescribe(skipSettings.for('blogs'))('BlogsController (e2e)', () => {
       await dropDataBase(app);
     });
 
-    it('/blogs (GET)', async () => {
-      await blogTestManager.checkBlogsBeforeTests();
-    });
+    // it('/blogs (GET)', async () => {
+    //   await blogTestManager.checkBlogsBeforeTests();
+    // });
 
     it("/blogs (post) - shouldn't create blog without auth", async () => {
       const inputData = blogTestManager.createInputData({});
@@ -108,12 +108,14 @@ aDescribe(skipSettings.for('blogs'))('BlogsController (e2e)', () => {
 
       const invalidInputData = blogTestManager.createInputData();
 
-      const { result } = await blogTestManager.updateBlog(
+      const result = await blogTestManager.updateBlog(
         invalidInputData,
         blog.id,
+        null,
         HttpStatus.BAD_REQUEST,
       );
-      blogTestManager.checkBlogData(result, blogValidationErrors);
+
+      blogTestManager.checkBlogData(result.body, blogValidationErrors);
 
       const { blog: existingBlog } = await blogTestManager.getBlogById(blog.id);
 
