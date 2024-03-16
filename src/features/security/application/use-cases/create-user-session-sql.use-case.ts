@@ -4,6 +4,7 @@ import { validateOrRejectModel } from '../../../../infra/validators/validate-or-
 import { SecuritySqlRepository } from '../../infrastructure/security.sql-repository';
 import { CreateSessionSQLCommand } from './commands/create-session.sql-command';
 import { UserSqlSessionDTO } from '../../api/models/security.view.models/security.sql-view.types';
+import { UserSessionDto } from '../../../auth/api/models/user-account.sql.dto';
 
 @CommandHandler(CreateSessionSQLCommand)
 export class CreateUserSessionSQLUseCase
@@ -17,15 +18,13 @@ export class CreateUserSessionSQLUseCase
     const { ip, browser, deviceType, refreshToken, userId, userPayload } =
       command.inputData;
 
-    const sessionDto: UserSqlSessionDTO = {
+    const sessionDto = new UserSessionDto(
       ip,
-      user_agent_info: `Device type: ${deviceType}, Application: ${browser}`,
-      user_id: userId,
-      device_id: userPayload.deviceId,
-      refresh_token: refreshToken,
-      rt_issued_at: new Date(userPayload.iat! * 1000),
-      rt_expiration_date: new Date(userPayload.exp! * 1000),
-    };
+      `Device type: ${deviceType}, Application: ${browser}`,
+      userId,
+      userPayload,
+      refreshToken,
+    );
 
     return this.securitySQLRepository.save(sessionDto);
   }

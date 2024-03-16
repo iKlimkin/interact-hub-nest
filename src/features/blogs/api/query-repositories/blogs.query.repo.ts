@@ -20,6 +20,7 @@ export class BlogsQueryRepo {
   ): Promise<PaginationViewModel<BlogType>> {
     try {
       const blogModel = new this.BlogModel();
+
       return BaseModel.paginateAndTransform<BlogDBType, BlogViewModelType>(
         this.BlogModel,
         blogModel.getBlogsViewModel,

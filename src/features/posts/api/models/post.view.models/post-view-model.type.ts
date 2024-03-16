@@ -49,6 +49,6 @@ export type PostViewModelType = {
 
     myStatus: likesStatus;
 
-    newestLikes: PostStatusInfo[];
+    newestLikes: PostStatusInfo[] | [];
   };
 };

@@ -20,7 +20,7 @@ import { DeleteOtherUserSessionsSqlCommand } from '../application/use-cases/comm
 import { SecurityInterface } from './models/security-input.models/security.interface';
 import { SecurityViewDeviceModel } from './models/security.view.models/security.view.types';
 import { SecuritySqlQueryRepo } from './query-repositories/security.query.sql-repo';
-import { ApiRequestCounterSQLRepository } from '../../../infra/logging/api-request-counter.sql-repository';
+import { ApiRequestCounterSQLRepository } from '../../../infra/logging/infra/api-request-counter.sql-repository';
 
 @Controller('security/devices')
 @UseGuards(RefreshTokenGuard)

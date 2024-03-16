@@ -34,8 +34,8 @@ export class TypeOrmOptions implements TypeOrmOptionsFactory {
       username: 'NodeJS',
       password: 'NodeJS',
       database: 'InteractHubNest',
-      autoLoadEntities: false,
-      synchronize: false,
+      autoLoadEntities: true,
+      synchronize: true,
     };
   }
 

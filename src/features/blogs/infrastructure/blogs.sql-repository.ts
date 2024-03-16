@@ -23,8 +23,8 @@ export class BlogsSqlRepository {
     try {
       const createQuery = `
         INSERT INTO blogs
-        (title, description, website_url, user_id, is_membership)
-        VALUES ($1, $2, $3, $4, $5)
+        (title, description, website_url, is_membership)
+        VALUES ($1, $2, $3, $4)
         RETURNING *
       `;
 
@@ -65,15 +65,20 @@ export class BlogsSqlRepository {
 
   async updateBlog(updateBlogDto: UpdateBlogCommandType): Promise<boolean> {
     try {
+      const { blogId, description, name, websiteUrl } = updateBlogDto;
+
       const updateQuery = `
         UPDATE blogs
         SET title = $1, description = $2, website_url = $3
         WHERE id = $4
       `;
-      const result = await this.dataSource.query(
-        updateQuery,
-        Object.values(updateBlogDto),
-      );
+
+      const result = await this.dataSource.query(updateQuery, [
+        name,
+        description,
+        websiteUrl,
+        blogId,
+      ]);
 
       return result[1] > 0;
     } catch (e) {

@@ -6,14 +6,17 @@ import {
   UserSqlSessionDTO,
   UserSqlSession,
 } from '../api/models/security.view.models/security.sql-view.types';
+import { UserSessionDto } from '../../auth/api/models/user-account.sql.dto';
 
 @Injectable()
 export class SecuritySqlRepository {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
   async save(
-    sessionDto: Readonly<UserSqlSessionDTO>,
+    sessionDto: Readonly<UserSessionDto>,
   ): Promise<OutputId | null> {
     try {
+      console.log(sessionDto);
+
       const query = `
       INSERT INTO "user_sessions"
       ("ip", "user_agent_info", "user_id", "device_id",

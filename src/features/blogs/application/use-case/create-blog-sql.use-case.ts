@@ -15,8 +15,8 @@ export class CreateBlogSqlUseCase
     await validateOrRejectModel(command, CreateBlogSqlCommand);
 
     const { description, name, websiteUrl } = command.createBlogDto;
-    const userId = '123'
-    const blogDto = new BlogDtoSqlModel(name, description, websiteUrl, userId);
+
+    const blogDto = new BlogDtoSqlModel(name, description, websiteUrl);
 
     return this.blogsSqlRepository.save(blogDto);
   }

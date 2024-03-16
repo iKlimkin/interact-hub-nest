@@ -11,6 +11,7 @@
     "start": "nest start",
     "watch": "tsc -w",
     "start:dev": "nest start --watch",
+    "start:dev:mongo": "set MAIN_DB=MONGO && nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",

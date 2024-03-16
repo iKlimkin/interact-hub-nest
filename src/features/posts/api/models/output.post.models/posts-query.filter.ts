@@ -1,12 +1,16 @@
 import { IsOptional } from "class-validator";
-import { BaseFilter } from "../../../../../domain/sorting-base-filter";
+import { BaseFilter, SortDirections } from "../../../../../domain/sorting-base-filter";
+import { ValidateSortBy, ValidSortDirection } from "../../../../../infra/decorators/transform/is-valid-string";
 
 
 export class PostsQueryFilter extends BaseFilter {
     pageNumber: string;
     pageSize: string;
+    @ValidateSortBy()
     sortBy: string;
-    sortDirection: 'asc' | 'desc';
+
+    @ValidSortDirection()
+    sortDirection: SortDirections;
     @IsOptional()
     searchContentTerm: string;
-} 
+}

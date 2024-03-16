@@ -331,13 +331,11 @@ aDescribe(skipSettings.for('posts'))('PostsController (e2e)', () => {
       );
 
       const post = await postTestManager.getPostById(posts[0].id);
-
+      
       postTestManager.checkPostData(post.extendedLikesInfo.likesCount, 4);
-
-      console.log( post.extendedLikesInfo.newestLikes );
     });
 
-    it.skip('/posts/:postId/like-status (PUT) - make , expect CREATED', async () => {
+    it('/posts/:postId/like-status (PUT) - change like status on dislike', async () => {
       const { posts, accessTokens } = expect.getState();
 
       await postTestManager.likeStatusOperations(
@@ -345,7 +343,8 @@ aDescribe(skipSettings.for('posts'))('PostsController (e2e)', () => {
         accessTokens[0],
         likesStatus.Dislike,
       );
-      const post = await postTestManager.getPostById(posts[0].id);
+
+      await postTestManager.getPostById(posts[0].id, accessTokens[0], likesStatus.Dislike);
     });
   });
 });

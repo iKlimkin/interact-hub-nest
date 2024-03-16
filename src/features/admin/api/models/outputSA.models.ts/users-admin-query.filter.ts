@@ -1,18 +1,23 @@
-import { IsIn, IsOptional } from 'class-validator';
-import { BaseFilter } from '../../../../../domain/sorting-base-filter';
-import { Transform } from 'class-transformer';
+import { IsOptional } from 'class-validator';
+import {
+  BaseFilter,
+  SortDirections,
+} from '../../../../../domain/sorting-base-filter';
+import {
+  ValidateSortBy,
+  ValidSortDirection,
+} from '../../../../../infra/decorators/transform/is-valid-string';
 
 export class SAQueryFilter extends BaseFilter {
   pageNumber: string;
   pageSize: string;
 
   @IsOptional()
-  @IsIn(['email', 'login', 'createdAt'], { message: ({ value }) => `Invalid sortBy parameter: ${value}`})
+  @ValidateSortBy()
   sortBy: string;
 
-  @IsIn(['asc', 'desc'], { message: ({ value }) => `Invalid sortDirection parameter: ${value}` })
-  @Transform(({ value }) => value.toLowerCase() === 'asc' ? 'asc' : 'desc' as const)
-  sortDirection: 'asc' | 'desc';
+  @ValidSortDirection()
+  sortDirection: SortDirections;
 
   searchEmailTerm: string;
   searchLoginTerm: string;

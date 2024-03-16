@@ -3,6 +3,41 @@ export const skipSettings = {
 
   userAuth: true,
   sa: true,
+  sa_blogs: true,
+  userAuthSql: true,
+  posts: false,
+  appTests: true,
+  blogs: true,
+  security: true,
+
+  for(testName: TestsName): boolean {
+    if (this.run_all_tests) return false;
+  
+    if (this[testName]) return this[testName];
+    
+    return false;
+  },
+};
+
+enum TestsNames {
+  appTests = 'appTests',
+  userAuth = 'userAuth',
+  userAuthSql = 'userAuthSql',
+  posts = 'posts',
+  blogs = 'blogs',
+  security = 'security',
+  sa = 'sa',
+  sa_blogs = 'sa_blogs'
+}
+
+type TestsName = keyof typeof TestsNames;
+
+
+export const skipDescribeSettings = {
+  run_all_tests: false,
+
+  userAuth: true,
+  sa: true,
   sa_blogs: false,
   userAuthSql: true,
   posts: true,
@@ -23,8 +58,9 @@ export const skipSettings = {
   },
 };
 
-enum TestsNames {
-  appTests = 'appTests',
+
+enum DescribeNames {
+  testing_create_blog = 'appTests',
   userAuth = 'userAuth',
   userAuthSql = 'userAuthSql',
   posts = 'posts',
@@ -34,4 +70,4 @@ enum TestsNames {
   sa_blogs = 'sa_blogs'
 }
 
-type TestsName = keyof typeof TestsNames;
+type SkipTitles = keyof typeof DescribeNames;

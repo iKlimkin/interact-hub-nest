@@ -195,9 +195,7 @@ export class PostsSqlController {
       throw errors.error;
     }
 
-    const post = await this.postsSqlQueryRepo.getPostById(
-      result.data!.id,
-    );
+    const post = await this.postsSqlQueryRepo.getPostById(result.data!.id);
 
     if (!post) {
       throw new Error();

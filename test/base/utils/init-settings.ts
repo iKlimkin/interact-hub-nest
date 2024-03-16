@@ -7,7 +7,7 @@ import { EmailManager } from '../../../src/infra/application/managers/email-mana
 import { applyAppSettings } from '../../../src/settings/apply-app.settings';
 import { UsersTestManager } from '../managers/UsersTestManager';
 import { EmailMockService } from '../mock/email.manager.mock';
-import { deleteAllData } from './dataBase-clean-up';
+import { deleteAllData, dropDataBase } from './dataBase-clean-up';
 
 export const initSettings = async (
   addSettingsToModuleBuilder?: (moduleBuilder: TestingModuleBuilder) => void,
@@ -43,6 +43,7 @@ export const initSettings = async (
   const httpServer = app.getHttpServer();
 
   await deleteAllData(databaseConnection);
+  await dropDataBase(app);
 
   return {
     app,

@@ -182,7 +182,6 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { login, email } = inputModel;
-    console.log({ email });
 
     const foundUser = await this.authQueryRepository.findByLoginOrEmail({
       login,

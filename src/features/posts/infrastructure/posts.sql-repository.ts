@@ -68,6 +68,8 @@ export class PostsSqlRepository {
     updateData: UpdatePostModel,
   ): Promise<boolean> {
     try {
+      const { blogId, content, shortDescription, title } = updateData.inputPostModel
+
       const updateQuery = `
       UPDATE posts
         SET title = $1, short_description = $2, content = $3, blog_id = $4
@@ -75,7 +77,10 @@ export class PostsSqlRepository {
       `;
 
       const result = await this.dataSource.query(updateQuery, [
-        ...Object.values(updateData.inputPostModel),
+        title,
+        shortDescription,
+        content,
+        blogId,
         postId,
       ]);
 

@@ -1,7 +1,13 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { MatchApiLimitType, MatchApiType } from './models/rate-limiter.models';
-import { ApiRequestModelType, RequestCounter } from './api-request.schema';
+import {
+  MatchApiLimitType,
+  MatchApiType,
+} from '../api/models/rate-limiter.models';
+import {
+  ApiRequestModelType,
+  RequestCounter,
+} from '../domain/entities/api-request.schema';
 
 @Injectable()
 export class ApiRequestCounterRepository {

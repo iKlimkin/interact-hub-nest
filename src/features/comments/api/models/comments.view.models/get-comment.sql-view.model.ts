@@ -17,7 +17,7 @@ export const getCommentSqlViewModel = (
     likesInfo: {
       likesCount: comment.likes_count || 0,
       dislikesCount: comment.dislikes_count || 0,
-      myStatus: comment.reaction_type || myStatus,
+      myStatus,
     },
   };
 };

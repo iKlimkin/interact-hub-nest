@@ -20,7 +20,7 @@ import { DeletePostUseCase } from '../features/posts/application/use-cases/delet
 import { UpdatePostUseCase } from '../features/posts/application/use-cases/update-post-use-case';
 import { PostsRepository } from '../features/posts/infrastructure/posts.repository';
 import { BlogIdExistConstraint } from '../infra/decorators/validate/valid-blogId';
-import { ApiRequestCounterRepository } from '../infra/logging/api-request-counter.repository';
+import { ApiRequestCounterRepository } from '../infra/logging/infra/api-request-counter.repository';
 import { BlogsSqlRepository } from '../features/blogs/infrastructure/blogs.sql-repository';
 import { BlogsSqlQueryRepo } from '../features/blogs/api/query-repositories/blogs.query.sql-repo';
 import { CreateBlogSqlUseCase } from '../features/blogs/application/use-case/create-blog-sql.use-case';

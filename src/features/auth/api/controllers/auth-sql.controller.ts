@@ -8,6 +8,7 @@ import {
   Post,
   Res,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { Response } from 'express';
@@ -42,6 +43,7 @@ import { InputRegistrationModel } from '../models/auth-input.models.ts/input-reg
 import { UserProfileType } from '../models/auth.output.models/auth.output.models';
 import { UserInfoType } from '../models/user-models';
 import { AuthQuerySqlRepository } from '../query-repositories/auth-query.sql-repo';
+import { RateLimitSqlInterceptor } from '../../../../infra/interceptors/rate-limit-sql.interceptor';
 
 type ClientInfo = {
   ip: string;
@@ -57,6 +59,7 @@ export class AuthSQLController {
   ) {}
 
   @UseGuards(CustomThrottlerGuard, LocalAuthGuard)
+  // @UseInterceptors(RateLimitSqlInterceptor)
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(

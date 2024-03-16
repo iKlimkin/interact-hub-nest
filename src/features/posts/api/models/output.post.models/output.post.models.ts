@@ -35,7 +35,7 @@ export class PostReactionCounter extends ReactionsSqlCounter {
 }
 
 export type UserPostReactionsType = {
-  liked_at: string;
+  liked_at: Date;
   user_login: string;
   user_id: string;
   post_id: string;

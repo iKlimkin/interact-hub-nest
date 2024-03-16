@@ -1,5 +1,5 @@
 import { SortDirection } from 'mongodb';
-import { BaseFilter } from '../../domain/sorting-base-filter';
+import { BaseFilter, convertSortBy } from '../../domain/sorting-base-filter';
 
 enum sortDirections {
   ASC = 'ASC',
@@ -81,4 +81,17 @@ export const getPagination = (
     sortBy,
     sortDirection: sortDirection as SortDirectionsType,
   };
+};
+
+const validateSortBy = (sortBySql: string): string => {
+  const allowedColumns = [
+    'id',
+    'name',
+    'description',
+    'websiteUrl',
+    'createdAt',
+    'isMembership',
+  ];
+
+  return allowedColumns.includes(sortBySql) ? convertSortBy[sortBySql] : '';
 };

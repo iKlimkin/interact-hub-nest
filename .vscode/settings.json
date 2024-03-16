@@ -17,5 +17,11 @@
       "name": "NodeJS"
     }
   ],
-  "cSpell.ignoreWords": ["ILIKE", "cqrs", "timeToExpirets", "typeorm"]
+  "cSpell.ignoreWords": [
+    "ILIKE",
+    "cqrs",
+    "timeToExpirets",
+    "timestamptz",
+    "typeorm"
+  ]
 }

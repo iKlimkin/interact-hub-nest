@@ -1,10 +1,20 @@
-import { BaseFilter } from "../../../../../domain/sorting-base-filter";
-
+import {
+  BaseFilter,
+  SortDirections,
+} from '../../../../../domain/sorting-base-filter';
+import {
+  ValidateSortBy,
+  ValidSortDirection,
+} from '../../../../../infra/decorators/transform/is-valid-string';
 
 export class BlogsQueryFilter extends BaseFilter {
-    pageNumber: string;
-    pageSize: string;
-    sortBy: string;
-    sortDirection: 'asc' | 'desc';
-    searchNameTerm: string;
-} 
+  pageNumber: string;
+  pageSize: string;
+
+  @ValidateSortBy()
+  sortBy: string;
+
+  @ValidSortDirection()
+  sortDirection: SortDirections;
+  searchNameTerm: string;
+}

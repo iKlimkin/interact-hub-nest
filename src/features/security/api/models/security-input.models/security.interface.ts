@@ -1,4 +1,4 @@
-import { MatchApiType } from '../../../../../infra/logging/models/rate-limiter.models';
+import { MatchApiType } from '../../../../../infra/logging/api/models/rate-limiter.models';
 import { UserInfoType } from '../../../../auth/api/models/user-models';
 
 import { SecurityViewDeviceModel } from '../security.view.models/security.view.types';

@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Observable } from 'rxjs';
-import { ApiRequestCounterService } from '../logging/api-request-counter.service';
+import { ApiRequestCounterService } from '../logging/application/api-request-counter.service';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -44,6 +44,7 @@ export class RateLimitSqlInterceptor implements NestInterceptor {
       url,
       timeLimit,
     });
+    console.log({count});
 
     if (count <= 5) return next.handle();
 

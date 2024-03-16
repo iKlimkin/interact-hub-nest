@@ -1,28 +1,38 @@
 import { BaseFilter } from '../../../src/domain/sorting-base-filter';
 import { SortOptions } from '../../../src/infra/utils/pagination';
 
-
-
 export class PaginationModel<T> {
   getData(
     data: PaginationModelData<T>,
-    query?: BaseFilter,
+    query?: any,
+    hideFieldOptions?: any
   ): PaginationModelData<T> {
     const { pagesCount, page, pageSize, totalCount, items } = data;
 
-    let cItems = [...items]
+    let cItems = [...items];
 
     if (query?.searchEmailTerm || query?.searchLoginTerm) {
       cItems = this.filterQueryTerms(cItems, query);
     }
-
+    
     if (query?.sortBy || query?.sortDirection) {
       cItems = this.sortingEntities(cItems, {
         sortBy: query.sortBy,
         sortDirection: query.sortDirection,
       });
     }
-
+    
+    if (query.hide === 'createdAt') {
+      cItems = cItems.map((item) => ({
+        ...item,
+        createdAt: expect.any(String),
+      }));
+    }
+    
+    if (hideFieldOptions) {
+      cItems = this.removeUnwantedFields(cItems, hideFieldOptions);
+    }
+    
     return {
       pagesCount: pagesCount ? pagesCount : 0,
       page: page ? page : 1,
@@ -33,8 +43,9 @@ export class PaginationModel<T> {
   }
 
   private filterQueryTerms(data, query) {
+    let result = [];
     if (query.searchEmailTerm || query.searchLoginTerm) {
-      return data.filter((e) => {
+      result = data.filter((e) => {
         const emailMatch = query.searchEmailTerm
           ? e.email.includes(query.searchEmailTerm)
           : !0;
@@ -47,7 +58,11 @@ export class PaginationModel<T> {
       });
     }
 
-    return data;
+    if (query.searchNameTerm) {
+      result = data.filter((e) => e.name.includes(query.searchNameTerm));
+    }
+
+    return result;
   }
 
   private sortingEntities(data, sortOptions: SortOptions) {
@@ -59,11 +74,21 @@ export class PaginationModel<T> {
         return fieldA.localeCompare(fieldB);
       }
 
-      if (sortOptions.sortDirection === 'desc') {
+      if (sortOptions.sortDirection === 'desc' || sortOptions.sortDirection !== 'asc') {
         return fieldB.localeCompare(fieldA);
       }
 
       return 0;
+    });
+  }
+
+  private removeUnwantedFields(data, fieldsToRemove) {
+    return data.map((item) => {
+      const newItem = { ...item };
+      fieldsToRemove.forEach((field) => {
+        delete newItem[field];
+      });
+      return newItem;
     });
   }
 }

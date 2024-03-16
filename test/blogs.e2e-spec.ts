@@ -67,7 +67,7 @@ aDescribe(skipSettings.for('blogs'))('BlogsController (e2e)', () => {
         HttpStatus.BAD_REQUEST,
       );
 
-      blogTestManager.checkBlogData(newBlog, blogValidationErrors);
+      blogTestManager.assertBlogsMatch(newBlog, blogValidationErrors);
     });
 
     it('/blogs (post) - should create and return new blog', async () => {
@@ -75,7 +75,7 @@ aDescribe(skipSettings.for('blogs'))('BlogsController (e2e)', () => {
 
       const newBlog = await blogTestManager.createBlog(correctInputData);
 
-      blogTestManager.checkBlogData(newBlog, blogEqualTo);
+      blogTestManager.assertBlogsMatch(newBlog, blogEqualTo);
       const expectLength = 1;
 
       await blogTestManager.checkStatusOptionId(newBlog.id);
@@ -115,18 +115,18 @@ aDescribe(skipSettings.for('blogs'))('BlogsController (e2e)', () => {
         HttpStatus.BAD_REQUEST,
       );
 
-      blogTestManager.checkBlogData(result.body, blogValidationErrors);
+      blogTestManager.assertBlogsMatch(result.body, blogValidationErrors);
 
       const { blog: existingBlog } = await blogTestManager.getBlogById(blog.id);
 
-      blogTestManager.checkBlogData(blog, existingBlog);
+      blogTestManager.assertBlogsMatch(blog, existingBlog);
     });
 
     it('/blogs (put) - should update blog', async () => {
       const { blog } = expect.getState();
 
       const beforeUpdate = await blogTestManager.getBlogById(blog.id);
-      blogTestManager.checkBlogData(beforeUpdate.blog.name, 'Marcus Aurelius');
+      blogTestManager.assertBlogsMatch(beforeUpdate.blog.name, 'Marcus Aurelius');
 
       const createOtherValidInputData = blogTestManager.createInputData({
         name: 'Zeno',
@@ -139,7 +139,7 @@ aDescribe(skipSettings.for('blogs'))('BlogsController (e2e)', () => {
 
       const afterUpdate = await blogTestManager.getBlogById(blog.id);
 
-      blogTestManager.checkBlogData(afterUpdate.blog.name, 'Zeno');
+      blogTestManager.assertBlogsMatch(afterUpdate.blog.name, 'Zeno');
     });
   });
 
@@ -216,7 +216,7 @@ aDescribe(skipSettings.for('blogs'))('BlogsController (e2e)', () => {
 
       const error = createErrorsMessages(['title']);
 
-      blogTestManager.checkBlogData(result, error);
+      blogTestManager.assertBlogsMatch(result, error);
     });
 
     it(`/blogs/:blogId/posts (POST) - shouldn't create post with invalid description`, async () => {
@@ -235,7 +235,7 @@ aDescribe(skipSettings.for('blogs'))('BlogsController (e2e)', () => {
         
       const error = createErrorsMessages(['shortDescription']);
         
-      blogTestManager.checkBlogData(result, error);
+      blogTestManager.assertBlogsMatch(result, error);
     });
 
     it(`/blogs/:blogId/posts (POST) - shouldn't create post with invalid content`, async () => {
@@ -254,7 +254,7 @@ aDescribe(skipSettings.for('blogs'))('BlogsController (e2e)', () => {
 
       const error = createErrorsMessages(['content']);
 
-      blogTestManager.checkBlogData(result, error);
+      blogTestManager.assertBlogsMatch(result, error);
     });
 
     it(`/blogs/:blogId/posts (POST) - shouldn't create post with all incorrect fields, testing error's messages`, async () => {
@@ -274,7 +274,7 @@ aDescribe(skipSettings.for('blogs'))('BlogsController (e2e)', () => {
         'content',
       ]);
 
-      blogTestManager.checkBlogData(result, errors);
+      blogTestManager.assertBlogsMatch(result, errors);
     });
 
     it(`/blogs/:blogId/posts (POST) - should create post for blog`, async () => {

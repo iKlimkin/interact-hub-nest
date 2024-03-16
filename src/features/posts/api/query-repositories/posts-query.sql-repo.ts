@@ -23,19 +23,33 @@ export class PostsSqlQueryRepo {
   ): Promise<PaginationViewModel<PostViewModelType>> {
     try {
       const { searchContentTerm } = queryOptions;
+      const isSql = true;
+
 
       const { pageNumber, pageSize, skip, sortBy, sortDirection } =
-        getPagination(queryOptions, !!0, !0);
+        getPagination(queryOptions, !!0, isSql);
 
       const searchTerm = `%${searchContentTerm ? searchContentTerm : ''}%`;
+      //(select count(*) from post_reactions) as likesCount
 
-      const sortQuery = `
-      SELECT *
-        FROM posts
-        WHERE content ILIKE $1
-        ORDER BY ${sortBy} ${sortDirection}
-        LIMIT $2 OFFSET $3
-      `;
+      const sortQuery =
+        // sortBy !== 'created_at'
+        //   ?
+        //   `
+        //   SELECT *
+        //     FROM posts p
+        //     WHERE content ILIKE $1
+        //     ORDER BY ${sortBy} COLLATE "C" ${sortDirection}
+        //     LIMIT $2 OFFSET $3
+        //   `
+        //   :
+        `
+          SELECT p.*
+            FROM posts p
+            WHERE content ILIKE $1
+            ORDER BY ${sortBy} ${sortDirection}
+            LIMIT $2 OFFSET $3
+          `;
 
       const sortedResult = await this.dataSource.query(sortQuery, [
         searchTerm,
@@ -52,7 +66,7 @@ export class PostsSqlQueryRepo {
           FROM blogs b
           INNER JOIN posts ON b.id = posts.blog_id
           INNER JOIN post_reactions ON posts.id = post_reactions.post_id
-          WHERE user_id = $1
+          WHERE post_reactions.user_id = $1
         `,
           [userId],
         );
@@ -61,13 +75,10 @@ export class PostsSqlQueryRepo {
       }
 
       const findReactionsQuery = `
-        SELECT pr.user_id, pr.reaction_type, pr.user_login, pr.liked_at
+        SELECT pr.user_id, pr.reaction_type, pr.user_login, pr.liked_at, pr.post_id
         FROM post_reactions pr
-        LEFT JOIN post_reaction_counts
-        ON pr.post_id = post_reaction_counts.post_id
         WHERE reaction_type = 'Like'
         ORDER BY liked_at DESC
-        LIMIT 3
       `;
 
       const latestReactions = await this.dataSource.query(findReactionsQuery);
@@ -138,7 +149,7 @@ export class PostsSqlQueryRepo {
         skip,
       ]);
 
-      let myReactions: UserReactionsOutType[];
+      let myReactions: UserReactionsOutType[] | likesStatus = likesStatus.None;
 
       if (userId) {
         const reactionsResult = await this.dataSource.query(
@@ -147,7 +158,7 @@ export class PostsSqlQueryRepo {
           FROM blogs b
           INNER JOIN posts ON b.id = posts.blog_id
           INNER JOIN post_reactions ON posts.id = post_reactions.post_id
-          WHERE user_id = $1
+          WHERE post_reactions.user_id = $1
         `,
           [userId],
         );
@@ -156,14 +167,11 @@ export class PostsSqlQueryRepo {
       }
 
       const latestReactionsQuery = `
-        SELECT pr.user_id, pr.reaction_type, pr.user_login, pr.liked_at
+        SELECT pr.user_id, pr.reaction_type, pr.user_login, pr.liked_at, post_id
         FROM post_reactions pr
-        LEFT JOIN post_reaction_counts prc
-        USING(post_id)
         LEFT JOIN posts ON pr.post_id = posts.id
         WHERE reaction_type = 'Like' AND blog_id = $1
         ORDER BY liked_at DESC
-        LIMIT 3
       `;
 
       const latestReactions = await this.dataSource.query(
@@ -206,7 +214,7 @@ export class PostsSqlQueryRepo {
 
       return postsViewModel;
     } catch (e) {
-      console.error(`Database fails operation with find post by blogId ${e}`);
+      console.error(`Database fails operation with find posts by blogId ${e}`);
       return null;
     }
   }
@@ -258,8 +266,9 @@ export class PostsSqlQueryRepo {
 
         myReaction = reactionResult
           ? reactionResult.reaction_type
-          : likesStatus.None;
+          : myReaction;
       }
+
 
       const reactionCounter = await this.dataSource.query(
         `
@@ -271,7 +280,7 @@ export class PostsSqlQueryRepo {
       );
 
       const latestReactionsQuery = `
-          SELECT user_id, reaction_type, user_login, liked_at
+          SELECT user_id, reaction_type, user_login, liked_at, post_id
           FROM post_reactions
           WHERE post_id = $1 AND reaction_type = 'Like'
           ORDER BY liked_at DESC
@@ -282,6 +291,7 @@ export class PostsSqlQueryRepo {
         latestReactionsQuery,
         [postId],
       );
+
 
       const findQuery = `
         SELECT *

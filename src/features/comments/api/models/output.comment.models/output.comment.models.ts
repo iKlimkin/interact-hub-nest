@@ -55,7 +55,7 @@ export type CommentSqlDbType = {
   created_at: Date;
   likes_count: number | null;
   dislikes_count: number | null;
-  reaction_type: likesStatus | null;
+  // reaction_type: likesStatus | null;
 };
 
 export type UserCommentReactionsType = Omit<

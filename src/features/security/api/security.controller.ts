@@ -11,7 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
-import { ApiRequestCounterRepository } from '../../../infra/logging/api-request-counter.repository';
+import { ApiRequestCounterRepository } from '../../../infra/logging/infra/api-request-counter.repository';
 import { ObjectIdPipe } from '../../../infra/pipes/valid-objectId.pipe';
 import { UserInfoType } from '../../auth/api/models/user-models';
 import { CurrentUserInfo } from '../../auth/infrastructure/decorators/current-user-info.decorator';
@@ -37,8 +37,9 @@ export class SecurityController implements SecurityInterface {
   ): Promise<SecurityViewDeviceModel[]> {
     const { userId } = userInfo;
 
-    const securityData =
-      await this.securityQueryRepo.getUserActiveSessions(userId);
+    const securityData = await this.securityQueryRepo.getUserActiveSessions(
+      userId,
+    );
 
     if (!securityData) {
       throw new UnauthorizedException('Have no active sessions');

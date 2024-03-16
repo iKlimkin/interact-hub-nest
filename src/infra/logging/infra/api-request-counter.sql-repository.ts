@@ -1,6 +1,9 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { MatchApiLimitType, MatchApiType } from './models/rate-limiter.models';
+import {
+  MatchApiLimitType,
+  MatchApiType,
+} from '../api/models/rate-limiter.models';
 
 @Injectable()
 export class ApiRequestCounterSQLRepository {

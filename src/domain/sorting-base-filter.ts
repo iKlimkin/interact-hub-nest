@@ -1,17 +1,31 @@
 import {
-  IsArray,
-  IsEnum,
-  IsNumber,
   IsOptional,
-  IsString,
-  Max,
-  Min,
-  isURL,
+  IsString
 } from 'class-validator';
 import { SortDirection } from 'mongodb';
 
+export enum convertSortBy {
+  id = 'id',
+  blogId = 'blog_id',
+  blogName = 'blog_title',
+  content = 'content',
+  title = 'title',
+  name = 'title',
+  description = 'description',
+  shortDescription = 'short_description',
+  websiteUrl = 'website_url',
+  createdAt = 'created_at',
+  created_at = 'created_at',
+  isMembership = 'is_membership',
+  email = 'email',
+  login = 'login',
+}
 
-enum SortDirections {
+type SortByType = typeof convertSortBy
+
+export const sortingKeys = Object.keys(convertSortBy)
+
+export enum SortDirections {
   Asc = 'asc',
   Desc = 'desc',
 }

@@ -14,9 +14,9 @@ export class CreateBlogSASqlUseCase
   async execute(command: CreateSABlogSqlCommand): Promise<OutputId | null> {
     await validateOrRejectModel(command, CreateSABlogSqlCommand);
 
-    const { description, name, websiteUrl, userId } = command.createBlogDto;
+    const { description, name, websiteUrl } = command.createBlogDto;
 
-    const blogDto = new BlogDtoSqlModel(name, description, websiteUrl, userId);
+    const blogDto = new BlogDtoSqlModel(name, description, websiteUrl);
 
     return this.blogsSqlRepository.save(blogDto);
   }

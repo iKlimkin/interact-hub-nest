@@ -16,3 +16,5 @@ export const deleteAllData = async (databaseConnection: Connection) => {
   await databaseConnection.collection('security').deleteMany();
   await databaseConnection.collection('auth').deleteMany();
 };
+
+

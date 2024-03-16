@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { MatchApiLimitType, MatchApiType } from './models/rate-limiter.models';
-import { ApiRequestCounterRepository } from './api-request-counter.repository';
-import { ApiRequestCounterSQLRepository } from './api-request-counter.sql-repository';
+import {
+  MatchApiLimitType,
+  MatchApiType,
+} from '../api/models/rate-limiter.models';
+import { ApiRequestCounterRepository } from '../infra/api-request-counter.repository';
+import { ApiRequestCounterSQLRepository } from '../infra/api-request-counter.sql-repository';
 
 @Injectable()
 export class ApiRequestCounterService {
@@ -25,7 +28,9 @@ export class ApiRequestCounterService {
     return this.apiRequestCounterSQLRepository.addApiRequestSql(inputData);
   }
 
-  async apiRequestCounterSql(inputData: MatchApiLimitType): Promise<{ count: number }> {
+  async apiRequestCounterSql(
+    inputData: MatchApiLimitType,
+  ): Promise<{ count: number }> {
     return this.apiRequestCounterSQLRepository.apiRequestCounterSql(inputData);
   }
 

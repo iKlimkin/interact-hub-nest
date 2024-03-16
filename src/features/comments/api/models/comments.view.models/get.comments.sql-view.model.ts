@@ -38,11 +38,11 @@ const convertStatus = (
   let result: likesStatus = likesStatus.None;
 
   if (Array.isArray(myReactions)) {
-    result = myReactions
-      .map((r) =>
-        r.comment_id === comment.id ? r.reaction_type : likesStatus.None,
-      )
-      .join('') as likesStatus || likesStatus.None;
+    result =
+      (myReactions
+        .filter((r) => r.comment_id === comment.id)
+        .map((r) => r.reaction_type)
+        .join('') as likesStatus) || likesStatus.None;
   } else {
     result = myReactions || likesStatus.None;
   }

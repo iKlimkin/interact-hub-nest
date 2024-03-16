@@ -28,10 +28,8 @@ aDescribe(skipSettings.for('sa'))('saController (e2e)', () => {
 
     paginationModel = new PaginationModel()
     saTestManager = new SATestManager(app);
-
-    await dropDataBase(app);
   });
-  
+
   afterAll(async () => {
     await app.close();
   });
@@ -57,7 +55,7 @@ aDescribe(skipSettings.for('sa'))('saController (e2e)', () => {
 
     it(`/sa/users (GET) - test pagination sa, 200`, async () => {
       const { paginationData } = expect.getState()
-      
+
       let data = {
         pagesCount: 0,
         page: 1,
@@ -65,10 +63,9 @@ aDescribe(skipSettings.for('sa'))('saController (e2e)', () => {
         totalCount: 9,
         items: paginationData,
       }
-      console.log(data);
-      
+
       const query1 = {};
-      
+
       const defaultSADataTest = createSADataForTest()
 
       let data2 = {
@@ -78,20 +75,17 @@ aDescribe(skipSettings.for('sa'))('saController (e2e)', () => {
         totalCount: 9,
         items: defaultSADataTest,
       }
-      const datapg = paginationModel.getData(data2)
-      console.log(datapg);
+      const dataPag = paginationModel.getData(data2)
 
       // defaultSADataTest.sort((a, b) => b.createdAt.).map(u => u)
-      console.log({defaultSADataTest});
       const res = await saTestManager.getSAPagination()
-      console.log({res});
-      
+
       // const result1 = await saTestManager.getSAPagination(query1, defaultSATestModel);
 
       const query2 = { searchLoginTerm: 'ykt91Ue6F3' };
-      
+
       // const result2 = await saTestManager.getSAPagination(query2, defaultSATestModel)
-      
+
       const query3 = { searchEmailTerm: 'qwert5wq@yaol.com' }
 
 

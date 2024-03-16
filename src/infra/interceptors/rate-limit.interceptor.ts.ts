@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Observable } from 'rxjs';
-import { ApiRequestCounterService } from '../logging/api-request-counter.service';
+import { ApiRequestCounterService } from '../logging/application/api-request-counter.service';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()

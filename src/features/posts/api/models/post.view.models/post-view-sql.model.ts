@@ -32,15 +32,21 @@ const convertStatus = (
   myReactions: UserReactionsOutType[] | likesStatus,
   rawPost: PostsSqlDbType,
 ): likesStatus => {
-  let result: likesStatus = likesStatus.None;
+  let result: likesStatus;
+
   if (Array.isArray(myReactions)) {
-    result = myReactions
-      .map((r) =>
-        r.post_id === rawPost.id ? r.reaction_type : likesStatus.None,
-      )
-      .join('') as likesStatus || likesStatus.None;
+    if (!myReactions.length) return likesStatus.None
+    result =
+      myReactions
+        .filter(r => r.post_id === rawPost.id)
+        .map(
+          (r) => r.post_id === rawPost.id
+            ? r.reaction_type
+            : likesStatus.None
+        )
+        .join('') as likesStatus || likesStatus.None;
   } else {
-    result = myReactions || likesStatus.None;
+    result = myReactions as likesStatus || likesStatus.None;
   }
 
   return result;
@@ -69,11 +75,16 @@ export const getPostSqlViewModel = (
       likesCount,
       dislikesCount,
       myStatus: convertStatus(myReactions, rawPost),
-      newestLikes: userReactions.map((like) => ({
-        addedAt: like.liked_at,
-        userId: like.user_id,
-        login: like.user_login,
-      })),
+      newestLikes: userReactions
+        .filter(reaction => reaction.post_id === rawPost.id)
+        .slice(0, 3)
+        .map(
+          (like) => ({
+            addedAt: like.liked_at.toISOString(),
+            userId: like.user_id,
+            login: like.user_login,
+          })
+        ),
     },
   };
 };

@@ -19,6 +19,7 @@ import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
 import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
 import { SetUserIdGuard } from '../../../../infra/guards/set-user-id.guard';
 import { ObjectIdPipe } from '../../../../infra/pipes/valid-objectId.pipe';
+import { LayerNoticeInterceptor } from '../../../../infra/utils/interlayer-error-handler.ts/error-layer-interceptor';
 import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth.guard';
 import { InputPostModelByBlogId } from '../../../posts/api/models/input.posts.models/create.post.model';
 import { PostsQueryFilter } from '../../../posts/api/models/output.post.models/posts-query.filter';
@@ -32,8 +33,6 @@ import { BlogsQueryFilter } from '../models/input.blog.models/blogs-query.filter
 import { InputBlogModel } from '../models/input.blog.models/create.blog.model';
 import { BlogViewModelType } from '../models/output.blog.models/blog.view.model-type';
 import { BlogsSqlQueryRepo } from '../query-repositories/blogs.query.sql-repo';
-import { LayerNoticeInterceptor } from '../../../../infra/utils/interlayer-error-handler.ts/error-layer-interceptor';
-import { FindEntityById } from '../../../auth/infrastructure/decorators/find-entity-by-id.decorator';
 
 @Controller('blogs')
 export class BlogsSqlController {

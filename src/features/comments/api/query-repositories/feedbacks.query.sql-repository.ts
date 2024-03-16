@@ -17,6 +17,79 @@ import { getPagination } from '../../../../infra/utils/pagination';
 export class FeedbacksQuerySqlRepo {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
+  async getComments(
+    queryOptions: CommentsQueryFilter,
+    userId?: string,
+  ): Promise<PaginationViewModel<CommentsViewModel>> {
+    try {
+      const { searchContentTerm } = queryOptions;
+
+      const { pageNumber, pageSize, sortBy, skip, sortDirection } =
+        getPagination(queryOptions, !!0, !0);
+
+      const filter = `%${searchContentTerm ? searchContentTerm : ''}%`;
+
+      const sortQuery = `
+      SELECT *
+        FROM comments
+        WHERE content ILIKE $1
+        ORDER BY ${sortBy} ${sortDirection}
+        LIMIT $2 OFFSET $3
+      `;
+
+      const result = await this.dataSource.query(sortQuery, [
+        filter,
+        pageSize,
+        skip,
+      ]);
+
+      let myReactions: CommentReactionsType[];
+
+      if (userId) {
+        const reactionsResult = await this.dataSource.query(
+          `
+          SELECT reaction_type, comment_id
+          FROM comment_reactions
+          WHERE user_id = $1
+        `,
+          [userId],
+        );
+
+        myReactions = reactionsResult;
+      }
+
+      const reactionCounter = await this.dataSource.query(
+        `
+        SELECT likes_count, dislikes_count, comment_id
+        FROM comment_reaction_counts
+        `,
+      );
+
+      const [commentsCounter] = await this.dataSource.query(
+        `
+          SELECT COUNT(*)
+          FROM comments
+          WHERE content ILIKE $1
+        `,
+        [filter],
+      );
+
+      const commentsViewModel = new PaginationViewModel<CommentsViewModel>(
+        result.map((comment: CommentSqlDbType) =>
+          getCommentsSqlViewModel(comment, reactionCounter, myReactions),
+        ),
+        pageNumber,
+        pageSize,
+        commentsCounter.count,
+      );
+
+      return commentsViewModel;
+    } catch (error) {
+      throw new Error(
+        `Database fails during find comments by postId operation ${error}`,
+      );
+    }
+  }
   async getCommentsByPostId(
     postId: string,
     queryOptions: CommentsQueryFilter,
@@ -50,13 +123,13 @@ export class FeedbacksQuerySqlRepo {
       if (userId) {
         const reactionsResult = await this.dataSource.query(
           `
-          SELECT reaction_type, comment_id
+          SELECT cr.reaction_type, cr.comment_id
           FROM posts p
           INNER JOIN comments c ON p.id = c.post_id
           INNER JOIN comment_reactions cr ON c.id = cr.comment_id
-          WHERE c.user_id = $1
+          WHERE cr.user_id = $1 AND c.post_id = $2
         `,
-          [userId],
+          [userId, postId],
         );
 
         myReactions = reactionsResult;
@@ -111,7 +184,7 @@ export class FeedbacksQuerySqlRepo {
           { reaction_type: likesStatus }[]
         >(
           `
-            SELECT reaction_type
+            SELECT reaction_type, user_id
             FROM comment_reactions
             WHERE comment_id = $1 AND user_id = $2
           `,
@@ -124,10 +197,9 @@ export class FeedbacksQuerySqlRepo {
       }
 
       const query = `
-        SELECT content, c.user_id, c.user_login, created_at, likes_count, dislikes_count, cr.reaction_type, c.id
+        SELECT content, user_id, user_login, created_at, likes_count, dislikes_count, id
         FROM comments c
         LEFT JOIN comment_reaction_counts crc ON c.id = crc.comment_id
-        LEFT JOIN comment_reactions cr USING(comment_id)
         WHERE c.id = $1
       `;
 
@@ -182,7 +254,6 @@ export class FeedbacksQuerySqlRepo {
     try {
       const { pageNumber, pageSize, sortBy, skip, sortDirection } =
         getPagination(queryOptions, !!0, !0);
-      console.log({ userId });
 
       const reactionsResult = await this.dataSource.query(
         `
@@ -192,7 +263,6 @@ export class FeedbacksQuerySqlRepo {
         `,
         [userId],
       );
-      console.log({ reactionsResult });
 
       const userReactions: CommentReactionsType[] = reactionsResult;
 

@@ -1,10 +1,11 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ConfigService } from '@nestjs/config';
 import { ConfigType } from './config/configuration';
 import { AuthConfigurationType } from './config/env-configurations';
+import { Wallet } from './features/admin/domain/entities/user-account.entity';
 
-@Controller()
+@Controller('users')
 export class AppController {
   constructor(
     private readonly configService: ConfigService<ConfigType>,
@@ -21,4 +22,12 @@ export class AppController {
       // auth: this.configService.get('auth', { infer: true })?.type
     };
   }
+
+  // @Post(':id/wallets')
+  // createWallet(
+  //   @Param('id') userId: number,
+  //   @Body() dto: any
+  // ): Promise<Wallet> {
+  //   // return this.appService.createWallet(userId, dto)
+  // }
 }

@@ -20,7 +20,6 @@ export class UpdateCommentReactionSqlUseCase
       userId,
       commentId,
     );
-    console.log({ existingReaction });
 
     await this.handleReaction({
       commentId,

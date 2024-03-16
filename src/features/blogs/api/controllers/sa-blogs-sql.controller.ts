@@ -41,8 +41,8 @@ import { AccessTokenGuard } from '../../../auth/infrastructure/guards/accessToke
 import { UserInfoType } from '../../../auth/api/models/user-models';
 import { CurrentUserInfo } from '../../../auth/infrastructure/decorators/current-user-info.decorator';
 
-@UseGuards(AccessTokenGuard)
-// @UseGuards(BasicSAAuthGuard)
+// @UseGuards(AccessTokenGuard)
+@UseGuards(BasicSAAuthGuard)
 @Controller('sa/blogs')
 export class SABlogsController {
   constructor(
@@ -55,7 +55,11 @@ export class SABlogsController {
   async getBlogs(
     @Query() query: BlogsQueryFilter,
   ): Promise<PaginationViewModel<BlogViewModelType>> {
-    return this.blogsSqlQueryRepo.getAllBlogs(query);
+    const result = await this.blogsSqlQueryRepo.getAllBlogs(query);
+
+    if (!result) throw new Error();
+
+    return result;
   }
 
   @Get(':id')
@@ -71,7 +75,7 @@ export class SABlogsController {
 
   @Get(':blogId/posts')
   async getPostsByBlogId(
-    @CurrentUserInfo() userInfo: UserInfoType,
+    //@CurrentUserInfo() userInfo: UserInfoType,
     @Param('blogId', ObjectIdPipe) blogId: string,
     @Query() query: PostsQueryFilter,
   ): Promise<PaginationViewModel<PostViewModelType>> {
@@ -79,13 +83,13 @@ export class SABlogsController {
 
     if (!blog) throw new NotFoundException('blog not found');
 
-    if (userInfo.userId !== blog.ownerInfo.userId)
-      throw new ForbiddenException();
+    // if (userInfo.userId !== blog.ownerInfo.userId)
+    //   throw new ForbiddenException();
 
     const posts = await this.postsSqlQueryRepo.getPostsByBlogId(
       blogId,
       query,
-      userInfo.userId,
+      // userInfo.userId,
     );
 
     if (!posts) throw new Error();
@@ -97,11 +101,11 @@ export class SABlogsController {
   @HttpCode(HttpStatus.CREATED)
   async createBlog(
     @Body() createBlogModel: InputBlogModel,
-    @CurrentUserInfo() userInfo: UserInfoType,
+    //@CurrentUserInfo() userInfo: UserInfoType,
   ): Promise<BlogViewModelType> {
     const command = new CreateSABlogSqlCommand({
       ...createBlogModel,
-      userId: userInfo.userId,
+      // userId: userInfo.userId,
     });
 
     const blog = await this.commandBus.execute<
@@ -117,7 +121,7 @@ export class SABlogsController {
   async createPost(
     @Param('id', ObjectIdPipe) blogId: string,
     @Body() body: InputPostModelByBlogId,
-    @CurrentUserInfo() userInfo: UserInfoType,
+    //@CurrentUserInfo() userInfo: UserInfoType,
   ): Promise<PostViewModelType> {
     const blog = await this.blogsSqlQueryRepo.getSABlogById(blogId);
 
@@ -125,9 +129,9 @@ export class SABlogsController {
       throw new NotFoundException();
     }
 
-    if (userInfo.userId !== blog.ownerInfo.userId) {
-      throw new ForbiddenException();
-    }
+    // if (userInfo.userId !== blog.ownerInfo.userId) {
+    //   throw new ForbiddenException();
+    // }
 
     const command = new CreatePostSqlCommand({ ...body, blogId });
 
@@ -154,15 +158,15 @@ export class SABlogsController {
     @Param('id') blogId: string,
     @Param('postId') postId: string,
     @Body() inputPostModel: InputPostModelByBlogId,
-    @CurrentUserInfo() userInfo: UserInfoType,
+    //@CurrentUserInfo() userInfo: UserInfoType,
   ) {
     const blog = await this.blogsSqlQueryRepo.getSABlogById(blogId);
     const post = await this.postsSqlQueryRepo.getPostById(postId);
 
     if (!blog || !post) throw new NotFoundException();
 
-    if (userInfo.userId !== blog.ownerInfo.userId)
-      throw new ForbiddenException();
+    //if (userInfo.userId !== blog.ownerInfo.userId)
+    // throw new ForbiddenException();
 
     const command = new UpdatePostSqlCommand({
       inputPostModel: { ...inputPostModel, blogId },
@@ -176,7 +180,7 @@ export class SABlogsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateBlog(
     @Param('id') blogId: string,
-    @CurrentUserInfo() userInfo: UserInfoType,
+    //@CurrentUserInfo() userInfo: UserInfoType,
     @Body() inputBlogModel: InputBlogModel,
   ) {
     const blog = await this.blogsSqlQueryRepo.getSABlogById(blogId);
@@ -185,9 +189,9 @@ export class SABlogsController {
       throw new NotFoundException();
     }
 
-    if (userInfo.userId !== blog.ownerInfo.userId) {
-      throw new ForbiddenException();
-    }
+    // if (userInfo.userId !== blog.ownerInfo.userId) {
+    //   throw new ForbiddenException();
+    // }
 
     const command = new UpdateSABlogSqlCommand({ ...inputBlogModel, blogId });
 
@@ -206,7 +210,7 @@ export class SABlogsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteBlog(
     @Param('id', ObjectIdPipe) blogId: string,
-    @CurrentUserInfo() userInfo: UserInfoType,
+    //@CurrentUserInfo() userInfo: UserInfoType,
   ) {
     const blog = await this.blogsSqlQueryRepo.getSABlogById(blogId);
 
@@ -214,12 +218,12 @@ export class SABlogsController {
       throw new NotFoundException();
     }
 
-    if (userInfo.userId !== blog.ownerInfo.userId) {
-      throw new ForbiddenException();
-    }
+    // if (userInfo.userId !== blog.ownerInfo.userId) {
+    //   throw new ForbiddenException();
+    // }
 
     const command = new DeleteBlogSqlCommand(blogId);
-    this.commandBus.execute(command);
+    await this.commandBus.execute(command);
   }
 
   @Delete(':id/posts/:postId')
@@ -227,17 +231,17 @@ export class SABlogsController {
   async deletePost(
     @Param('id', ObjectIdPipe) blogId: string,
     @Param('postId', ObjectIdPipe) postId: string,
-    @CurrentUserInfo() userInfo: UserInfoType,
+    //@CurrentUserInfo() userInfo: UserInfoType,
   ) {
     const blog = await this.blogsSqlQueryRepo.getSABlogById(blogId);
     const post = await this.postsSqlQueryRepo.getPostById(postId);
 
     if (!blog || !post) throw new NotFoundException();
 
-    if (userInfo.userId !== blog.ownerInfo.userId)
-      throw new ForbiddenException();
+    //if (userInfo.userId !== blog.ownerInfo.userId)
+    // throw new ForbiddenException();
 
     const command = new DeletePostSqlCommand(postId);
-    this.commandBus.execute(command);
+    await this.commandBus.execute(command);
   }
 }

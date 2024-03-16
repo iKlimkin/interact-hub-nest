@@ -6,7 +6,7 @@ export const getSABlogSqlViewModel = (
 ): SABlogViewModelType => ({
   id: blog.id,
   ownerInfo: {
-    userId: blog.user_id,
+    userId: blog.user_id ? blog.user_id : 'test'
   },
   name: blog.title,
   description: blog.description,

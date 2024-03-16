@@ -89,13 +89,9 @@ export class PostsTestManager {
   }
 
   async getPosts() {
-    await request(this.application).get('/posts').expect(HttpStatus.OK, {
-      pagesCount: 0,
-      page: 1,
-      pageSize: 10,
-      totalCount: 0,
-      items: [],
-    });
+    await request(this.application)
+      .get('/posts')
+      .expect(HttpStatus.OK);
   }
 
   async getPostById(

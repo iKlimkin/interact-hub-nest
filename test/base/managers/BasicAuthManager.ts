@@ -50,4 +50,15 @@ export class BasicAuthorization {
       .delete(`${RouterPaths[path]}/${entityId}`)
       .expect(expectedStatus);
   }
+
+  async testDeleteSAAuthorization(
+    path: PathMappings,
+    blogId: string,
+    postId: string,
+    expectedStatus: number = HttpStatus.UNAUTHORIZED,
+  ) {
+    await request(this.application)
+      .delete(`${RouterPaths[path]}/${blogId}/posts/${postId}`)
+      .expect(expectedStatus);
+  }
 }

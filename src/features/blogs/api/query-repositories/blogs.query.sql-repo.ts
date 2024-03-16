@@ -18,16 +18,26 @@ export class BlogsSqlQueryRepo {
 
   async getAllBlogs(
     queryOptions: BlogsQueryFilter,
-  ): Promise<PaginationViewModel<BlogViewModelType>> {
+  ): Promise<PaginationViewModel<BlogViewModelType> | null> {
     try {
       const { searchNameTerm } = queryOptions;
+      const isSql = true;
 
       const { pageNumber, pageSize, skip, sortBy, sortDirection } =
-        getPagination(queryOptions, !!0, !0);
+        getPagination(queryOptions, !!0, isSql);
 
       const searchTerm = `%${searchNameTerm ? searchNameTerm : ''}%`;
 
-      const query = `
+      const query =
+        sortBy !== 'created_at'
+          ? `
+      SELECT *
+        FROM blogs
+        WHERE title ILIKE $1
+        ORDER BY ${sortBy} COLLATE "C" ${sortDirection}
+        LIMIT $2 OFFSET $3
+      `
+          : `
       SELECT *
         FROM blogs
         WHERE title ILIKE $1
@@ -59,7 +69,9 @@ export class BlogsSqlQueryRepo {
 
       return blogsViewModel;
     } catch (e) {
-      throw new InternalServerErrorException(`Some troubles occurred during find blogs: ${e}`)
+      // throw new InternalServerErrorException(`Some troubles occurred during find blogs: ${e}`)
+      console.error(`Some troubles occurred during find blogs: ${e}`);
+      return null;
     }
   }
 
@@ -70,7 +82,6 @@ export class BlogsSqlQueryRepo {
           FROM blogs
           WHERE id = $1
         `;
-
 
       const result = await this.dataSource.query<BlogsSqlDbType[]>(findQuery, [
         blogId,

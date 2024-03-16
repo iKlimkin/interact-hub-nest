@@ -1,20 +1,20 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
-import { InputBlogModel } from '../../../src/features/blogs/api/models/input.blog.models/create.blog.model';
 import request from 'supertest';
-import { PathMappings, RouterPaths } from '../utils/routing';
+import { LikeStatusType, likesStatus } from '../../../src/domain/likes.types';
+import { InputBlogModel } from '../../../src/features/blogs/api/models/input.blog.models/create.blog.model';
 import {
   BlogType,
   BlogsTypeWithId,
 } from '../../../src/features/blogs/api/models/output.blog.models/blog.models';
-import { ErrorsMessages } from '../../../src/infra/utils/error-handler';
 import { BlogViewModelType } from '../../../src/features/blogs/api/models/output.blog.models/blog.view.model-type';
 import {
   CreatePostModel,
   InputPostModelByBlogId,
 } from '../../../src/features/posts/api/models/input.posts.models/create.post.model';
 import { PostViewModelType } from '../../../src/features/posts/api/models/post.view.models/post-view-model.type';
-import { LikeStatusType, likesStatus } from '../../../src/domain/likes.types';
-import { number } from 'joi';
+import { ErrorsMessages } from '../../../src/infra/utils/error-handler';
+import { PathMappings, RouterPaths } from '../utils/routing';
+import { blogsData } from '../rest-models-helpers/blogs.constants';
 
 export class BlogsTestManager {
   constructor(
@@ -55,6 +55,26 @@ export class BlogsTestManager {
         shortDescription: field.shortDescription || 'Stoic philosophers',
       };
     }
+  }
+
+  async getBlogsWithPagination(token: string, query?) {
+    if (query) {
+      const { pageNumber, pageSize, searchNameTerm, sortBy, sortDirection } = query
+
+      const response = await request(this.application)
+        .get(this.routing)
+        .auth(token, { type: 'bearer' })
+        .query({
+          pageSize: pageSize ? pageSize : '',
+          pageNumber: pageNumber ? pageNumber : '',
+          searchNameTerm: searchNameTerm ? searchNameTerm : '',
+          sortDirection: sortDirection ? sortDirection : '',
+          sortBy: sortBy ? sortBy : '',
+        })
+        .expect(HttpStatus.OK);
+        
+        return response.body
+    } 
   }
 
   checkBlogsBeforeTests = async (
@@ -164,7 +184,7 @@ export class BlogsTestManager {
           newestLikes: expect.any(Array),
         },
       } as PostViewModelType;
-      
+
       expect(response.body).toEqual(expectResponseModel);
     }
     const post = response.body;
@@ -193,6 +213,28 @@ export class BlogsTestManager {
       .expect(expectStatus);
   }
 
+  async updateSAPost(
+    inputData: InputPostModelByBlogId,
+    blogId: string,
+    postId: string,
+    accessToken: string | null = null,
+    expectStatus: number = HttpStatus.NO_CONTENT,
+  ) {
+    if (!accessToken) {
+      return request(this.application)
+        .put(`${this.routing}/${blogId}/posts/${postId}`)
+        .set('Authorization', 'Basic YWRtaW46cXdlcnR5')
+        .send(inputData)
+        .expect(expectStatus);
+    }
+
+    return request(this.application)
+      .put(`${this.routing}/${blogId}/posts/${postId}`)
+      .auth(accessToken, { type: 'bearer' })
+      .send(inputData)
+      .expect(expectStatus);
+  }
+
   checkBlogModel(
     responseModel:
       | BlogType
@@ -210,7 +252,7 @@ export class BlogsTestManager {
     expect(responseModel).toEqual(expectedResult);
   }
 
-  checkBlogData(responseData: any, expectedResult: any) {
+  assertBlogsMatch(responseData: any, expectedResult: any) {
     expect(responseData).toEqual(expectedResult);
   }
 
@@ -222,10 +264,19 @@ export class BlogsTestManager {
     return { blog: response.body };
   }
 
+  async getSABlogs(token: string, expectedStatus: number = HttpStatus.OK) {
+    const response = await request(this.application)
+      .get(`${this.routing}`)
+      .auth(token, { type: 'bearer' })
+      .expect(expectedStatus);
+
+    return response.body;
+  }
+
   async getPostsByBlogId(
     blogId: string,
     token: string | null,
-    status: LikeStatusType,
+    status: LikeStatusType = likesStatus.None,
     expectStatus: number = HttpStatus.OK,
   ) {
     const { body } = await request(this.application)
@@ -233,25 +284,29 @@ export class BlogsTestManager {
       .auth(token || 'any', { type: 'bearer' })
       .expect(expectStatus);
 
-    const postViewModel: PostViewModelType = body.items;
+    const postViewModel: PostViewModelType[] = body.items;
 
-    expect(postViewModel).toEqual([
-      {
-        id: expect.any(String),
-        title: expect.any(String),
-        shortDescription: expect.any(String),
-        content: expect.any(String),
-        blogId: expect.any(String),
-        blogName: expect.any(String),
-        createdAt: expect.any(String),
-        extendedLikesInfo: {
-          likesCount: expect.any(Number),
-          dislikesCount: expect.any(Number),
-          myStatus: status,
-          newestLikes: expect.any(Array),
-        },
-      } as PostViewModelType,
-    ]);
+    if (postViewModel.length) {
+      expect(postViewModel).toEqual([
+        {
+          id: expect.any(String),
+          title: expect.any(String),
+          shortDescription: expect.any(String),
+          content: expect.any(String),
+          blogId: expect.any(String),
+          blogName: expect.any(String),
+          createdAt: expect.any(String),
+          extendedLikesInfo: {
+            likesCount: expect.any(Number),
+            dislikesCount: expect.any(Number),
+            myStatus: status,
+            newestLikes: expect.any(Array),
+          },
+        } as PostViewModelType,
+      ]);
+    } else {
+      expect(postViewModel).toEqual([]);
+    }
   }
 
   async checkStatusOptionId(
@@ -333,5 +388,53 @@ export class BlogsTestManager {
           ? HttpStatus.OK
           : HttpStatus.NOT_FOUND,
       );
+  }
+
+  async deleteSAPost(
+    blogId: string,
+    postId: string,
+    accessToken: string,
+    expectedStatus: number = HttpStatus.NO_CONTENT,
+  ) {
+    const beforeDelete = await request(this.application)
+      .get(`${this.routing}/${blogId}/posts`)
+      .auth(accessToken, { type: 'bearer' });
+
+    const posts: PostViewModelType[] = beforeDelete.body.items;
+
+    if (posts) {
+      const post = posts.map((p: PostViewModelType) => p.id === postId);
+
+      expect(post).toBeDefined();
+
+      const result = await request(this.application)
+        .delete(`${this.routing}/${blogId}/posts/${postId}`)
+        .auth(accessToken, { type: 'bearer' })
+        .expect(expectedStatus);
+
+      const afterDelete = await this.application
+        .get(`${this.routing}/${blogId}/posts`)
+        .auth(accessToken, { type: 'bearer' });
+
+      const deletedPost = afterDelete.body.items;
+      const notFoundedPost = deletedPost.map(
+        (p: PostViewModelType) => p.id === postId,
+      );
+
+      expect(notFoundedPost).toBeUndefined();
+    }
+  }
+
+  async createBlogsForFurtherTests(accessToken: string) {
+    for (let i = 0; i < 9; i++) {
+      await this.createSABlog(
+        this.createInputData({
+          name: blogsData.philosophers[i],
+          description: blogsData.description[i + 1],
+          websiteUrl: blogsData.websiteUrl[i + 1],
+        }),
+        accessToken,
+      );
+    }
   }
 }

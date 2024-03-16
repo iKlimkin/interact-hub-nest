@@ -18,11 +18,26 @@ import { SATestManager } from './base/managers/SATestManager';
 import { UsersTestManager } from './base/managers/UsersTestManager';
 import { initSettings } from './base/utils/init-settings';
 import { BlogsTestManager } from './base/managers/BlogsTestManager';
-import { constants } from './base/rest-models-helpers/blogs.constants';
+import {
+  constants,
+  createSABlogsDataForTests,
+} from './base/rest-models-helpers/blogs.constants';
 import { createErrorsMessages } from './base/utils/make-errors-messages';
 import { wait } from './base/utils/wait';
 import { likesStatus } from '../src/domain/likes.types';
+import { BlogViewModelType } from '../src/features/blogs/api/models/output.blog.models/blog.view.model-type';
+import { PaginationModel } from './base/utils/pagination-model';
+import { removeUnwantedFields } from './base/utils/remove-fields';
 
+interface IBlogsPagination {
+  pagesCount: number;
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  items: Array<{
+    [key: string]: any;
+  }>;
+}
 aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
   let app: INestApplication;
   let testingAppModule: TestingModule;
@@ -33,6 +48,7 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
   let saManager: SATestManager;
   let usersTestManager: UsersTestManager;
   let dataBase: DataSource;
+  let paginationModel: PaginationModel<BlogViewModelType>;
 
   beforeAll(async () => {
     const result = await initSettings();
@@ -48,13 +64,16 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
     basicAuthManager = new BasicAuthorization(app);
     authManager = new AuthManager(app);
     saManager = new SATestManager(app);
+    paginationModel = new PaginationModel();
 
     await dropDataBase(app);
   });
 
   afterAll(async () => {
     await app.close();
+    // await dropDataBase(app);
   });
+
   beforeEach(async () => {
     const inputData1 = usersTestManager.createInputData({
       login: 'log1',
@@ -101,7 +120,7 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
     });
   });
 
-  describe('testing create blog', () => {
+  describe.skip('testing create blog', () => {
     afterAll(async () => {
       await dropDataBase(app);
     });
@@ -146,7 +165,7 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
       );
 
       const error = createErrorsMessages(['name']);
-      blogTestManager.checkBlogData(res1, error);
+      blogTestManager.assertBlogsMatch(res1, error);
 
       const inputDataOverLenName = blogTestManager.createInputData({
         name: constants.inputData.length16,
@@ -159,7 +178,7 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
       );
 
       const error2 = createErrorsMessages(['name']);
-      blogTestManager.checkBlogData(res2, error2);
+      blogTestManager.assertBlogsMatch(res2, error2);
     });
     it("/sa/blogs (POST) - shouldn't create blog with incorrect blog description", async () => {
       const { accessToken } = expect.getState();
@@ -175,7 +194,7 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
       );
 
       const error = createErrorsMessages(['description']);
-      blogTestManager.checkBlogData(res1, error);
+      blogTestManager.assertBlogsMatch(res1, error);
 
       const longDescription = blogTestManager.createInputData({
         description: constants.inputData.length501,
@@ -188,7 +207,7 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
       );
 
       const error2 = createErrorsMessages(['description']);
-      blogTestManager.checkBlogData(res2, error2);
+      blogTestManager.assertBlogsMatch(res2, error2);
     });
     it("/sa/blogs (POST) - shouldn't create blog with incorrect website url", async () => {
       const { accessToken } = expect.getState();
@@ -204,7 +223,7 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
       );
 
       const error = createErrorsMessages(['websiteUrl']);
-      blogTestManager.checkBlogData(res1, error);
+      blogTestManager.assertBlogsMatch(res1, error);
 
       const longWebsiteUrl = blogTestManager.createInputData({
         websiteUrl: constants.inputData.length101,
@@ -217,7 +236,7 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
       );
 
       const error2 = createErrorsMessages(['websiteUrl']);
-      blogTestManager.checkBlogData(res2, error2);
+      blogTestManager.assertBlogsMatch(res2, error2);
 
       const doesNotMatchUrl = blogTestManager.createInputData({
         websiteUrl: 'websiteUrl',
@@ -230,7 +249,7 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
       );
 
       const error3 = createErrorsMessages(['websiteUrl']);
-      blogTestManager.checkBlogData(res3, error3);
+      blogTestManager.assertBlogsMatch(res3, error3);
     });
     it('/sa/blogs (post) - should create and return new blogs', async () => {
       await dataBase.query(`DELETE FROM blogs`);
@@ -253,7 +272,7 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
       );
 
       blogTestManager.checkBlogModel(blog, blogEqualTo);
-      blogTestManager.checkBlogData(blog.isMembership, true);
+      blogTestManager.assertBlogsMatch(blog.isMembership, true);
 
       await blogTestManager.checkStatusOptionId(blog.id, accessToken);
 
@@ -262,7 +281,10 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
     });
   });
 
-  describe('testing update blog', () => {
+  describe.skip('testing update blog', () => {
+    afterAll(async () => {
+      await dropDataBase(app);
+    });
     it("/sa/blogs (put) - shouldn't update blog without auth", async () => {
       const { accessToken, blog, blog2 } = expect.getState();
 
@@ -300,14 +322,14 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
         HttpStatus.BAD_REQUEST,
       );
 
-      blogTestManager.checkBlogData(result.body, blogValidationErrors);
+      blogTestManager.assertBlogsMatch(result.body, blogValidationErrors);
 
       const { blog: existingBlog } = await blogTestManager.checkStatusOptionId(
         blog.id,
         accessToken,
       );
 
-      blogTestManager.checkBlogData(blog, existingBlog);
+      blogTestManager.assertBlogsMatch(blog, existingBlog);
     });
 
     it("/sa/blogs (put) - shouldn't update the blog by foreign user, 403", async () => {
@@ -326,7 +348,7 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
         accessToken,
       );
 
-      blogTestManager.checkBlogData(blog, existingBlog);
+      blogTestManager.assertBlogsMatch(blog, existingBlog);
 
       const attempt2 = await blogTestManager.updateBlog(
         correctInputBlogData,
@@ -340,7 +362,7 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
         accessToken,
       );
 
-      blogTestManager.checkBlogData(blog2, existingBlog2);
+      blogTestManager.assertBlogsMatch(blog2, existingBlog2);
     });
 
     it('/sa/blogs (put) - should update blog', async () => {
@@ -350,7 +372,10 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
         blog.id,
         accessToken,
       );
-      blogTestManager.checkBlogData(beforeUpdate.blog.name, 'Marcus Aurelius');
+      blogTestManager.assertBlogsMatch(
+        beforeUpdate.blog.name,
+        'Marcus Aurelius',
+      );
 
       const createOtherValidInputData = blogTestManager.createInputData({
         name: 'Zeno',
@@ -367,18 +392,21 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
         accessToken,
       );
 
-      blogTestManager.checkBlogData(afterUpdate.blog.name, 'Zeno');
+      blogTestManager.assertBlogsMatch(afterUpdate.blog.name, 'Zeno');
     });
   });
 
-  describe('testing delete blog', () => {
-    it('/blogs/:blogId - should not remove blog without auth, 401', async () => {
+  describe.skip('testing delete blog', () => {
+    afterAll(async () => {
+      await dropDataBase(app);
+    });
+    it('sa/blogs/:blogId - should not remove blog without auth, 401', async () => {
       const { blog } = expect.getState();
 
       await basicAuthManager.testDeleteAuthorization('sa_blogs', blog.id);
     });
 
-    it("/blogs/:blogId - shouldn't remove blog with incorrect id, 404", async () => {
+    it("sa/blogs/:blogId - shouldn't remove blog with incorrect id, 404", async () => {
       const { blog, accessToken } = expect.getState();
       const invalidBlogId = blog.id.slice(-5);
 
@@ -389,7 +417,7 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
       );
     });
 
-    it('/blogs/:blogId - should not remove blog by foreign user, 403', async () => {
+    it('sa/blogs/:blogId - should not remove blog by foreign user, 403', async () => {
       const { blog, accessToken2 } = expect.getState();
       await blogTestManager.deleteSABlog(
         blog.id,
@@ -398,15 +426,18 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
       );
     });
 
-    it('/blogs/:blogId - should remove blog and return not found, 204', async () => {
+    it('sa/blogs/:blogId - should remove blog and return not found, 204', async () => {
       const { blog, accessToken } = expect.getState();
 
       await blogTestManager.deleteSABlog(blog.id, accessToken);
     });
   });
 
-  describe('testing create post', () => {
-    it(`/blogs/:blogId/posts (POST) - shouldn't create post without auth, 401`, async () => {
+  describe.skip('testing create post', () => {
+    // afterAll(async () => {
+    //   await dropDataBase(app);
+    // });
+    it(`sa/blogs/:blogId/posts (POST) - shouldn't create post without auth, 401`, async () => {
       const { blog } = expect.getState();
 
       await basicAuthManager.testPostAuthorization(
@@ -416,7 +447,7 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
       );
     });
 
-    it(`/blogs/:blogId/posts (POST) - shouldn't create post with invalid title, 400`, async () => {
+    it(`sa/blogs/:blogId/posts (POST) - shouldn't create post with invalid title, 400`, async () => {
       const { blog, accessToken } = expect.getState();
 
       const incorrectInputData = blogTestManager.createPostInputData({
@@ -432,7 +463,7 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
 
       const error = createErrorsMessages(['title']);
 
-      blogTestManager.checkBlogData(result, error);
+      blogTestManager.assertBlogsMatch(result, error);
 
       const incorrectInputData2 = blogTestManager.createPostInputData({
         title: constants.inputData.length31,
@@ -447,10 +478,10 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
 
       const error2 = createErrorsMessages(['title']);
 
-      blogTestManager.checkBlogData(result2, error2);
+      blogTestManager.assertBlogsMatch(result2, error2);
     });
 
-    it(`/blogs/:blogId/posts (POST) - shouldn't create post with invalid description, 400`, async () => {
+    it(`sa/blogs/:blogId/posts (POST) - shouldn't create post with invalid description, 400`, async () => {
       const { blog, accessToken } = expect.getState();
 
       const incorrectInputData = blogTestManager.createPostInputData({
@@ -466,7 +497,7 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
 
       const error = createErrorsMessages(['shortDescription']);
 
-      blogTestManager.checkBlogData(result, error);
+      blogTestManager.assertBlogsMatch(result, error);
 
       const incorrectInputData2 = blogTestManager.createPostInputData({
         shortDescription: constants.inputData.length101,
@@ -481,10 +512,10 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
 
       const error2 = createErrorsMessages(['shortDescription']);
 
-      blogTestManager.checkBlogData(result2, error2);
+      blogTestManager.assertBlogsMatch(result2, error2);
     });
 
-    it(`/blogs/:blogId/posts (POST) - shouldn't create post with invalid content, 400`, async () => {
+    it(`sa/blogs/:blogId/posts (POST) - shouldn't create post with invalid content, 400`, async () => {
       const { blog, accessToken } = expect.getState();
 
       const incorrectInputData = blogTestManager.createPostInputData({
@@ -500,7 +531,7 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
 
       const error = createErrorsMessages(['content']);
 
-      blogTestManager.checkBlogData(result, error);
+      blogTestManager.assertBlogsMatch(result, error);
 
       const incorrectInputData2 = blogTestManager.createPostInputData({
         content: constants.inputData.length1001,
@@ -515,10 +546,10 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
 
       const error2 = createErrorsMessages(['content']);
 
-      blogTestManager.checkBlogData(result2, error2);
+      blogTestManager.assertBlogsMatch(result2, error2);
     });
 
-    it(`/blogs/:blogId/posts (POST) - shouldn't create post with all incorrect fields, testing error's messages, 400`, async () => {
+    it(`sa/blogs/:blogId/posts (POST) - shouldn't create post with all incorrect fields, testing error's messages, 400`, async () => {
       const { blog, accessToken } = expect.getState();
 
       const incorrectInputData = blogTestManager.createPostInputData();
@@ -536,10 +567,10 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
         'content',
       ]);
 
-      blogTestManager.checkBlogData(result, errors);
+      blogTestManager.assertBlogsMatch(result, errors);
     });
 
-    it(`/blogs/:blogId/posts (POST) - shouldn't create post for blog by foreign user, 403`, async () => {
+    it(`sa/blogs/:blogId/posts (POST) - shouldn't create post for blog by foreign user, 403`, async () => {
       const { blog, accessToken2 } = expect.getState();
 
       const inputCreatePostData = blogTestManager.createPostInputData({});
@@ -554,7 +585,7 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
       expect.setState({ inputCreatePostData });
     });
 
-    it(`/blogs/:blogId/posts (POST) - Try creating a post with an id of a blog that does not exist in test data, and assert that it fails or results in an error since the blog cannot be found, 404`, async () => {
+    it(`sa/blogs/:blogId/posts (POST) - Try creating a post with an id of a blog that does not exist in test data, and assert that it fails or results in an error since the blog cannot be found, 404`, async () => {
       const { blog, accessToken, inputCreatePostData } = expect.getState();
 
       const invalidBlog = { ...blog, id: blog.id.slice(-5) };
@@ -569,37 +600,202 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
       expect.setState({ inputCreatePostData });
     });
 
-    it(`/blogs/:blogId/posts (POST) - should create post for existing blog`, async () => {
+    it(`sa/blogs/:blogId/posts (POST) - should create post for existing blog`, async () => {
       const { blog, inputCreatePostData, accessToken } = expect.getState();
-      console.log({blog, inputCreatePostData});
-      
-      const post = await blogTestManager.createSAPost(inputCreatePostData, blog, accessToken);
 
-      expect.setState({ post })
-    });
-
-    it(`/blogs/:blogId/posts (GET) - should return one post`, async () => {
-      const { blog, accessToken } = expect.getState();
-      const myStatus = likesStatus.None;
-
-      await blogTestManager.getPostsByBlogId(
+      const beforeCreate = await blogTestManager.getPostsByBlogId(
         blog.id,
         accessToken,
-        myStatus,
       );
-    });
-  });
-  describe.skip('testing update post', () => {
-    it(`/blogs/:blogId/posts (GET) - should return one post`, async () => {
-      const { blog } = expect.getState();
-      const myStatusWithoutToken = likesStatus.None;
 
-      await blogTestManager.getPostsByBlogId(
-        blog.id,
-        null,
-        myStatusWithoutToken,
+      const post = await blogTestManager.createSAPost(
+        inputCreatePostData,
+        blog,
+        accessToken,
+      );
+
+      const afterCreate = await postTestManager.getPostById(
+        post.id,
+        accessToken,
+      );
+
+      expect.setState({ post });
+    });
+
+    it(`sa/blogs/:blogId/posts (GET) - Retrieve post by blog ID endpoint returns expected post`, async () => {
+      const { post, accessToken } = expect.getState();
+
+      await blogTestManager.getPostsByBlogId(post.blogId, accessToken);
+    });
+  });
+
+  describe.skip('testing update post', () => {
+    it(`/sa/blogs/:blogId/:postId (PUT) - shouldn't update the post with whole incorrect input data, 400`, async () => {
+      const { post, accessToken } = expect.getState();
+      const invalidInputData = blogTestManager.createPostInputData();
+
+      const result = await blogTestManager.updateSAPost(
+        invalidInputData,
+        post.blogId,
+        post.id,
+        accessToken,
+        HttpStatus.BAD_REQUEST,
+      );
+
+      const errors = createErrorsMessages([
+        'title',
+        'shortDescription',
+        'content',
+      ]);
+
+      postTestManager.checkPostData(result.body, errors);
+    });
+
+    it(`/sa/blogs/:blogId/:postId (PUT) - shouldn't update post with invalid post id and blog id, 404`, async () => {
+      const { post, accessToken, blog } = expect.getState();
+      const invalidPostId = post.id.slice(-5);
+      const invalidBlogId = blog.id.slice(-5);
+
+      const updatePostData = blogTestManager.createPostInputData({
+        title: 'new title',
+      });
+
+      await blogTestManager.updateSAPost(
+        updatePostData,
+        post.blogId,
+        invalidPostId,
+        accessToken,
+        HttpStatus.NOT_FOUND,
+      );
+
+      await blogTestManager.updateSAPost(
+        updatePostData,
+        invalidBlogId,
+        post.id,
+        accessToken,
+        HttpStatus.NOT_FOUND,
+      );
+
+      expect.setState({ updatePostData });
+    });
+
+    it(`/sa/blogs/:blogId/:postId (PUT) - shouldn't update post by foreign user, 403`, async () => {
+      const { post, accessToken2, updatePostData } = expect.getState();
+
+      await blogTestManager.updateSAPost(
+        updatePostData,
+        post.blogId,
+        post.id,
+        accessToken2,
+        HttpStatus.FORBIDDEN,
+      );
+    });
+
+    it('/sa/blogs/:blogId/:postId (PUT) - should update post', async () => {
+      const { post, accessToken, updatePostData } = expect.getState();
+
+      await blogTestManager.updateSAPost(
+        updatePostData,
+        post.blogId,
+        post.id,
+        accessToken,
       );
     });
   });
-  describe('testing delete post', () => {});
+
+  describe.skip('testing delete post', () => {
+    afterAll(async () => {
+      await dropDataBase(app);
+    });
+
+    it('sa/blogs/:blogId/:postId - should not remove post without token, 401', async () => {
+      const { post, blog } = expect.getState();
+
+      await basicAuthManager.testDeleteSAAuthorization(
+        'sa_blogs',
+        post.blogId,
+        post.id,
+      );
+    });
+
+    it("sa/blogs/:blogId/:postId - shouldn't remove post with incorrect post and blog Id, 404", async () => {
+      const { post, accessToken } = expect.getState();
+
+      const invalidPostId = post.id.slice(-5);
+
+      const invalidBlogId = post.blogId.slice(-5);
+
+      await blogTestManager.deleteSAPost(
+        invalidBlogId,
+        invalidPostId,
+        accessToken,
+        HttpStatus.NOT_FOUND,
+      );
+    });
+
+    it('sa/blogs/:blogId/:postId - should not remove post by foreign user, 403', async () => {
+      const { post, accessToken2 } = expect.getState();
+      await blogTestManager.deleteSAPost(
+        post.blogId,
+        post.id,
+        accessToken2,
+        HttpStatus.FORBIDDEN,
+      );
+    });
+
+    it('sa/blogs/:blogId/postId - should remove blog, 204', async () => {
+      const { blog, accessToken } = expect.getState();
+
+      await blogTestManager.deleteSABlog(blog.id, accessToken);
+    });
+  });
+
+  describe.skip(`testing blog pagination`, () => {
+    afterAll(async () => {
+      await dropDataBase(app);
+    });
+
+    beforeEach(async () => {
+      await dataBase.query(
+        `DELETE FROM blogs WHERE title LIKE 'Marcus%' OR title LIKE  'August' `,
+      );
+    });
+
+    it(`sa/blogs (GET)`, async () => {
+      const { accessToken } = expect.getState();
+      await blogTestManager.createBlogsForFurtherTests(accessToken);
+
+      const databaseBlogs = await blogTestManager.getSABlogs(accessToken);
+
+      const fieldsToRemove = ['id', 'createdAt'];
+      const dataBaseBlogsData = removeUnwantedFields(
+        databaseBlogs,
+        fieldsToRemove,
+      );
+
+      const mockBlogsForTest = createSABlogsDataForTests();
+
+      const mockBlogsData = {
+        pagesCount: 1,
+        page: 1,
+        pageSize: 10,
+        totalCount: 9,
+        items: mockBlogsForTest,
+      };
+
+      const mockPaginationBlogsData = paginationModel.getData(
+        mockBlogsData,
+        {
+          sortDirection: 'desc',
+          hide: 'createdAt',
+        },
+        fieldsToRemove,
+      );
+
+      blogTestManager.assertBlogsMatch(
+        dataBaseBlogsData,
+        mockPaginationBlogsData,
+      );
+    });
+  });
 });

@@ -18,7 +18,7 @@ export class SetUserIdGuard implements CanActivate {
         });
         request.userId = userPayload.userId;
       } catch (error) {
-        console.error(`invalid accessToken ${error}`);
+        // console.error(`invalid accessToken ${error}`);
         return true;
       }
     }
@@ -28,6 +28,6 @@ export class SetUserIdGuard implements CanActivate {
 
   private extractTokenFromHeaders(request: Request): string | null {
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : null;
+    return (type && type === 'Bearer') ? token : null;
   }
 }

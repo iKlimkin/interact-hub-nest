@@ -58,6 +58,16 @@ export class FeedbacksSqlController {
     return comment;
   }
 
+  @Get()
+  @UseGuards(SetUserIdGuard)
+  @HttpCode(HttpStatus.OK)
+  async getComments(
+    @Query() query: CommentsQueryFilter,
+    @CurrentUserId() userId: string,
+  ): Promise<PaginationViewModel<CommentsViewModel>> {
+    return this.feedbacksQuerySqlRepo.getComments(query, userId);
+  }
+
   @Get('user/test')
   @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.OK)
