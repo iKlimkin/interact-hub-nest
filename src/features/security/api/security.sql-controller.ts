@@ -21,12 +21,14 @@ import { SecurityInterface } from './models/security-input.models/security.inter
 import { SecurityViewDeviceModel } from './models/security.view.models/security.view.types';
 import { ApiRequestCounterSQLRepository } from '../../../infra/logging/infra/api-request-counter.sql-repository';
 import { SecuritySqlQueryRepo } from './query-repositories/security.query.sql-repo';
+import { SecurityTORQueryRepo } from './query-repositories/security.query.tor-repo';
 
 @Controller('security/devices')
 @UseGuards(RefreshTokenGuard)
 export class SecuritySqlController implements SecurityInterface {
   constructor(
     private securitySqlQueryRepo: SecuritySqlQueryRepo,
+    private securityRepo: SecurityTORQueryRepo,
     private apiRequestCounterSqlRepository: ApiRequestCounterSQLRepository,
     private commandBus: CommandBus,
   ) {}
@@ -37,7 +39,7 @@ export class SecuritySqlController implements SecurityInterface {
   ): Promise<SecurityViewDeviceModel[]> {
     const { userId } = userInfo;
 
-    const securityData = await this.securitySqlQueryRepo.getUserActiveSessions(
+    const securityData = await this.securityRepo.getUserActiveSessions(
       userId,
     );
 
@@ -61,7 +63,7 @@ export class SecuritySqlController implements SecurityInterface {
     @Param('id', ObjectIdPipe) deviceId: string,
     @CurrentUserInfo() userInfo: UserInfoType,
   ) {
-    const sessionExistence = await this.securitySqlQueryRepo.getUserSession(
+    const sessionExistence = await this.securityRepo.getUserSession(
       deviceId,
     );
 
@@ -69,7 +71,7 @@ export class SecuritySqlController implements SecurityInterface {
       throw new NotFoundException('Session not found');
     }
 
-    const sessions = await this.securitySqlQueryRepo.getUserActiveSessions(
+    const sessions = await this.securityRepo.getUserActiveSessions(
       userInfo.userId,
     );
 

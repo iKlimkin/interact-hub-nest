@@ -25,7 +25,7 @@ export class SecurityTORQueryRepo {
           userAccount: { id: userId },
         },
       });
-
+      
       if (!sessions) return null;
 
       return sessions.map(getTORSessionViewModel);
