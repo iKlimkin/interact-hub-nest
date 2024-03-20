@@ -9,19 +9,19 @@ import {
 
 export class InputRegistrationModel {
   /**
-   * login of the registr user account
+   * login of the registered user account
    */
   @iSValidField(loginLength, loginMatch)
   login: string;
 
   /**
-   * password of the registr user account.
+   * password of the registered user account.
    */
   @iSValidField(passwordLength)
   password: string;
 
   /**
-   * email of the registr user account.
+   * email of the registered user account.
    */
   @iSValidField(frequentLength, emailMatches)
   email: string;

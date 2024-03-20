@@ -5,6 +5,7 @@ import { UserIdType } from '../../../admin/api/models/outputSA.models.ts/user-mo
 import { AuthUsersSqlRepository } from '../../infrastructure/auth-users.sql-repository';
 import { CheckCredentialsSQLCommand } from './commands/check-credentials-sql.command';
 import { CheckCredentialsCommand } from './commands/check-credentials.command';
+import { AuthUsersTORRepository } from '../../infrastructure/auth-users.tor-repository';
 
 @CommandHandler(CheckCredentialsSQLCommand)
 export class CheckCredentialsSQLUseCase
@@ -12,6 +13,7 @@ export class CheckCredentialsSQLUseCase
 {
   constructor(
     private authUsersSqlRepository: AuthUsersSqlRepository,
+    private authRepo: AuthUsersTORRepository,
     private bcryptAdapter: BcryptAdapter,
   ) {}
 
@@ -20,21 +22,21 @@ export class CheckCredentialsSQLUseCase
   ): Promise<UserIdType | null> {
     await validateOrRejectModel(command, CheckCredentialsSQLCommand);
 
-    const user = await this.authUsersSqlRepository.findByLoginOrEmail({
+    const userAccount = await this.authRepo.findByLoginOrEmail({
       loginOrEmail: command.inputData.loginOrEmail,
     });
 
-    if (!user) return null;
+    if (!userAccount) return null;
 
     const validPassword = await this.bcryptAdapter.compareAsync(
       command.inputData.password,
-      user.password_hash,
+      userAccount.password_hash,
     );
 
     if (!validPassword) return null;
 
     return {
-      userId: user.id,
+      userId: userAccount.id,
     };
   }
 }

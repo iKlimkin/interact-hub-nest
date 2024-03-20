@@ -21,7 +21,7 @@ export class PostsSqlRepository {
         VALUES ($1, $2, $3, $4, $5)
         RETURNING id
       `;
-
+      
       const result = await this.dataSource.query(
         createQuery,
         Object.values(postDto.createPostDto),

@@ -1,4 +1,4 @@
-import { SuperAdminsController } from '../../../admin/api/controllers/super-admin.controller';
+import { SuperAdminsController } from '../../../admin/api/controllers/sa.controller';
 import { SASqlController } from '../../../admin/api/controllers/sa.sql.controller';
 import { SecurityController } from '../../../security/api/security.controller';
 import { SecuritySqlController } from '../../../security/api/security.sql-controller';
@@ -11,7 +11,7 @@ export const authControllers = [
   SecurityController,
 ];
 
-export const authSqlControllers = [
+export const usersSqlControllers = [
   AuthSQLController,
   SASqlController,
   SecuritySqlController,

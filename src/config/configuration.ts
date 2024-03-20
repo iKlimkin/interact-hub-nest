@@ -1,6 +1,9 @@
 import { getMongoConnection, getEnv } from './env-configurations';
 
-export const getEnvConfiguration = () => ({
+const getConfig = (
+  environmentVariables: EnvironmentVariable,
+  currentEnvironment: Environments,
+) => ({
   Port: parseInt(process.env.PORT ?? '5000'),
   jwtSetting: {
     ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,
@@ -29,18 +32,29 @@ export const getEnvConfiguration = () => ({
   getEnv: getEnv(),
 });
 
-export type ConfigurationType = ReturnType<typeof getEnvConfiguration>;
+export type ConfigurationType = ReturnType<typeof getConfig>;
 
-export type EnvironmentsTypes =
-  | 'DEVELOPMENT'
-  | 'STAGING'
-  | 'PRODUCTION'
-  | 'TESTING';
-
-export const Environments = ['DEVELOPMENT', 'STAGING', 'PRODUCTION', 'TESTING'];
+export enum Environments {
+  DEVELOPMENT = 'DEVELOPMENT',
+  STAGING = 'STAGING',
+  PRODUCTION = 'PRODUCTION',
+  TESTING = 'TESTING',
+}
+export type EnvironmentVariable = { [key: string]: string | undefined };
+export type EnvironmentTypes = keyof typeof Environments;
 
 export type ConfigType = ConfigurationType & {
   MONGO_URI: string;
   MONGO_URI2: string;
   NODE_ENV: 'production' | 'development' | 'stage';
+};
+
+export default () => {
+  const environmentVariables = process.env;
+
+  console.log('process.env.ENV =', environmentVariables.ENV);
+  const currentEnvironment: Environments =
+    environmentVariables.ENV as Environments;
+
+  return getConfig(environmentVariables, currentEnvironment);
 };

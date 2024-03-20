@@ -1,21 +1,12 @@
-import {
-  Entity,
-  OneToOne,
-  JoinColumn,
-  Column,
-  IntegerType,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { Comments } from './comments.entity';
+import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { BaseEntity } from '../../../../domain/base-entity';
+import type { Comment } from './comment.entity';
 
 @Entity()
-export class CommentReactionCounts {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @OneToOne(() => Comments)
-  @JoinColumn()
-  comment: Comments;
+export class CommentReactionCounts extends BaseEntity {
+  @OneToOne('Comment', { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'comment_id' })
+  comment: Comment;
 
   @Column({ type: 'integer' })
   likes_count: number;

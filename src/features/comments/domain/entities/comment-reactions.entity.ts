@@ -1,18 +1,19 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { UserAccounts } from '../../../admin/domain/entities/user-account.entity';
-import { Comments } from './comments.entity';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { BaseEntity } from '../../../../domain/base-entity';
+import { likesStatus } from '../../../../domain/likes.types';
+import { UserAccount } from '../../../admin/domain/entities/user-account.entity';
+import { Comment } from './comment.entity';
 
 @Entity()
-export class CommentReactions {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+export class CommentReaction extends BaseEntity {
+  @Column()
+  reaction_type: likesStatus;
 
-  @ManyToOne(() => Comments, (c) => c.commentReactions)
-  comment: Comments;
+  @ManyToOne('Comment', 'commentReactions', { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'comment_id' })
+  comment: Comment;
 
-  @ManyToOne(() => UserAccounts, (ua) => ua.commentReactions)
-  userAccount: UserAccounts;
-
-  @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
-  liked_at: Date;
+  @ManyToOne('UserAccount', 'commentReactions')
+  @JoinColumn({ name: 'user_id' })
+  userAccount: UserAccount;
 }

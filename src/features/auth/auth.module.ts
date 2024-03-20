@@ -12,7 +12,7 @@ import { SecurityService } from '../security/application/security.service';
 import { AuthService } from './application/auth.service';
 import {
   authControllers,
-  authSqlControllers,
+  usersSqlControllers,
 } from './infrastructure/settings/auth-controllers';
 import {
   Strategies,
@@ -30,7 +30,11 @@ import {
 import { mongooseModels } from './infrastructure/settings/mongoose-models';
 import { UsersSqlQueryRepository } from '../admin/api/query-repositories/users.query.sql-repo';
 import { UsersSQLRepository } from '../admin/infrastructure/users.sql-repository';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserAccount } from '../admin/domain/entities/user-account.entity';
+import { UserSession } from '../security/domain/entities/security.entity';
 import { SecuritySqlQueryRepo } from '../security/api/query-repositories/security.query.sql-repo';
+import { TemporaryUserAccount } from './domain/entities/temp-account.entity';
 
 @Module({
   imports: [
@@ -45,6 +49,7 @@ import { SecuritySqlQueryRepo } from '../security/api/query-repositories/securit
         limit: 50,
       },
     ]),
+    TypeOrmModule.forFeature([UserAccount, UserSession, TemporaryUserAccount]),
   ],
 
   providers: [
@@ -66,7 +71,7 @@ import { SecuritySqlQueryRepo } from '../security/api/query-repositories/securit
     ...authSQLUseCases,
   ],
   controllers:
-    process.env.MAIN_DB === 'MONGO' ? authControllers : authSqlControllers,
+    process.env.MAIN_DB === 'MONGO' ? authControllers : usersSqlControllers,
   exports: [
     JwtModule,
     BcryptAdapter,

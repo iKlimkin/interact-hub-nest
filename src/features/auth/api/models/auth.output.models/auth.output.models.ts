@@ -15,7 +15,7 @@ export type UserProfileType = Pick<UserType, 'login' | 'email'> & {
 
 export type UserRecoveryType = {
   recoveryCode: string;
-  expirationDate: string;
+  expirationDate: Date;
 };
 
 export type UserAccountDBType = WithId<UserAccountType>;

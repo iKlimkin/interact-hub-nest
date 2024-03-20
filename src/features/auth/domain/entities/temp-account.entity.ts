@@ -1,10 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity } from 'typeorm';
+import { BaseEntity } from '../../../../domain/base-entity';
 
 @Entity()
-export class TemporaryUserAccount {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class TemporaryUserAccount extends BaseEntity {
   @Column()
   email: string;
 
@@ -12,8 +10,5 @@ export class TemporaryUserAccount {
   recovery_code: string;
 
   @Column()
-  code_expiration_time: string;
-
-  @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
-  created_at: Date;
+  code_expiration_time: Date;
 }

@@ -5,6 +5,7 @@ import { AuthUsersSqlRepository } from '../../infrastructure/auth-users.sql-repo
 import { CreateTemporaryAccountSqlCommand } from './commands/create-temp-account-sql.command';
 import { SendRecoveryMsgCommand } from './commands/send-recovery-msg.command';
 import { createRecoveryCode } from './helpers/create-recovery-message.helper';
+import { AuthUsersTORRepository } from '../../infrastructure/auth-users.tor-repository';
 
 @CommandHandler(CreateTemporaryAccountSqlCommand)
 export class CreateTemporaryAccountSqlUseCase
@@ -12,6 +13,7 @@ export class CreateTemporaryAccountSqlUseCase
 {
   constructor(
     private authUsersSqlRepository: AuthUsersSqlRepository,
+    private authUsersRepo: AuthUsersTORRepository,
     private commandBus: CommandBus,
   ) {}
 
@@ -21,7 +23,7 @@ export class CreateTemporaryAccountSqlUseCase
     const { email } = command.inputData;
 
     const temporaryUserAccount =
-      await this.authUsersSqlRepository.createTemporaryUserAccount(
+      await this.authUsersRepo.createTemporaryUserAccount(
         recoveryPassInfo,
         email,
       );

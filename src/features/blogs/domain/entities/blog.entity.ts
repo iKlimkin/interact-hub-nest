@@ -1,18 +1,10 @@
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { UserAccounts } from '../../../admin/domain/entities/user-account.entity';
-import { Posts } from '../../../posts/domain/entities/post.entity';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import type { UserAccount } from '../../../admin/domain/entities/user-account.entity';
+import type { Post } from '../../../posts/domain/entities/post.entity';
+import { BaseEntity } from '../../../../domain/base-entity';
 
 @Entity()
-export class Blogs {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class Blog extends BaseEntity {
   @Column()
   title: string;
 
@@ -22,15 +14,13 @@ export class Blogs {
   @Column()
   website_url: string;
 
-  @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
-  created_at: Date;
-
   @Column()
   is_membership: Boolean;
 
-  @ManyToOne(() => UserAccounts, (u) => u.blogs)
-  userAccount: UserAccounts;
+  @ManyToOne('UserAccount', 'blogs')
+  @JoinColumn({ name: 'user_id' })
+  userAccount: UserAccount;
 
-  @OneToMany(() => Posts, (p) => p.blog)
-  posts: Posts[];
+  @OneToMany('Post', 'blog')
+  posts: Post[];
 }

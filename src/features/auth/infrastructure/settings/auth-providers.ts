@@ -13,7 +13,7 @@ import { AdminUserService } from '../../../admin/application/user.admins.service
 import { UsersRepository } from '../../../admin/infrastructure/users.repository';
 import { UsersSQLRepository } from '../../../admin/infrastructure/users.sql-repository';
 import { SecurityQueryRepo } from '../../../security/api/query-repositories/security.query.repo';
-import { SecuritySqlQueryRepo } from '../../../security/api/query-repositories/security.query.sql-repo';
+import { SecurityTORQueryRepo } from '../../../security/api/query-repositories/security.query.tor-repo';
 import { SecurityService } from '../../../security/application/security.service';
 import { CreateUserSessionSQLUseCase } from '../../../security/application/use-cases/create-user-session-sql.use-case';
 import { DeleteActiveSessionSqlUseCase } from '../../../security/application/use-cases/delete-active-session-sql.use-case';
@@ -54,12 +54,21 @@ import {
   RefreshTokenStrategy,
 } from '../guards/strategies/jwt-strategy';
 import { LocalStrategy } from '../guards/strategies/local-strategy';
+import { UsersQueryRepo } from '../../../admin/infrastructure/users.query.typeorm-repo';
+import { LoggerService } from '../../../../infra/logging/application/logger.service';
+import { SecurityTORRepository } from '../../../security/infrastructure/security.tor-repository';
+import { UserAccountsRepo } from '../../../admin/infrastructure/users.typeorm-repo';
+import { AuthUsersTORRepository } from '../auth-users.tor-repository';
+import { SecuritySqlQueryRepo } from '../../../security/api/query-repositories/security.query.sql-repo';
+import { AuthQueryTORRepository } from '../../api/query-repositories/auth-query.tor-repo';
 
 export const userAccountProviders: Provider[] = [
   AuthUsersRepository,
   AuthQueryRepository,
   AuthUsersSqlRepository,
   AuthQuerySqlRepository,
+  AuthQueryTORRepository,
+  AuthUsersTORRepository,
 ];
 
 export const usersProviders: Provider[] = [
@@ -68,6 +77,8 @@ export const usersProviders: Provider[] = [
   UsersRepository,
   UsersSQLRepository,
   UsersSqlQueryRepository,
+  UsersQueryRepo,
+  UserAccountsRepo,
 ];
 
 export const Strategies: Provider[] = [
@@ -89,6 +100,8 @@ export const securitiesProviders: Provider[] = [
   SecurityQueryRepo,
   SecuritySqlRepository,
   SecuritySqlQueryRepo,
+  SecurityTORRepository,
+  SecurityTORQueryRepo,
 ];
 
 export const authUseCases: Provider[] = [
@@ -135,4 +148,9 @@ export const authEventHandlers: Provider[] = [
   CreateUserAccountEventHandler,
 ];
 
-export const adapters: Provider[] = [BcryptAdapter, EmailManager, EmailAdapter];
+export const adapters: Provider[] = [
+  BcryptAdapter,
+  EmailManager,
+  EmailAdapter,
+  LoggerService,
+];

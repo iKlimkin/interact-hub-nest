@@ -1,22 +1,11 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { Blogs } from '../../../blogs/domain/entities/blog.entity';
-import { Comments } from '../../../comments/domain/entities/comments.entity';
-import { PostReactions } from './post-reactions.entity';
-import { PostReactionCounts } from './post-reaction-counts.entity';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import type { Blog } from '../../../blogs/domain/entities/blog.entity';
+import type { PostReaction } from './post-reactions.entity';
+import type { Comment } from '../../../comments/domain/entities/comment.entity';
+import { BaseEntity } from '../../../../domain/base-entity';
 
 @Entity()
-export class Posts {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class Post extends BaseEntity {
   @Column()
   title: string;
 
@@ -24,26 +13,18 @@ export class Posts {
   short_description: string;
 
   @Column()
-  website_url: string;
+  blog_title: string;
 
   @Column()
   content: string;
 
-  @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
-  created_at: Date;
+  @ManyToOne('Blog', 'posts')
+  @JoinColumn({ name: 'blog_id' })
+  blog: Blog;
 
-  @ManyToOne(() => Blogs, (b) => b.posts)
-  @JoinColumn()
-  blog: Blogs;
+  @OneToMany('Comment', 'post')
+  comments: Comment[];
 
-  @OneToMany(() => Comments, (c) => c.post)
-  comments: Comments[];
-
-  @OneToMany(() => PostReactions, (pr) => pr.post)
-  @JoinColumn()
-  postReactions: PostReactions[];
-
-  @OneToOne(() => PostReactionCounts)
-  @JoinColumn()
-  postReactionCounts: PostReactionCounts;
+  @OneToMany('PostReaction', 'post')
+  postReactions: PostReaction[];
 }

@@ -3,7 +3,6 @@ import { AppService } from './app.service';
 import { ConfigService } from '@nestjs/config';
 import { ConfigType } from './config/configuration';
 import { AuthConfigurationType } from './config/env-configurations';
-import { Wallet } from './features/admin/domain/entities/user-account.entity';
 
 @Controller('users')
 export class AppController {

@@ -19,8 +19,8 @@ import { DeleteActiveSessionSqlCommand } from '../application/use-cases/commands
 import { DeleteOtherUserSessionsSqlCommand } from '../application/use-cases/commands/delete-other-user-sessions-sql.command';
 import { SecurityInterface } from './models/security-input.models/security.interface';
 import { SecurityViewDeviceModel } from './models/security.view.models/security.view.types';
-import { SecuritySqlQueryRepo } from './query-repositories/security.query.sql-repo';
 import { ApiRequestCounterSQLRepository } from '../../../infra/logging/infra/api-request-counter.sql-repository';
+import { SecuritySqlQueryRepo } from './query-repositories/security.query.sql-repo';
 
 @Controller('security/devices')
 @UseGuards(RefreshTokenGuard)

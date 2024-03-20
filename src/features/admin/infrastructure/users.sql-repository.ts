@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { CreateUserResultData } from '../application/user.admins.service';
 import {
-  UsersSQLDto,
   UsersResponseModel,
+  UsersSQLDto,
 } from '../../auth/api/models/auth.output.models/auth-sql.output.models';
+import { CreateUserResultData } from '../application/user.admins.service';
 
 @Injectable()
 export class UsersSQLRepository {
@@ -63,14 +63,16 @@ export class UsersSQLRepository {
       DELETE FROM user_sessions
       WHERE user_id = $1
     `;
-    await this.dataSource.query(deleteSessionsQuery, [userId]);
+      await this.dataSource.query(deleteSessionsQuery, [userId]);
 
-    const deleteUserAccountsQuery = `
+      const deleteUserAccountsQuery = `
       DELETE FROM user_accounts
       WHERE id = $1
     `;
 
-    const result = await this.dataSource.query(deleteUserAccountsQuery, [userId]);
+      const result = await this.dataSource.query(deleteUserAccountsQuery, [
+        userId,
+      ]);
 
       return result[1] > 0;
     } catch (error) {

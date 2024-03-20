@@ -25,12 +25,15 @@ import { InputUserModel } from '../models/create-user.model';
 import { SAQueryFilter } from '../models/outputSA.models.ts/users-admin-query.filter';
 import { SAViewModel } from '../models/userAdmin.view.models/userAdmin.view.model';
 import { UsersSqlQueryRepository } from '../query-repositories/users.query.sql-repo';
+import { UsersQueryRepo } from '../../infrastructure/users.query.typeorm-repo';
+import { LoggerService } from '../../../../infra/logging/application/logger.service';
 
 @UseGuards(BasicSAAuthGuard)
 @Controller('sa/users')
 export class SASqlController {
   constructor(
-    private usersSQLQueryRepository: UsersSqlQueryRepository,
+    private usersQueryRepository: UsersSqlQueryRepository,
+    private usersQueryRepo: UsersQueryRepo,
     private commandBus: CommandBus,
   ) {}
 
@@ -39,7 +42,10 @@ export class SASqlController {
   async getUserAdmins(
     @Query() query: SAQueryFilter,
   ): Promise<PaginationViewModel<SAViewModel> | any> {
-    return this.usersSQLQueryRepository.getAllUsers(query);
+    const typeormBuilder = await this.usersQueryRepo.getAllUsers();
+    console.log({ typeormBuilder });
+
+    return this.usersQueryRepository.getAllUsers(query);
   }
 
   @Get(':id')
@@ -47,7 +53,7 @@ export class SASqlController {
   async getUserAdmin(
     @Param('id', ObjectIdPipe) userId: string,
   ): Promise<SAViewModel | void> {
-    const userAdmin = await this.usersSQLQueryRepository.getUserById(userId);
+    const userAdmin = await this.usersQueryRepository.getUserById(userId);
 
     if (!userAdmin) {
       throw new NotFoundException();
@@ -72,7 +78,7 @@ export class SASqlController {
       }
     }
 
-    const foundNewestUser = await this.usersSQLQueryRepository.getUserById(
+    const foundNewestUser = await this.usersQueryRepo.getUserById(
       result.data!.userId,
     );
 

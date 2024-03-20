@@ -30,7 +30,8 @@ export class TestDatabaseRepo {
     @InjectModel(Blog.name) private BlogModel: BlogModelType,
     @InjectModel(Post.name) private PostModel: PostModelType,
     @InjectModel(Comment.name) private CommentModel: CommentModelType,
-    @InjectModel(UserAccount.name) private UserAccountModel: UserAccountModelType,
+    @InjectModel(UserAccount.name)
+    private UserAccountModel: UserAccountModelType,
     @InjectModel(Security.name) private SecurityModel: SecurityModelType,
   ) {}
 
@@ -47,6 +48,7 @@ export class TestDatabaseRepo {
       DELETE FROM user_sessions;
       DELETE FROM user_accounts;
       DELETE FROM api_requests;
+      TRUNCATE TABLE user_account CASCADE
     `);
 
       await Promise.all([

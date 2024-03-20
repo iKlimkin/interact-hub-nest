@@ -13,7 +13,7 @@ import {
   EmailMockService,
 } from './base/mock/email.manager.mock';
 import { userConstants } from './base/rest-models-helpers/users.constants';
-import { SecuritySqlQueryRepo } from '../src/features/security/api/query-repositories/security.query.sql-repo';
+import { SecuritySqlQueryRepo } from '../src/features/security/api/query-repositories/security.query.tor-repo';
 import { DataSource } from 'typeorm';
 import { TestingModule } from '@nestjs/testing';
 import { AuthUsersSqlRepository } from '../src/features/auth/infrastructure/auth-users.sql-repository';

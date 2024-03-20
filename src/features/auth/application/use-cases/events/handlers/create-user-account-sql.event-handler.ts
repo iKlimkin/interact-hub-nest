@@ -9,9 +9,14 @@ export class CreateUserAccountEventHandler
 {
   constructor(private commandBus: CommandBus) {}
   async handle(event: CreateUserAccountEvent) {
-    await validateOrRejectModel(event, CreateUserAccountEvent);
+    try {
+      await validateOrRejectModel(event, CreateUserAccountEvent);
 
-    const command = new CreateUserSQLCommand(event.userDto);
-    await this.commandBus.execute(command);
+      const command = new CreateUserSQLCommand(event.userDto);
+      await this.commandBus.execute(command);
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
   }
 }

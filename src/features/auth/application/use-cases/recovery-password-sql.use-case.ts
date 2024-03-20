@@ -5,6 +5,7 @@ import { PasswordRecoverySqlCommand } from './commands/recovery-password-sql.com
 import { SendRecoveryMsgCommand } from './commands/send-recovery-msg.command';
 import { createRecoveryCode } from './helpers/create-recovery-message.helper';
 import { AuthUsersSqlRepository } from '../../infrastructure/auth-users.sql-repository';
+import { AuthUsersTORRepository } from '../../infrastructure/auth-users.tor-repository';
 
 @CommandHandler(PasswordRecoverySqlCommand)
 export class PasswordRecoverySqlUseCase
@@ -13,19 +14,19 @@ export class PasswordRecoverySqlUseCase
   constructor(
     private commandBus: CommandBus,
     private authUsersSqlRepository: AuthUsersSqlRepository,
+    private authUsersRepo: AuthUsersTORRepository,
   ) {}
 
   async execute(command: PasswordRecoverySqlCommand): Promise<boolean> {
     const recoveryPassInfo: UserRecoveryType = createRecoveryCode();
     const { email } = command.inputData;
-    
-    const updateRecoveryCode =
-      await this.authUsersSqlRepository.updateRecoveryCode(
-        email,
-        recoveryPassInfo,
-      );
 
-    if (!updateRecoveryCode) return updateRecoveryCode;
+    const updateRecoveryCode = await this.authUsersRepo.updateRecoveryCode(
+      email,
+      recoveryPassInfo,
+    );
+
+    if (!updateRecoveryCode) return false;
 
     const sendRecoveryMsgCommand = new SendRecoveryMsgCommand({
       email,

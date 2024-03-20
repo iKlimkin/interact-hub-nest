@@ -31,6 +31,7 @@ export class TypeOrmOptions implements TypeOrmOptionsFactory {
       type: 'postgres',
       host: 'localhost',
       port: 5432,
+      logging: ['query', 'error'],
       username: 'NodeJS',
       password: 'NodeJS',
       database: 'InteractHubNest',
@@ -55,8 +56,8 @@ export class TypeOrmOptions implements TypeOrmOptionsFactory {
   private createRemoteConnection(): TypeOrmModuleOptions {
     console.log(this.configService.get('PG_REMOTE_URL'));
     return {
-      type: 'postgres',
       url: this.configService.get<string>('PG_REMOTE_URL') || '',
+      type: 'postgres',
       autoLoadEntities: true,
       synchronize: true,
       ssl: true,

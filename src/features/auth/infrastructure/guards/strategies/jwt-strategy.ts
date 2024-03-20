@@ -4,6 +4,8 @@ import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { jwtConstants } from '../constants';
 import { SecurityQueryRepo } from '../../../../security/api/query-repositories/security.query.repo';
+import { SecurityTORQueryRepo } from '../../../../security/api/query-repositories/security.query.tor-repo';
+import { SecurityTORRepository } from '../../../../security/infrastructure/security.tor-repository';
 import { SecuritySqlQueryRepo } from '../../../../security/api/query-repositories/security.query.sql-repo';
 
 @Injectable()
@@ -13,6 +15,8 @@ export class AccessTokenStrategy extends PassportStrategy(
 ) {
   constructor(
     private securityQueryRepo: SecurityQueryRepo,
+    private securityTORRepository: SecurityTORRepository,
+    private securityTORQueryRepo: SecurityTORQueryRepo,
     private securitySqlQueryRepo: SecuritySqlQueryRepo,
   ) {
     super({
@@ -26,8 +30,8 @@ export class AccessTokenStrategy extends PassportStrategy(
     const userSession = await this.securityQueryRepo.getUserSession(
       payload.deviceId,
     );
-      
-    const userSqlSession = await this.securitySqlQueryRepo.getUserSession(
+
+    const userSqlSession = await this.securityTORQueryRepo.getUserSession(
       payload.deviceId,
     );
 
@@ -44,6 +48,7 @@ export class RefreshTokenStrategy extends PassportStrategy(
   constructor(
     private securityQueryRepo: SecurityQueryRepo,
     private securitySqlQueryRepo: SecuritySqlQueryRepo,
+    private securityTORQueryRepo: SecurityTORQueryRepo,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
@@ -59,7 +64,7 @@ export class RefreshTokenStrategy extends PassportStrategy(
 
     const userSession = await this.securityQueryRepo.getUserSession(deviceId);
 
-    const userSqlSession = await this.securitySqlQueryRepo.getUserSession(
+    const userSqlSession = await this.securityTORQueryRepo.getUserSession(
       deviceId,
     );
 
@@ -75,5 +80,5 @@ export class RefreshTokenStrategy extends PassportStrategy(
 }
 
 const cookieExtractor = (request: Request): string => {
-  return request.cookies.refreshToken || request.headers.cookie?.split('=')[1]
-}
+  return request.cookies.refreshToken || request.headers.cookie?.split('=')[1];
+};

@@ -44,6 +44,7 @@ import { UserProfileType } from '../models/auth.output.models/auth.output.models
 import { UserInfoType } from '../models/user-models';
 import { AuthQuerySqlRepository } from '../query-repositories/auth-query.sql-repo';
 import { RateLimitSqlInterceptor } from '../../../../infra/interceptors/rate-limit-sql.interceptor';
+import { AuthQueryTORRepository } from '../query-repositories/auth-query.tor-repo';
 
 type ClientInfo = {
   ip: string;
@@ -54,12 +55,13 @@ type ClientInfo = {
 export class AuthSQLController {
   constructor(
     private authQuerySqlRepository: AuthQuerySqlRepository,
+    private authRepo: AuthQueryTORRepository,
     private authService: AuthService,
     private commandBus: CommandBus,
   ) {}
 
-  @UseGuards(CustomThrottlerGuard, LocalAuthGuard)
   // @UseInterceptors(RateLimitSqlInterceptor)
+  @UseGuards(CustomThrottlerGuard, LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(
@@ -78,7 +80,7 @@ export class AuthSQLController {
     const { browser, deviceType } = getDeviceInfo(clientInfo.userAgentInfo);
 
     const createSessionData: InputSessionDataValidator = {
-      userPayload,
+      userPayload: userPayload,
       browser,
       deviceType,
       ip: clientInfo.ip,
@@ -132,12 +134,11 @@ export class AuthSQLController {
   @Post('new-password')
   @HttpCode(HttpStatus.NO_CONTENT)
   async newPassword(@Body() body: InputRecoveryPassModel) {
-    const userAccount =
-      await this.authQuerySqlRepository.findUserAccountByRecoveryCode(
-        body.recoveryCode,
-      );
+    const existingAccount = await this.authRepo.findUserAccountByRecoveryCode(
+      body.recoveryCode,
+    );
 
-    if (userAccount) {
+    if (existingAccount) {
       const command = new UpdatePasswordSqlCommand(body);
 
       return this.commandBus.execute<UpdatePasswordSqlCommand, boolean>(
@@ -154,9 +155,7 @@ export class AuthSQLController {
   @Post('password-recovery')
   @HttpCode(HttpStatus.NO_CONTENT)
   async passwordRecovery(@Body() inputEmailModel: InputRecoveryEmailModel) {
-    const userAccount = await this.authQuerySqlRepository.findByLoginOrEmail(
-      inputEmailModel,
-    );
+    const userAccount = await this.authRepo.findByLoginOrEmail(inputEmailModel);
 
     if (!userAccount) {
       const command = new CreateTemporaryAccountSqlCommand(inputEmailModel);
@@ -182,7 +181,7 @@ export class AuthSQLController {
   ) {
     const { login, email } = inputModel;
 
-    const foundUser = await this.authQuerySqlRepository.findByLoginOrEmail({
+    const foundUser = await this.authRepo.findByLoginOrEmail({
       login,
       email,
     });
@@ -190,11 +189,11 @@ export class AuthSQLController {
     if (foundUser) {
       let errors: ErrorType;
 
-      if (foundUser.email === email) {
+      if (foundUser.accountData.email === email) {
         errors = makeErrorsMessages('email');
       }
 
-      if (foundUser.login === login) {
+      if (foundUser.accountData.login === login) {
         errors = makeErrorsMessages('login');
       }
 
@@ -235,17 +234,21 @@ export class AuthSQLController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { email } = inputModel;
-    const confirmedUser = await this.authQuerySqlRepository.findByLoginOrEmail({
+    const userAccount = await this.authRepo.findByLoginOrEmail({
       email,
     });
 
-    if (!confirmedUser || confirmedUser.is_confirmed) {
+    if (
+      !userAccount ||
+      userAccount.emailConfirmation.isConfirmed ||
+      new Date(userAccount.emailConfirmation.expirationDate) < new Date()
+    ) {
       const errors = makeErrorsMessages('confirmation');
       res.status(HttpStatus.BAD_REQUEST).send(errors);
       return;
     }
 
-    const command = new UpdateConfirmationCodeSqlCommand(confirmedUser);
+    const command = new UpdateConfirmationCodeSqlCommand(userAccount);
 
     await this.commandBus.execute(command);
   }
@@ -255,7 +258,7 @@ export class AuthSQLController {
   async getProfile(
     @CurrentUserInfo() userInfo: UserInfoType,
   ): Promise<UserProfileType> {
-    const user = await this.authQuerySqlRepository.getUserById(userInfo.userId);
+    const user = await this.authRepo.getUserById(userInfo.userId);
 
     if (!user) {
       throw new NotFoundException('User not found');

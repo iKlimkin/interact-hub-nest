@@ -1,21 +1,12 @@
-import {
-  Column,
-  Entity,
-  IntegerType,
-  JoinColumn,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { Posts } from './post.entity';
+import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { BaseEntity } from '../../../../domain/base-entity';
+import { Post } from './post.entity';
 
 @Entity()
-export class PostReactionCounts {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @OneToOne(() => Posts)
-  @JoinColumn()
-  post: Posts;
+export class PostReactionCounts extends BaseEntity {
+  @OneToOne('Post', { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'post_id' })
+  post: Post;
 
   @Column({ type: 'integer' })
   likes_count: number;

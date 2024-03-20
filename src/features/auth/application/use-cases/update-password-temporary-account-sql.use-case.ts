@@ -4,6 +4,7 @@ import { validateOrRejectModel } from '../../../../infra/validators/validate-or-
 import { AuthUsersSqlRepository } from '../../infrastructure/auth-users.sql-repository';
 import { UpdatePasswordTemporaryAccountSqlCommand } from './commands/update-password-temporary-account-sql.command';
 import { CreateUserAccountEvent } from './events/create-user-account-event';
+import { AuthUsersTORRepository } from '../../infrastructure/auth-users.tor-repository';
 
 @CommandHandler(UpdatePasswordTemporaryAccountSqlCommand)
 export class UpdatePasswordTemporaryAccountSqlUseCase
@@ -11,6 +12,7 @@ export class UpdatePasswordTemporaryAccountSqlUseCase
 {
   constructor(
     private authUsersSqlRepository: AuthUsersSqlRepository,
+    private authRepo: AuthUsersTORRepository,
     private eventBus: EventBus,
   ) {}
 
@@ -25,13 +27,11 @@ export class UpdatePasswordTemporaryAccountSqlUseCase
     const { recoveryCode, newPassword } = command.inputDto;
 
     const temporaryUserAccount =
-      await this.authUsersSqlRepository.findTemporaryAccountByRecoveryCode(
+      await this.authRepo.findTemporaryAccountByRecoveryCode(
         recoveryCode,
       );
 
-    if (!temporaryUserAccount) {
-      throw new Error();
-    }
+    if (!temporaryUserAccount) throw new Error();
 
     const uniqueLogin = uuidv4();
 
@@ -43,6 +43,6 @@ export class UpdatePasswordTemporaryAccountSqlUseCase
 
     await this.eventBus.publish(event);
 
-    return this.authUsersSqlRepository.deleteTemporaryUserAccount(recoveryCode);
+    return this.authRepo.deleteTemporaryUserAccount(recoveryCode);
   }
 }

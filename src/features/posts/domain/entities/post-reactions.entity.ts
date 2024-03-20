@@ -1,26 +1,22 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { Posts } from './post.entity';
-import { UserAccounts } from '../../../admin/domain/entities/user-account.entity';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { BaseEntity } from '../../../../domain/base-entity';
+import { likesStatus } from '../../../../domain/likes.types';
+import type { UserAccount } from '../../../admin/domain/entities/user-account.entity';
+import type { Post } from './post.entity';
 
 @Entity()
-export class PostReactions {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+export class PostReaction extends BaseEntity {
+  @Column()
+  reaction_type: likesStatus;
 
-  @ManyToOne(() => Posts, (p) => p.postReactions)
-  @JoinColumn()
-  post: Posts;
+  @Column()
+  user_login: string;
 
-  @ManyToOne(() => UserAccounts, (ua) => ua.postReactions)
-  @JoinColumn()
-  userAccount: UserAccounts;
+  @ManyToOne('Post', 'postReactions', { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'post_id' })
+  post: Post;
 
-  @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
-  liked_at: Date;
+  @ManyToOne('UserAccount', 'postReactions')
+  @JoinColumn({ name: 'user_id' })
+  user: UserAccount;
 }

@@ -15,7 +15,6 @@ export class SecuritySqlRepository {
     sessionDto: Readonly<UserSessionDto>,
   ): Promise<OutputId | null> {
     try {
-      console.log(sessionDto);
 
       const query = `
       INSERT INTO "user_sessions"

@@ -1,16 +1,19 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { OutputId } from '../../../../domain/likes.types';
 import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
+import { UserSessionDto } from '../../../auth/api/models/user-account.sql.dto';
 import { SecuritySqlRepository } from '../../infrastructure/security.sql-repository';
 import { CreateSessionSQLCommand } from './commands/create-session.sql-command';
-import { UserSqlSessionDTO } from '../../api/models/security.view.models/security.sql-view.types';
-import { UserSessionDto } from '../../../auth/api/models/user-account.sql.dto';
+import { SecurityTORRepository } from '../../infrastructure/security.tor-repository';
 
 @CommandHandler(CreateSessionSQLCommand)
 export class CreateUserSessionSQLUseCase
   implements ICommandHandler<CreateSessionSQLCommand>
 {
-  constructor(private securitySQLRepository: SecuritySqlRepository) {}
+  constructor(
+    private securitySQLRepository: SecuritySqlRepository,
+    private securityRepo: SecurityTORRepository
+    ) {}
 
   async execute(command: CreateSessionSQLCommand): Promise<OutputId | null> {
     await validateOrRejectModel(command, CreateSessionSQLCommand);
@@ -26,6 +29,6 @@ export class CreateUserSessionSQLUseCase
       refreshToken,
     );
 
-    return this.securitySQLRepository.save(sessionDto);
+    return this.securityRepo.save(sessionDto);
   }
 }

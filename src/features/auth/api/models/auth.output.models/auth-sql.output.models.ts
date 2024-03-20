@@ -14,3 +14,4 @@ export interface UsersResponseModel {
   password_recovery_code: string | null;
   password_recovery_expiration: string | null;
 }
+

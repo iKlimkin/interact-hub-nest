@@ -4,5 +4,5 @@ import { v4 as uuidv4 } from 'uuid';
 
 export const createRecoveryCode = (): UserRecoveryType => ({
   recoveryCode: uuidv4(),
-  expirationDate: add(new Date(), { minutes: 45 }).toISOString(),
+  expirationDate: add(new Date(), { minutes: 45 })
 });
