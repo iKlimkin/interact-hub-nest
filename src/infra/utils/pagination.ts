@@ -40,13 +40,17 @@ export const getPagination = (
     sortBy = inputData.sortBy || 'createdAt';
   }
 
-  const pageNumber: number = inputData.pageNumber
-    ? Math.min(+inputData.pageNumber, 50)
-    : 1;
+  const parsedPageNumber = parseInt(inputData.pageNumber, 10);
+  const pageNumber =
+    !isNaN(parsedPageNumber)
+      ? Math.min(parsedPageNumber, 50)
+      : 1;
 
-  const pageSize: number = inputData.pageSize
-    ? Math.min(+inputData.pageSize, 50)
-    : 10;
+  const parsedPageSize = parseInt(inputData.pageSize, 10);
+  const pageSize =
+    !isNaN(parsedPageSize)
+      ? Math.min(parsedPageSize, 50)
+      : 10;
 
   const skip: number = (pageNumber - 1) * pageSize;
 

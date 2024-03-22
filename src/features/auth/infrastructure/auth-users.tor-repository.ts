@@ -1,20 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import {
-  DataSource,
-  Like,
-  Repository,
-  FindOptions,
+  Equal,
   FindOptionsWhere,
-  MoreThan,
+  Like,
+  MoreThanOrEqual,
+  Repository
 } from 'typeorm';
 import { OutputId } from '../../../domain/likes.types';
+import { UserAccount } from '../../admin/domain/entities/user-account.entity';
 import { PasswordRecoveryType } from '../api/models/auth-input.models.ts/input-password-rec.type';
+import { UsersResponseModel } from '../api/models/auth.output.models/auth-sql.output.models';
 import { UserRecoveryType } from '../api/models/auth.output.models/auth.output.models';
 import { LoginOrEmailType } from '../api/models/auth.output.models/auth.user.types';
 import { TemporaryAccountDBType } from '../api/models/temp-account.models.ts/temp-account-models';
-import { UsersResponseModel } from '../api/models/auth.output.models/auth-sql.output.models';
-import { UserAccount } from '../../admin/domain/entities/user-account.entity';
 import { TemporaryUserAccount } from '../domain/entities/temp-account.entity';
 
 type PasswordsType = {
@@ -121,7 +120,7 @@ export class AuthUsersTORRepository {
 
       const result = await this.userAccounts.findOneBy({
         confirmation_code: confirmationCode,
-        confirmation_expiration_date: MoreThan(currentTime),
+        confirmation_expiration_date: MoreThanOrEqual(currentTime),
       });
 
       if (!result) return null;
@@ -142,10 +141,10 @@ export class AuthUsersTORRepository {
       const { email, login, loginOrEmail } = inputData;
 
       const conditions: FindOptionsWhere<UserAccount>[] = [
-        { email: Like('' + email) },
-        { login: Like('' + login) },
-        { email: Like('' + loginOrEmail) },
-        { login: Like('' + loginOrEmail) },
+        { email: Equal('' + email) },
+        { login: Equal('' + login) },
+        { email: Equal('' + loginOrEmail) },
+        { login: Equal('' + loginOrEmail) },
       ];
 
       const result = await this.userAccounts.findOne({ where: conditions });

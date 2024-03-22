@@ -2,7 +2,7 @@ export class BlogDtoSqlModel {
   constructor(
     public title: string,
     public description: string,
-    public website_url: string,
+    public websiteUrl: string,
     public isMembership: boolean = false,
   ) {}
 }

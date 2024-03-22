@@ -40,12 +40,14 @@ import { DeleteCommentSqlUseCase } from '../features/comments/application/use-ca
 import { UpdateCommentReactionSqlUseCase } from '../features/comments/application/use-cases/update-comment-reaction-sql.use-case';
 import { CreateBlogSASqlUseCase } from '../features/blogs/application/use-case/create-sa-blog-sql.use-case';
 import { UpdateSABlogSqlUseCase } from '../features/blogs/application/use-case/update-sa-blog-sql.use-case';
+import { BlogsTORRepo } from '../features/blogs/infrastructure/blogs.typeorm-repository';
 
 const blogsProviders: Provider[] = [
   BlogsQueryRepo,
   BlogsRepository,
   BlogsSqlRepository,
   BlogsSqlQueryRepo,
+  BlogsTORRepo,
 ];
 
 const postsProviders: Provider[] = [

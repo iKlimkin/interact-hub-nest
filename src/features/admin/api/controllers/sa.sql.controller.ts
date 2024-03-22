@@ -42,10 +42,7 @@ export class SASqlController {
   async getUserAdmins(
     @Query() query: SAQueryFilter,
   ): Promise<PaginationViewModel<SAViewModel> | any> {
-    const typeormBuilder = await this.usersQueryRepo.getAllUsers();
-    console.log({ typeormBuilder });
-
-    return this.usersQueryRepository.getAllUsers(query);
+    return this.usersQueryRepo.getAllUsers(query);
   }
 
   @Get(':id')
@@ -53,7 +50,7 @@ export class SASqlController {
   async getUserAdmin(
     @Param('id', ObjectIdPipe) userId: string,
   ): Promise<SAViewModel | void> {
-    const userAdmin = await this.usersQueryRepository.getUserById(userId);
+    const userAdmin = await this.usersQueryRepo.getUserById(userId);
 
     if (!userAdmin) {
       throw new NotFoundException();

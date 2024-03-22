@@ -40,6 +40,7 @@ import { BlogsSqlQueryRepo } from '../query-repositories/blogs.query.sql-repo';
 import { AccessTokenGuard } from '../../../auth/infrastructure/guards/accessToken.guard';
 import { UserInfoType } from '../../../auth/api/models/user-models';
 import { CurrentUserInfo } from '../../../auth/infrastructure/decorators/current-user-info.decorator';
+import { BlogsTORRepo } from '../../infrastructure/blogs.typeorm-repository';
 
 // @UseGuards(AccessTokenGuard)
 @UseGuards(BasicSAAuthGuard)

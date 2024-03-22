@@ -4,6 +4,9 @@ import { Repository } from 'typeorm';
 import { UserAccount } from '../domain/entities/user-account.entity';
 import { SAViewModel } from '../api/models/userAdmin.view.models/userAdmin.view.model';
 import { getSAViewSQLModel } from '../api/models/userAdmin.view.models/saView.model';
+import { getPagination } from '../../../infra/utils/pagination';
+import { SAQueryFilter } from '../api/models/outputSA.models.ts/users-admin-query.filter';
+import { PaginationViewModel } from '../../../domain/sorting-base-filter';
 
 @Injectable()
 export class UsersQueryRepo {
@@ -12,27 +15,73 @@ export class UsersQueryRepo {
     private readonly userAccounts: Repository<UserAccount>,
   ) {}
 
-  async getAllUsers() {
-    try {
-      const builder = this.userAccounts
-        .createQueryBuilder('sa')
-        .select(['sa.lastName'])
-        .addSelect((qb) =>
-          qb
-            .select('COUNT(*)', 'walletCounts')
-            .from('wallet', 'w')
-            .where('w.ownerId = u.id'),
-        );
+  async getAllUsers(
+    queryOptions: SAQueryFilter,
+  ): Promise<PaginationViewModel<SAViewModel>> {
+    const { searchEmailTerm, searchLoginTerm } = queryOptions;
 
-      const sql = builder.getSql();
+    const { pageNumber, pageSize, skip, sortBy, sortDirection } = getPagination(
+      queryOptions,
+      false,
+      !0,
+    );
 
-      return sql;
-    } catch (error) {
-      console.error(
-        'Database fails operate with find users by sorting model',
-        error,
-      );
-    }
+    const searchTerms = [
+      `%${searchLoginTerm ? searchLoginTerm : ''}%`,
+      `%${searchEmailTerm ? searchEmailTerm : ''}%`,
+    ];
+    const queryBuilder = this.userAccounts.createQueryBuilder('user_accounts');
+
+/**
+ * sortBy !== 'created_at'
+        ? `
+      SELECT *
+      FROM user_accounts
+      WHERE login ILIKE $1 OR email ILIKE $2
+      ORDER BY ${sortBy} COLLATE "C" ${sortDirection}
+      LIMIT $3 OFFSET $4
+    `
+        : `
+      SELECT *
+      FROM user_accounts
+      WHERE login ILIKE $1 OR email ILIKE $2
+      ORDER BY ${sortBy} ${sortDirection}
+      LIMIT $3 OFFSET $4
+    `;
+ */
+
+    queryBuilder
+      .where(
+        'user_accounts.login ILIKE :login OR user_accounts.email ILIKE :email',
+        { login: searchTerms[0], email: searchTerms[1] },
+      )
+      .orderBy(
+        sortBy !== 'created_at'
+          ? `user_accounts.${sortBy} COLLATE "C"`
+          : 'user_accounts.created_at',
+        sortDirection,
+      )
+      .skip(skip)
+      .take(pageSize);
+
+    const result = await queryBuilder.getMany();
+
+    const count = await queryBuilder.getCount();
+
+    const userSAViewModel = new PaginationViewModel<SAViewModel>(
+      result.map(getSAViewSQLModel),
+      pageNumber,
+      pageSize,
+      count,
+    );
+
+    return userSAViewModel;
+  }
+  catch(error) {
+    throw new InternalServerErrorException(
+      'Database fails operate with find users by sorting model',
+      error,
+    );
   }
 
   async getUserById(userId: string): Promise<SAViewModel | null> {

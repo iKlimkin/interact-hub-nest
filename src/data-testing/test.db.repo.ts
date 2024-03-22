@@ -20,7 +20,7 @@ import {
   Security,
   SecurityModelType,
 } from '../features/security/domain/entities/security.schema';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 
 @Injectable()
@@ -38,17 +38,19 @@ export class TestDatabaseRepo {
   async deleteAllData() {
     try {
       const sqlDataSource = this.dataSource.query(`
-      DELETE FROM post_reactions;
-      DELETE FROM post_reaction_counts;
-      DELETE FROM comment_reactions;
-      DELETE FROM comment_reaction_counts;
+      DELETE FROM post_reactions_m;
+      DELETE FROM post_reaction_counts_m;
+      DELETE FROM comment_reactions_m;
+      DELETE FROM comment_reaction_counts_m;
       DELETE FROM comments;
       DELETE FROM posts;
       DELETE FROM blogs;
       DELETE FROM user_sessions;
       DELETE FROM user_accounts;
       DELETE FROM api_requests;
-      TRUNCATE TABLE user_account CASCADE
+      TRUNCATE TABLE temporary_user_account;
+      TRUNCATE TABLE user_session CASCADE;
+      TRUNCATE TABLE user_account CASCADE;
     `);
 
       await Promise.all([
