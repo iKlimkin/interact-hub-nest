@@ -32,24 +32,6 @@ export class UsersQueryRepo {
     ];
     const queryBuilder = this.userAccounts.createQueryBuilder('user_accounts');
 
-/**
- * sortBy !== 'created_at'
-        ? `
-      SELECT *
-      FROM user_accounts
-      WHERE login ILIKE $1 OR email ILIKE $2
-      ORDER BY ${sortBy} COLLATE "C" ${sortDirection}
-      LIMIT $3 OFFSET $4
-    `
-        : `
-      SELECT *
-      FROM user_accounts
-      WHERE login ILIKE $1 OR email ILIKE $2
-      ORDER BY ${sortBy} ${sortDirection}
-      LIMIT $3 OFFSET $4
-    `;
- */
-
     queryBuilder
       .where(
         'user_accounts.login ILIKE :login OR user_accounts.email ILIKE :email',
@@ -65,7 +47,6 @@ export class UsersQueryRepo {
       .take(pageSize);
 
     const result = await queryBuilder.getMany();
-
     const count = await queryBuilder.getCount();
 
     const userSAViewModel = new PaginationViewModel<SAViewModel>(

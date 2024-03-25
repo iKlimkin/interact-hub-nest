@@ -41,6 +41,9 @@ import { UpdateCommentReactionSqlUseCase } from '../features/comments/applicatio
 import { CreateBlogSASqlUseCase } from '../features/blogs/application/use-case/create-sa-blog-sql.use-case';
 import { UpdateSABlogSqlUseCase } from '../features/blogs/application/use-case/update-sa-blog-sql.use-case';
 import { BlogsTORRepo } from '../features/blogs/infrastructure/blogs.typeorm-repository';
+import { BlogsTORQueryRepo } from '../features/blogs/api/query-repositories/blogs.query.typeorm-repo';
+import { PostsTorRepo } from '../features/posts/infrastructure/posts.typeorm-repository';
+import { PostsTORQueryRepo } from '../features/posts/api/query-repositories/posts-query.typeorm-repo';
 
 const blogsProviders: Provider[] = [
   BlogsQueryRepo,
@@ -48,6 +51,7 @@ const blogsProviders: Provider[] = [
   BlogsSqlRepository,
   BlogsSqlQueryRepo,
   BlogsTORRepo,
+  BlogsTORQueryRepo,
 ];
 
 const postsProviders: Provider[] = [
@@ -56,6 +60,8 @@ const postsProviders: Provider[] = [
   PostsSqlQueryRepo,
   PostsRepository,
   PostsSqlRepository,
+  PostsTorRepo,
+  PostsTORQueryRepo,
 ];
 
 const feedbacksProviders: Provider[] = [

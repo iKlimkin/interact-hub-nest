@@ -3,13 +3,16 @@ import { AppService } from './app.service';
 import { ConfigService } from '@nestjs/config';
 import { ConfigType } from './config/configuration';
 import { AuthConfigurationType } from './config/env-configurations';
+import { seedAllData } from './infra/utils/seed/seed-data';
+import { DataSource } from 'typeorm';
 
-@Controller('users')
+@Controller('app')
 export class AppController {
   constructor(
     private readonly configService: ConfigService<ConfigType>,
     private readonly configAuthService: ConfigService<AuthConfigurationType>,
     private readonly appService: AppService,
+    private readonly dataSource: DataSource,
   ) {}
 
   @Get()
@@ -22,11 +25,8 @@ export class AppController {
     };
   }
 
-  // @Post(':id/wallets')
-  // createWallet(
-  //   @Param('id') userId: number,
-  //   @Body() dto: any
-  // ): Promise<Wallet> {
-  //   // return this.appService.createWallet(userId, dto)
-  // }
+  @Post()
+  async seedData() {
+    await seedAllData(this.dataSource);
+  }
 }

@@ -66,6 +66,6 @@ export type LikesCountType = ReactionsCounter & {
 };
 
 export abstract class ReactionsSqlCounter {
-  abstract likes_count: number;
-  abstract dislikes_count: number;
+  likes_count: number;
+  dislikes_count: number;
 }

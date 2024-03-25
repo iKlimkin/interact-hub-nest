@@ -33,11 +33,13 @@ import { BlogsQueryFilter } from '../models/input.blog.models/blogs-query.filter
 import { InputBlogModel } from '../models/input.blog.models/create.blog.model';
 import { BlogViewModelType } from '../models/output.blog.models/blog.view.model-type';
 import { BlogsSqlQueryRepo } from '../query-repositories/blogs.query.sql-repo';
+import { BlogsTORQueryRepo } from '../query-repositories/blogs.query.typeorm-repo';
 
 @Controller('blogs')
 export class BlogsSqlController {
   constructor(
     private readonly blogsSqlQueryRepo: BlogsSqlQueryRepo,
+    private readonly blogQueryRepo: BlogsTORQueryRepo,
     private readonly postsSqlQueryRepo: PostsSqlQueryRepo,
     private readonly commandBus: CommandBus,
   ) {}
@@ -46,7 +48,7 @@ export class BlogsSqlController {
   async getBlogs(
     @Query() query: BlogsQueryFilter,
   ): Promise<PaginationViewModel<BlogViewModelType>> {
-    const result = await this.blogsSqlQueryRepo.getAllBlogs(query);
+    const result = await this.blogQueryRepo.getAllBlogs(query);
 
     if (!result) {
       throw new InternalServerErrorException();
@@ -111,29 +113,29 @@ export class BlogsSqlController {
     return result;
   }
 
-  @Post(':id/posts')
-  @UseGuards(BasicSAAuthGuard)
-  @HttpCode(HttpStatus.CREATED)
-  async createPostForBlog(
-    @Param('id', ObjectIdPipe) blogId: string,
-    @Body() body: InputPostModelByBlogId,
-  ): Promise<PostViewModelType> {
-    const command = new CreatePostSqlCommand({ ...body, blogId });
+  // @Post(':id/posts')
+  // @UseGuards(BasicSAAuthGuard)
+  // @HttpCode(HttpStatus.CREATED)
+  // async createPostForBlog(
+  //   @Param('id', ObjectIdPipe) blogId: string,
+  //   @Body() body: InputPostModelByBlogId,
+  // ): Promise<PostViewModelType> {
+  //   const command = new CreatePostSqlCommand({ ...body, blogId });
 
-    const post = await this.commandBus.execute<CreatePostSqlCommand, LayerNoticeInterceptor<OutputId | null>>(command);
+  //   const post = await this.commandBus.execute<CreatePostSqlCommand, LayerNoticeInterceptor<OutputId | null>>(command);
 
-    if (post.hasError()) {
-      throw new InternalServerErrorException('Post not created');
-    }
+  //   if (post.hasError()) {
+  //     throw new InternalServerErrorException('Post not created');
+  //   }
 
-    const newlyCreatedPost = await this.postsSqlQueryRepo.getPostById(post.data!.id);
+  //   const newlyCreatedPost = await this.postsSqlQueryRepo.getPostById(post.data!.id);
 
-    if (!newlyCreatedPost) {
-      throw new Error('Newest post not found');
-    }
+  //   if (!newlyCreatedPost) {
+  //     throw new Error('Newest post not found');
+  //   }
 
-    return newlyCreatedPost;
-  }
+  //   return newlyCreatedPost;
+  // }
 
   @Put(':id')
   @UseGuards(BasicSAAuthGuard)

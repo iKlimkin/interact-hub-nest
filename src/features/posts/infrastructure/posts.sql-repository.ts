@@ -21,7 +21,7 @@ export class PostsSqlRepository {
         VALUES ($1, $2, $3, $4, $5)
         RETURNING id
       `;
-      
+
       const result = await this.dataSource.query(
         createQuery,
         Object.values(postDto.createPostDto),
@@ -68,19 +68,18 @@ export class PostsSqlRepository {
     updateData: UpdatePostModel,
   ): Promise<boolean> {
     try {
-      const { blogId, content, shortDescription, title } = updateData.inputPostModel
+      const { content, shortDescription, title } = updateData;
 
       const updateQuery = `
       UPDATE posts
-        SET title = $1, short_description = $2, content = $3, blog_id = $4
-        WHERE id = $5
+        SET title = $1, short_description = $2, content = $3
+        WHERE id = $4
       `;
 
       const result = await this.dataSource.query(updateQuery, [
         title,
         shortDescription,
         content,
-        blogId,
         postId,
       ]);
 

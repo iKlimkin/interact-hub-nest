@@ -1,10 +1,10 @@
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 import { BaseEntity } from '../../../../domain/base-entity';
-import { Post } from './post.entity';
+import type { Post } from './post.entity';
 
 @Entity()
 export class PostReactionCounts extends BaseEntity {
-  @OneToOne('Post', { onDelete: 'CASCADE' })
+  @OneToOne('Post', 'postReactionCounts', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'post_id' })
   post: Post;
 

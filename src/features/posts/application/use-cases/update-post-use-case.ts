@@ -4,7 +4,7 @@ import { UpdatePostModel } from '../../api/models/input.posts.models/create.post
 import { PostsRepository } from '../../infrastructure/posts.repository';
 
 export class UpdatePostCommand {
-  constructor(public updatePostDto: UpdatePostModel) {}
+  constructor(public updatePostDto: UpdatePostModel & { blogId: string }) {}
 }
 
 @CommandHandler(UpdatePostCommand)
@@ -12,11 +12,16 @@ export class UpdatePostUseCase implements ICommandHandler<UpdatePostCommand> {
   constructor(private postsRepository: PostsRepository) {}
 
   async execute(command: UpdatePostCommand): Promise<boolean> {
-    await validateOrRejectModel(command, UpdatePostCommand);
+    try {
+      await validateOrRejectModel(command, UpdatePostCommand);
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
 
     return this.postsRepository.updatePost(
       command.updatePostDto.postId,
-      command.updatePostDto.inputPostModel,
+      command.updatePostDto,
     );
   }
 }

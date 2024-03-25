@@ -2,19 +2,34 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
 import { PostsSqlRepository } from '../../infrastructure/posts.sql-repository';
 import { UpdatePostSqlCommand } from './commands/update-post-sql.command';
+import { LayerNoticeInterceptor } from '../../../../infra/utils/interlayer-error-handler.ts/error-layer-interceptor';
+import { GetErrors } from '../../../../infra/utils/interlayer-error-handler.ts/user-errors';
+import { PostsTorRepo } from '../../infrastructure/posts.typeorm-repository';
 
 @CommandHandler(UpdatePostSqlCommand)
 export class UpdatePostSqlUseCase
   implements ICommandHandler<UpdatePostSqlCommand>
 {
-  constructor(private postsSqlRepository: PostsSqlRepository) {}
+  constructor(
+    private postsSqlRepository: PostsSqlRepository,
+    private postsRepo: PostsTorRepo,
+  ) {}
 
-  async execute(command: UpdatePostSqlCommand): Promise<boolean> {
-    await validateOrRejectModel(command, UpdatePostSqlCommand);
+  async execute(
+    command: UpdatePostSqlCommand,
+  ): Promise<LayerNoticeInterceptor | void> {
+    const notice = new LayerNoticeInterceptor();
+    try {
+      await validateOrRejectModel(command, UpdatePostSqlCommand);
+    } catch (error) {
+      notice.addError(
+        'Input data incorrect',
+        'model',
+        GetErrors.IncorrectModel,
+      );
+      return notice;
+    }
 
-    return this.postsSqlRepository.updatePost(
-      command.updatePostDto.postId,
-      command.updatePostDto,
-    );
+    await this.postsRepo.updatePost(command.updatePostDto);
   }
 }

@@ -1,5 +1,6 @@
-import { InputPostModel } from '../../../api/models/input.posts.models/create.post.model';
+import { CreatePostByBlogIdModel, InputPostModel } from '../../../api/models/input.posts.models/create.post.model';
 
 export class CreatePostSqlCommand {
-  constructor(public createDataDto: InputPostModel) {}
+  constructor(public createDataDto: CreatePostByBlogIdModel) {
+  }
 }

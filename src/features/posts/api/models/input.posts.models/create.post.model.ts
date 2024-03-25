@@ -60,15 +60,6 @@ export class InputPostModel {
   blogId: string;
 }
 
-export class CreatePostByBlogIdModel {
-  @IsString()
-  blogId: string;
-  @IsString()
-  blogTitle: string;
-
-  inputPostModel: InputPostModelByBlogId;
-}
-
 export class InputPostModelByBlogId {
   /**
    *  post's title
@@ -88,10 +79,15 @@ export class InputPostModelByBlogId {
   @iSValidField(contentLength)
   content: string;
 }
+export class CreatePostByBlogIdModel extends InputPostModelByBlogId {
+  @IsString()
+  blogId: string;
 
-export class UpdatePostModel {
-  inputPostModel: InputPostModel;
+  @IsString()
+  blogTitle: string;
+}
 
+export class UpdatePostModel extends InputPostModelByBlogId{
   @IsString()
   postId: string;
 }

@@ -41,6 +41,8 @@ import { AccessTokenGuard } from '../../../auth/infrastructure/guards/accessToke
 import { UserInfoType } from '../../../auth/api/models/user-models';
 import { CurrentUserInfo } from '../../../auth/infrastructure/decorators/current-user-info.decorator';
 import { BlogsTORRepo } from '../../infrastructure/blogs.typeorm-repository';
+import { BlogsTORQueryRepo } from '../query-repositories/blogs.query.typeorm-repo';
+import { PostsTORQueryRepo } from '../../../posts/api/query-repositories/posts-query.typeorm-repo';
 
 // @UseGuards(AccessTokenGuard)
 @UseGuards(BasicSAAuthGuard)
@@ -48,7 +50,9 @@ import { BlogsTORRepo } from '../../infrastructure/blogs.typeorm-repository';
 export class SABlogsController {
   constructor(
     private readonly blogsSqlQueryRepo: BlogsSqlQueryRepo,
+    private readonly blogsQueryRepo: BlogsTORQueryRepo,
     private readonly postsSqlQueryRepo: PostsSqlQueryRepo,
+    private readonly postsQueryRepo: PostsTORQueryRepo,
     private readonly commandBus: CommandBus,
   ) {}
 
@@ -56,7 +60,7 @@ export class SABlogsController {
   async getBlogs(
     @Query() query: BlogsQueryFilter,
   ): Promise<PaginationViewModel<BlogViewModelType>> {
-    const result = await this.blogsSqlQueryRepo.getAllBlogs(query);
+    const result = await this.blogsQueryRepo.getAllBlogs(query);
 
     if (!result) throw new Error();
 
@@ -67,7 +71,7 @@ export class SABlogsController {
   async getBlogById(
     @Param('id', ObjectIdPipe) blogId: string,
   ): Promise<BlogViewModelType> {
-    const blog = await this.blogsSqlQueryRepo.getBlogById(blogId);
+    const blog = await this.blogsQueryRepo.getBlogById(blogId);
 
     if (!blog) throw new NotFoundException('blog not found');
 
@@ -75,21 +79,24 @@ export class SABlogsController {
   }
 
   @Get(':blogId/posts')
+  @UseGuards(SetUserIdGuard)
   async getPostsByBlogId(
     //@CurrentUserInfo() userInfo: UserInfoType,
+    @CurrentUserId() userId: string,
     @Param('blogId', ObjectIdPipe) blogId: string,
     @Query() query: PostsQueryFilter,
   ): Promise<PaginationViewModel<PostViewModelType>> {
-    const blog = await this.blogsSqlQueryRepo.getSABlogById(blogId);
+    const blog = await this.blogsQueryRepo.getBlogById(blogId);
 
     if (!blog) throw new NotFoundException('blog not found');
 
     // if (userInfo.userId !== blog.ownerInfo.userId)
     //   throw new ForbiddenException();
 
-    const posts = await this.postsSqlQueryRepo.getPostsByBlogId(
+    const posts = await this.postsQueryRepo.getPostsByBlogId(
       blogId,
       query,
+      userId
       // userInfo.userId,
     );
 
@@ -114,7 +121,7 @@ export class SABlogsController {
       OutputId
     >(command);
 
-    return (await this.blogsSqlQueryRepo.getBlogById(blog.id))!;
+    return (await this.blogsQueryRepo.getBlogById(blog.id))!;
   }
 
   @Post(':id/posts')
@@ -124,7 +131,7 @@ export class SABlogsController {
     @Body() body: InputPostModelByBlogId,
     //@CurrentUserInfo() userInfo: UserInfoType,
   ): Promise<PostViewModelType> {
-    const blog = await this.blogsSqlQueryRepo.getSABlogById(blogId);
+    const blog = await this.blogsQueryRepo.getBlogById(blogId);
 
     if (!blog) {
       throw new NotFoundException();
@@ -134,7 +141,11 @@ export class SABlogsController {
     //   throw new ForbiddenException();
     // }
 
-    const command = new CreatePostSqlCommand({ ...body, blogId });
+    const command = new CreatePostSqlCommand({
+      ...body,
+      blogId,
+      blogTitle: blog.name,
+    });
 
     const post = await this.commandBus.execute<
       CreatePostSqlCommand,
@@ -146,9 +157,9 @@ export class SABlogsController {
       throw errors.error;
     }
 
-    const result = await this.postsSqlQueryRepo.getPostById(post.data!.id);
+    const result = await this.postsQueryRepo.getPostById(post.data!.id);
 
-    if (!result) throw new Error();
+    if (!result) throw new NotFoundException();
 
     return result;
   }
@@ -161,8 +172,8 @@ export class SABlogsController {
     @Body() inputPostModel: InputPostModelByBlogId,
     //@CurrentUserInfo() userInfo: UserInfoType,
   ) {
-    const blog = await this.blogsSqlQueryRepo.getSABlogById(blogId);
-    const post = await this.postsSqlQueryRepo.getPostById(postId);
+    const blog = await this.blogsQueryRepo.getBlogById(blogId);
+    const post = await this.postsQueryRepo.getPostById(postId);
 
     if (!blog || !post) throw new NotFoundException();
 
@@ -170,7 +181,7 @@ export class SABlogsController {
     // throw new ForbiddenException();
 
     const command = new UpdatePostSqlCommand({
-      inputPostModel: { ...inputPostModel, blogId },
+      ...inputPostModel,
       postId,
     });
 
@@ -184,7 +195,8 @@ export class SABlogsController {
     //@CurrentUserInfo() userInfo: UserInfoType,
     @Body() inputBlogModel: InputBlogModel,
   ) {
-    const blog = await this.blogsSqlQueryRepo.getSABlogById(blogId);
+    const blog = await this.blogsQueryRepo.getBlogById(blogId);
+    console.log(blog);
 
     if (!blog) {
       throw new NotFoundException();
@@ -213,7 +225,7 @@ export class SABlogsController {
     @Param('id', ObjectIdPipe) blogId: string,
     //@CurrentUserInfo() userInfo: UserInfoType,
   ) {
-    const blog = await this.blogsSqlQueryRepo.getSABlogById(blogId);
+    const blog = await this.blogsQueryRepo.getBlogById(blogId);
 
     if (!blog) {
       throw new NotFoundException();
@@ -234,8 +246,8 @@ export class SABlogsController {
     @Param('postId', ObjectIdPipe) postId: string,
     //@CurrentUserInfo() userInfo: UserInfoType,
   ) {
-    const blog = await this.blogsSqlQueryRepo.getSABlogById(blogId);
-    const post = await this.postsSqlQueryRepo.getPostById(postId);
+    const blog = await this.blogsQueryRepo.getBlogById(blogId);
+    const post = await this.postsQueryRepo.getPostById(postId);
 
     if (!blog || !post) throw new NotFoundException();
 

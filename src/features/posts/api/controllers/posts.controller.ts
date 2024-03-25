@@ -213,7 +213,7 @@ export class PostsController {
     @Param('id', ObjectIdPipe) postId: string,
     @Body() inputPostModel: InputPostModel,
   ) {
-    const command = new UpdatePostCommand({ inputPostModel, postId });
+    const command = new UpdatePostCommand({ ...inputPostModel, postId });
 
     const updatedPost = await this.commandBus.execute<
       UpdatePostCommand,

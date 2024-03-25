@@ -49,7 +49,7 @@ export class BlogsTORRepo {
   async updateBlog(updateBlogDto: UpdateBlogCommandType): Promise<boolean> {
     try {
       const { blogId, description, name, websiteUrl } = updateBlogDto;
-
+      
       const result = await this.blogs.update(
         { id: blogId },
         { title: name, description, website_url: websiteUrl },

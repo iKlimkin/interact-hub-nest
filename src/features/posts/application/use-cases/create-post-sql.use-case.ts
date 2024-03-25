@@ -7,6 +7,8 @@ import { BlogsSqlRepository } from '../../../blogs/infrastructure/blogs.sql-repo
 import { PostDtoSqlModel } from '../../api/models/post-sql.model';
 import { PostsSqlRepository } from '../../infrastructure/posts.sql-repository';
 import { CreatePostSqlCommand } from './commands/create-post-sql.command';
+import { BlogsTORRepo } from '../../../blogs/infrastructure/blogs.typeorm-repository';
+import { PostsTorRepo } from '../../infrastructure/posts.typeorm-repository';
 
 @CommandHandler(CreatePostSqlCommand)
 export class CreatePostSqlUseCase
@@ -14,33 +16,39 @@ export class CreatePostSqlUseCase
 {
   constructor(
     private postsSqlRepository: PostsSqlRepository,
-    private blogsSqlRepository: BlogsSqlRepository
+    private postsRepo: PostsTorRepo,
+    private blogsSqlRepository: BlogsSqlRepository,
+    private blogsRepo: BlogsTORRepo,
   ) {}
 
   async execute(
     command: CreatePostSqlCommand,
   ): Promise<LayerNoticeInterceptor<OutputId | null>> {
-    await validateOrRejectModel(command, CreatePostSqlCommand);
     const notice = new LayerNoticeInterceptor<OutputId>();
 
-    const { title, shortDescription, content, blogId } = command.createDataDto;
-
-    const blog = await this.blogsSqlRepository.getBlogById(blogId)
-
-    if (!blog) {
-      notice.addError('Blog not found', 'db', GetErrors.NotFound);
+    try {
+      await validateOrRejectModel(command, CreatePostSqlCommand);
+    } catch (error) {
+      notice.addError(
+        'Input data incorrect',
+        'input',
+        GetErrors.IncorrectModel,
+      );
       return notice;
     }
+
+    const { title, shortDescription, content, blogId, blogTitle } =
+      command.createDataDto;
 
     const postDto = new PostDtoSqlModel({
       title,
       short_description: shortDescription,
       content,
-      blog_id: command.createDataDto.blogId,
-      blog_title: blog.title,
+      blog_id: blogId,
+      blog_title: blogTitle,
     });
 
-    const result = await this.postsSqlRepository.save(postDto);
+    const result = await this.postsRepo.createPost(postDto);
 
     if (result) {
       notice.addData(result);

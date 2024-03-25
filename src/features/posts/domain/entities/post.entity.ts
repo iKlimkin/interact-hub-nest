@@ -1,8 +1,16 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+} from 'typeorm';
 import type { Blog } from '../../../blogs/domain/entities/blog.entity';
 import type { PostReaction } from './post-reactions.entity';
 import type { Comment } from '../../../comments/domain/entities/comment.entity';
 import { BaseEntity } from '../../../../domain/base-entity';
+import type { PostReactionCounts } from './post-reaction-counts.entity';
 
 @Entity()
 export class Post extends BaseEntity {
@@ -27,4 +35,7 @@ export class Post extends BaseEntity {
 
   @OneToMany('PostReaction', 'post')
   postReactions: PostReaction[];
+
+  @OneToOne('PostReactionCounts', 'post')
+  postReactionCounts: PostReactionCounts;
 }

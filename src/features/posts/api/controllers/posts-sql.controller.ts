@@ -41,12 +41,14 @@ import { InputLikeStatusModel } from '../models/input.posts.models/input-post..m
 import { PostsQueryFilter } from '../models/output.post.models/posts-query.filter';
 import { PostViewModelType } from '../models/post.view.models/post-view-model.type';
 import { PostsSqlQueryRepo } from '../query-repositories/posts-query.sql-repo';
+import { PostsTORQueryRepo } from '../query-repositories/posts-query.typeorm-repo';
 
 @Controller('posts')
 export class PostsSqlController {
   constructor(
     private feedbacksQuerySqlRepo: FeedbacksQuerySqlRepo,
     private postsSqlQueryRepo: PostsSqlQueryRepo,
+    private postsQueryRepo: PostsTORQueryRepo,
     private usersSqlQueryRepository: UsersSqlQueryRepository,
     private commandBus: CommandBus,
   ) {}
@@ -67,7 +69,8 @@ export class PostsSqlController {
     @Param('id', ObjectIdPipe) postId: string,
     @CurrentUserId() userId: string,
   ): Promise<PostViewModelType> {
-    const post = await this.postsSqlQueryRepo.getPostById(postId, userId);
+
+    const post = await this.postsQueryRepo.getPostById(postId, userId);
 
     if (!post) {
       throw new NotFoundException('post not found');
@@ -177,32 +180,32 @@ export class PostsSqlController {
     return foundNewComment!;
   }
 
-  @Post()
-  @UseGuards(BasicSAAuthGuard)
-  @HttpCode(HttpStatus.CREATED)
-  async createPost(
-    @Body() inputPostModel: InputPostModel,
-  ): Promise<PostViewModelType> {
-    const command = new CreatePostSqlCommand(inputPostModel);
+  // @Post()
+  // @UseGuards(BasicSAAuthGuard)
+  // @HttpCode(HttpStatus.CREATED)
+  // async createPost(
+  //   @Body() inputPostModel: InputPostModel,
+  // ): Promise<PostViewModelType> {
+  //   const command = new CreatePostSqlCommand(inputPostModel);
 
-    const result = await this.commandBus.execute<
-      CreatePostSqlCommand,
-      LayerNoticeInterceptor<OutputId | null>
-    >(command);
+  //   const result = await this.commandBus.execute<
+  //     CreatePostSqlCommand,
+  //     LayerNoticeInterceptor<OutputId | null>
+  //   >(command);
 
-    if (result.hasError()) {
-      const errors = handleErrors(result.code, result.extensions);
-      throw errors.error;
-    }
+  //   if (result.hasError()) {
+  //     const errors = handleErrors(result.code, result.extensions);
+  //     throw errors.error;
+  //   }
 
-    const post = await this.postsSqlQueryRepo.getPostById(result.data!.id);
+  //   const post = await this.postsSqlQueryRepo.getPostById(result.data!.id);
 
-    if (!post) {
-      throw new Error();
-    }
+  //   if (!post) {
+  //     throw new Error();
+  //   }
 
-    return post;
-  }
+  //   return post;
+  // }
 
   @Put(':id')
   @UseGuards(BasicSAAuthGuard)
@@ -215,7 +218,7 @@ export class PostsSqlController {
 
     if (!post) throw new NotFoundException();
 
-    const command = new UpdatePostSqlCommand({ inputPostModel, postId });
+    const command = new UpdatePostSqlCommand({ ...inputPostModel, postId });
 
     await this.commandBus.execute(command);
   }

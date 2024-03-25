@@ -15,7 +15,7 @@ export class Blog extends BaseEntity {
   website_url: string;
 
   @Column()
-  is_membership: Boolean;
+  is_membership: boolean;
 
   @ManyToOne('UserAccount', 'blogs')
   @JoinColumn({ name: 'user_id' })

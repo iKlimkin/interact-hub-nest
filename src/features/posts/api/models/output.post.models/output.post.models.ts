@@ -30,8 +30,6 @@ export type PostsSqlDbType = {
 
 export class PostReactionCounter extends ReactionsSqlCounter {
   post_id: string;
-  dislikes_count: number;
-  likes_count: number;
 }
 
 export type UserPostReactionsType = {
@@ -42,6 +40,7 @@ export type UserPostReactionsType = {
   reaction_type: likesStatus;
 };
 
-export type UserReactionsOutType = Pick<UserPostReactionsType, 'reaction_type'> & {post_id: string}
-
-
+export type UserReactionsOutType = Pick<
+  UserPostReactionsType,
+  'reaction_type'
+> & { post_id: string };
