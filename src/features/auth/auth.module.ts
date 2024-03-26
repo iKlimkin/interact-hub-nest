@@ -4,12 +4,15 @@ import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { BcryptAdapter } from '../../infra/adapters/bcrypt-adapter';
-import { UsersQueryRepository } from '../admin/api/query-repositories/users.query.repo';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersSqlQueryRepository } from '../admin/api/query-repositories/users.query.sql-repo';
+import { UserAccount } from '../admin/domain/entities/user-account.entity';
 import { UsersRepository } from '../admin/infrastructure/users.repository';
-import { SecurityQueryRepo } from '../security/api/query-repositories/security.query.repo';
-import { SecurityService } from '../security/application/security.service';
+import { UsersSQLRepository } from '../admin/infrastructure/users.sql-repository';
+import { UserAccountsTORRepo } from '../admin/infrastructure/users.typeorm-repo';
+import { UserSession } from '../security/domain/entities/security.entity';
 import { AuthService } from './application/auth.service';
+import { TemporaryUserAccount } from './domain/entities/temp-account.entity';
 import {
   authControllers,
   usersSqlControllers,
@@ -28,13 +31,6 @@ import {
   usersProviders,
 } from './infrastructure/settings/auth-providers';
 import { mongooseModels } from './infrastructure/settings/mongoose-models';
-import { UsersSqlQueryRepository } from '../admin/api/query-repositories/users.query.sql-repo';
-import { UsersSQLRepository } from '../admin/infrastructure/users.sql-repository';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserAccount } from '../admin/domain/entities/user-account.entity';
-import { UserSession } from '../security/domain/entities/security.entity';
-import { SecuritySqlQueryRepo } from '../security/api/query-repositories/security.query.sql-repo';
-import { TemporaryUserAccount } from './domain/entities/temp-account.entity';
 
 @Module({
   imports: [
@@ -74,14 +70,10 @@ import { TemporaryUserAccount } from './domain/entities/temp-account.entity';
     process.env.MAIN_DB === 'MONGO' ? authControllers : usersSqlControllers,
   exports: [
     JwtModule,
-    BcryptAdapter,
     UsersRepository,
     UsersSQLRepository,
-    UsersQueryRepository,
+    UserAccountsTORRepo,
     UsersSqlQueryRepository,
-    SecurityService,
-    SecurityQueryRepo,
-    SecuritySqlQueryRepo,
     CqrsModule,
   ],
 })

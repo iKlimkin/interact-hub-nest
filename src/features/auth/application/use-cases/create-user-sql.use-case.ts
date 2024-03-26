@@ -10,7 +10,7 @@ import { UsersSQLRepository } from '../../../admin/infrastructure/users.sql-repo
 import { CreateUserSQLCommand } from './commands/create-user-sql.command';
 import { EmailNotificationEvent } from './events/email-notification-event';
 import { UsersSQLDto } from '../../api/models/auth.output.models/auth-sql.output.models';
-import { UserAccountsRepo } from '../../../admin/infrastructure/users.typeorm-repo';
+import { UserAccountsTORRepo } from '../../../admin/infrastructure/users.typeorm-repo';
 
 @CommandHandler(CreateUserSQLCommand)
 export class CreateUserSQLUseCase
@@ -18,7 +18,7 @@ export class CreateUserSQLUseCase
 {
   constructor(
     private usersSQLRepository: UsersSQLRepository,
-    private userAccountsRepo: UserAccountsRepo,
+    private userAccountsRepo: UserAccountsTORRepo,
     private bcryptAdapter: BcryptAdapter,
     private eventBus: EventBus,
   ) {}

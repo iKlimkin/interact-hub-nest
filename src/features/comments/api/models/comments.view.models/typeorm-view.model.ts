@@ -23,8 +23,6 @@ export const getCommentsTORViewModel = (
   comment: Comment,
   myReactions: CommentReaction[],
 ): CommentsViewModel => {
-  console.log(comment, myReactions);
-
   return {
     id: comment.id,
     content: comment.content,

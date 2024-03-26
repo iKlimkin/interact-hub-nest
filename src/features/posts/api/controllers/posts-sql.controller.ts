@@ -141,7 +141,7 @@ export class PostsSqlController {
   @Post(':id/comments')
   @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.CREATED)
-  async createCommentByPostId(
+  async createComment(
     @Param('id', ObjectIdPipe) postId: string,
     @Body() body: InputContentModel,
     @CurrentUserInfo() userInfo: UserInfoType,

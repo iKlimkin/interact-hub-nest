@@ -181,8 +181,6 @@ export class FeedbacksQueryTORRepo {
     try {
       let myReaction: likesStatus = likesStatus.None;
 
-      userId = '031b96ce-ba2c-4bfb-abeb-a0f6c8a6f570';
-
       if (userId) {
         const comment = await this.comments.findOne({
           where: { id: commentId },
@@ -190,12 +188,12 @@ export class FeedbacksQueryTORRepo {
         });
 
         if (comment) {
-          const userReaction = comment.commentReactions.find(
+          const reaction = comment.commentReactions.find(
             (reaction) => reaction.userAccount.id === userId,
           );
 
-          myReaction = userReaction
-            ? userReaction.reaction_type
+          myReaction = reaction
+            ? reaction.reaction_type
             : likesStatus.None;
         }
       }

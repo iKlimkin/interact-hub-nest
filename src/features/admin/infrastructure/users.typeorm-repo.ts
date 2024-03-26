@@ -6,7 +6,7 @@ import { CreateUserResultData } from '../application/user.admins.service';
 import { UserAccount } from '../domain/entities/user-account.entity';
 
 @Injectable()
-export class UserAccountsRepo {
+export class UserAccountsTORRepo {
   constructor(
     @InjectRepository(UserAccount)
     private readonly userAccounts: Repository<UserAccount>,

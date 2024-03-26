@@ -9,14 +9,14 @@ import { CreateUserResultData } from '../user.admins.service';
 import { CreateSACommand } from './commands/create-sa.command';
 import { validateOrRejectModel } from '../../../../infra/validators/validate-or-reject.model';
 import { UsersSQLDto } from '../../../auth/api/models/auth.output.models/auth-sql.output.models';
-import { UserAccountsRepo } from '../../infrastructure/users.typeorm-repo';
+import { UserAccountsTORRepo } from '../../infrastructure/users.typeorm-repo';
 
 @CommandHandler(CreateSACommand)
 export class CreateSAUseCase implements ICommandHandler<CreateSACommand> {
   constructor(
     private usersSQLRepository: UsersSQLRepository,
     private bcryptAdapter: BcryptAdapter,
-    private userAccountsRepo: UserAccountsRepo
+    private userAccountsRepo: UserAccountsTORRepo
   ) {}
 
   async execute(

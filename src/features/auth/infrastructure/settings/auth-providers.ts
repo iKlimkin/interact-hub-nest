@@ -57,7 +57,7 @@ import { LocalStrategy } from '../guards/strategies/local-strategy';
 import { UsersQueryRepo } from '../../../admin/infrastructure/users.query.typeorm-repo';
 import { LoggerService } from '../../../../infra/logging/application/logger.service';
 import { SecurityTORRepository } from '../../../security/infrastructure/security.tor-repository';
-import { UserAccountsRepo } from '../../../admin/infrastructure/users.typeorm-repo';
+import { UserAccountsTORRepo } from '../../../admin/infrastructure/users.typeorm-repo';
 import { AuthUsersTORRepository } from '../auth-users.tor-repository';
 import { SecuritySqlQueryRepo } from '../../../security/api/query-repositories/security.query.sql-repo';
 import { AuthQueryTORRepository } from '../../api/query-repositories/auth-query.tor-repo';
@@ -78,7 +78,7 @@ export const usersProviders: Provider[] = [
   UsersSQLRepository,
   UsersSqlQueryRepository,
   UsersQueryRepo,
-  UserAccountsRepo,
+  UserAccountsTORRepo,
 ];
 
 export const Strategies: Provider[] = [

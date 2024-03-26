@@ -8,6 +8,7 @@ import { CommentDtoSqlModel } from '../../api/models/comment-dto-sql.model';
 import { FeedbacksSqlRepo } from '../../infrastructure/feedbacks.sql-repository';
 import { CreateCommentSqlCommand } from './commands/create-comment-sql.command';
 import { FeedbacksTORRepo } from '../../infrastructure/feedbacks.typeorm-repository';
+import { UserAccountsTORRepo } from '../../../admin/infrastructure/users.typeorm-repo';
 
 @CommandHandler(CreateCommentSqlCommand)
 export class CreateCommentSqlUseCase
@@ -16,6 +17,7 @@ export class CreateCommentSqlUseCase
   constructor(
     private feedbacksSqlRepo: FeedbacksSqlRepo,
     private usersSqlRepository: UsersSQLRepository,
+    private userAccountsRepo: UserAccountsTORRepo,
     private feedbacksRepo: FeedbacksTORRepo,
   ) {}
 
@@ -31,7 +33,7 @@ export class CreateCommentSqlUseCase
 
     const { userId, content, postId } = command.inputData;
 
-    const user = await this.usersSqlRepository.getUserById(userId);
+    const user = await this.userAccountsRepo.getUserById(userId);
 
     if (!user) {
       notice.addError('User not found', 'db', GetErrors.NotFound);

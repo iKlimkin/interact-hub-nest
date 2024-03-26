@@ -76,8 +76,8 @@ export class PostsTORQueryRepo {
           'pr.created_at',
           'pr.post_id',
         ])
-        .innerJoinAndSelect('pr.post', 'posts')
-        .leftJoin('posts.blog', 'b')
+        .leftJoin('pr.post', 'post')
+        .addSelect('post.id')
         .leftJoin('pr.user', 'user')
         .addSelect('user.id')
         .where('pr.reaction_type = :reactionType', {
@@ -233,11 +233,12 @@ export class PostsTORQueryRepo {
       queryBuilder
         .where('posts.id = :postId', { postId })
         .leftJoinAndSelect('posts.postReactionCounts', 'prc')
-        .leftJoinAndSelect('posts.blog', 'b');
+        .leftJoin('posts.blog', 'b')
+        .addSelect('b.id');
 
-      const result = await queryBuilder.getOne();
+      const post = await queryBuilder.getOne();
 
-      if (!result) return null;
+      if (!post) return null;
 
       const latestReactions = await this.postReactions
         .createQueryBuilder('pr')
@@ -246,9 +247,11 @@ export class PostsTORQueryRepo {
           'pr.user_login',
           'pr.created_at',
           'pr.post_id',
+          'post.id',
         ])
-        .leftJoinAndSelect('pr.user', 'user')
-        .leftJoinAndSelect('pr.post', 'post')
+        .leftJoin('pr.user', 'user')
+        .addSelect('user.id')
+        .leftJoin('pr.post', 'post')
         .where('pr.post_id = :postId', { postId })
         .andWhere('pr.reaction_type = :reactionType', {
           reactionType: likesStatus.Like,
@@ -270,7 +273,7 @@ export class PostsTORQueryRepo {
         myReaction = reaction ? reaction.reaction_type : likesStatus.None;
       }
 
-      return getPostTORViewModel(result, latestReactions, myReaction);
+      return getPostTORViewModel(post, latestReactions, myReaction);
     } catch (error) {
       console.error(`Database fails operate during find post ${error}`);
       return null;
