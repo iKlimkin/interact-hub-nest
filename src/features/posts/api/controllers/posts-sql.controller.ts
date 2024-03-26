@@ -62,7 +62,7 @@ export class PostsSqlController {
     @Query() query: PostsQueryFilter,
     @CurrentUserId() userId: string,
   ): Promise<PaginationViewModel<PostViewModelType>> {
-    return this.postsSqlQueryRepo.getAllPosts(query, userId);
+    return this.postsQueryRepo.getAllPosts(query, userId);
   }
 
   @Get(':id')
@@ -71,7 +71,6 @@ export class PostsSqlController {
     @Param('id', ObjectIdPipe) postId: string,
     @CurrentUserId() userId: string,
   ): Promise<PostViewModelType> {
-
     const post = await this.postsQueryRepo.getPostById(postId, userId);
 
     if (!post) {

@@ -52,6 +52,17 @@ const convertStatus = (
   return result;
 };
 
+const mapNewestLikes = (reactions, postId) => {
+  return reactions
+    .filter(reaction => reaction.post_id === postId)
+    .slice(0, 3)
+    .map(like => ({
+      addedAt: like.liked_at.toISOString(),
+      userId: like.user_id,
+      login: like.user_login,
+    }));
+};
+
 export const getPostSqlViewModel = (
   rawPost: PostsSqlDbType,
   userReactions: UserPostReactionsType[],
@@ -75,16 +86,7 @@ export const getPostSqlViewModel = (
       likesCount,
       dislikesCount,
       myStatus: convertStatus(myReactions, rawPost),
-      newestLikes: userReactions
-        .filter(reaction => reaction.post_id === rawPost.id)
-        .slice(0, 3)
-        .map(
-          (like) => ({
-            addedAt: like.liked_at.toISOString(),
-            userId: like.user_id,
-            login: like.user_login,
-          })
-        ),
+      newestLikes: mapNewestLikes(userReactions, rawPost.id),
     },
   };
 };

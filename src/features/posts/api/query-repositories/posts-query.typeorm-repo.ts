@@ -1,14 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Like, Repository } from 'typeorm';
 import { likesStatus } from '../../../../domain/likes.types';
 import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
 import { getPagination } from '../../../../infra/utils/pagination';
 import { PostReaction } from '../../domain/entities/post-reactions.entity';
 import { Post } from '../../domain/entities/post.entity';
-import {
-  UserReactionsOutType
-} from '../models/output.post.models/output.post.models';
+import { UserReactionsOutType } from '../models/output.post.models/output.post.models';
 import { PostsQueryFilter } from '../models/output.post.models/posts-query.filter';
 import { PostViewModelType } from '../models/post.view.models/post-view-model.type';
 import { getPostTORViewModel } from '../models/post.view.models/post-view-typeorm.model';
@@ -22,108 +20,88 @@ export class PostsTORQueryRepo {
     @InjectDataSource() private readonly dataSource: DataSource,
   ) {}
 
-  // async getAllPosts(
-  //   queryOptions: PostsQueryFilter,
-  //   userId?: string,
-  // ): Promise<PaginationViewModel<PostViewModelType>> {
-  //   try {
-  //     const { searchContentTerm } = queryOptions;
-  //     const isSql = true;
+  async getAllPosts(
+    queryOptions: PostsQueryFilter,
+    userId?: string,
+  ): Promise<PaginationViewModel<PostViewModelType>> {
+    try {
+      const { searchContentTerm } = queryOptions;
+      const isSql = true;
 
-  //     const { pageNumber, pageSize, skip, sortBy, sortDirection } =
-  //       getPagination(queryOptions, !!0, isSql);
+      const { pageNumber, pageSize, skip, sortBy, sortDirection } =
+        getPagination(queryOptions, !!0, isSql);
 
-  //     const searchTerm = `%${searchContentTerm ? searchContentTerm : ''}%`;
-  //     //(select count(*) from post_reactions) as likesCount
+      const searchTerm = `%${searchContentTerm ? searchContentTerm : ''}%`;
 
-  //     const sortQuery =
-  //       // sortBy !== 'created_at'
-  //       //   ?
-  //       //   `
-  //       //   SELECT *
-  //       //     FROM posts p
-  //       //     WHERE content ILIKE $1
-  //       //     ORDER BY ${sortBy} COLLATE "C" ${sortDirection}
-  //       //     LIMIT $2 OFFSET $3
-  //       //   `
-  //       //   :
-  //       `
-  //         SELECT p.*
-  //           FROM posts p
-  //           WHERE content ILIKE $1
-  //           ORDER BY ${sortBy} ${sortDirection}
-  //           LIMIT $2 OFFSET $3
-  //         `;
+      const queryBuilder = this.posts.createQueryBuilder('posts');
 
-  //     const sortedResult = await this.dataSource.query(sortQuery, [
-  //       searchTerm,
-  //       pageSize,
-  //       skip,
-  //     ]);
+      queryBuilder
+        .where('posts.content ILIKE :searchTerm', { searchTerm })
+        .leftJoinAndSelect('posts.blog', 'blogs')
+        .leftJoinAndSelect('posts.postReactionCounts', 'counts')
+        .orderBy(
+          sortBy !== 'created_at'
+            ? `posts.${sortBy} COLLATE 'C'`
+            : `posts.created_at`,
+          sortDirection,
+        )
+        .skip(skip)
+        .take(pageSize);
 
-  //     let myReactions: UserReactionsOutType[];
+      const result = await queryBuilder.getManyAndCount();
 
-  //     if (userId) {
-  //       const reactionsResult = await this.dataSource.query(
-  //         `
-  //         SELECT reaction_type, post_id
-  //         FROM blogs b
-  //         INNER JOIN posts ON b.id = posts.blog_id
-  //         INNER JOIN post_reactions ON posts.id = post_reactions.post_id
-  //         WHERE post_reactions.user_id = $1
-  //       `,
-  //         [userId],
-  //       );
+      const posts = result[0];
+      const count = result[1];
 
-  //       myReactions = reactionsResult;
-  //     }
+      let myReactions: PostReaction[];
 
-  //     const findReactionsQuery = `
-  //       SELECT pr.user_id, pr.reaction_type, pr.user_login, pr.liked_at, pr.post_id
-  //       FROM post_reactions pr
-  //       WHERE reaction_type = 'Like'
-  //       ORDER BY liked_at DESC
-  //     `;
+      if (userId) {
+        const reactions = await this.postReactions.find({
+          where: {
+            user: {
+              id: userId,
+            },
+          },
+          relations: ['post'],
+        });
 
-  //     const latestReactions = await this.dataSource.query(findReactionsQuery);
+        myReactions = reactions ? reactions : [];
+      }
 
-  //     const reactionCounter = await this.dataSource.query(
-  //       `
-  //       SELECT likes_count, dislikes_count, post_id
-  //       FROM post_reaction_counts
-  //       `,
-  //     );
+      const latestReactions = await this.postReactions
+        .createQueryBuilder('pr')
+        .select([
+          'pr.reaction_type',
+          'pr.user_login',
+          'pr.created_at',
+          'pr.post_id',
+        ])
+        .innerJoinAndSelect('pr.post', 'posts')
+        .leftJoin('posts.blog', 'b')
+        .leftJoinAndSelect('pr.user', 'user')
+        .where('pr.reaction_type = :reactionType', {
+          reactionType: likesStatus.Like,
+        })
+        .orderBy('pr.created_at', 'DESC')
+        .limit(3)
+        .getMany();
 
-  //     const [postsCounter] = await this.dataSource.query(
-  //       `
-  //         SELECT COUNT(*)
-  //         FROM posts
-  //         WHERE content ILIKE $1
-  //       `,
-  //       [searchTerm],
-  //     );
+      const postsViewModel = new PaginationViewModel<PostViewModelType>(
+        posts.map((post: Post) =>
+          getPostTORViewModel(post, latestReactions, myReactions),
+        ),
+        pageNumber,
+        pageSize,
+        count,
+      );
 
-  //     const postsViewModel = new PaginationViewModel<PostViewModelType>(
-  //       sortedResult.map((rawPost: PostsSqlDbType) =>
-  //         getPostSqlViewModel(
-  //           rawPost,
-  //           latestReactions,
-  //           reactionCounter,
-  //           myReactions,
-  //         ),
-  //       ),
-  //       pageNumber,
-  //       pageSize,
-  //       postsCounter.count,
-  //     );
-
-  //     return postsViewModel;
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(
-  //       `Database fails operation with find all posts ${error}`,
-  //     );
-  //   }
-  // }
+      return postsViewModel;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Database fails operation with find all posts ${error}`,
+      );
+    }
+  }
 
   async getPostsByBlogId(
     blogId: string,
@@ -144,7 +122,8 @@ export class PostsTORQueryRepo {
       queryBuilder
         .where('posts.content ILIKE :searchTerm', { searchTerm })
         .andWhere('posts.blog_id = :blogId', { blogId })
-        // .leftJoinAndSelect('posts.blog', 'blog')
+        .leftJoinAndSelect('posts.blog', 'blog')
+        .leftJoinAndSelect('posts.postReactionCounts', 'counts')
         .orderBy(
           sortBy !== 'created_at'
             ? `posts.${sortBy} COLLATE 'C'`
@@ -155,26 +134,29 @@ export class PostsTORQueryRepo {
         .take(pageSize);
 
       const result = await queryBuilder.getManyAndCount();
-      console.log(result[0]);
 
-      let myReactions: UserReactionsOutType[] | likesStatus = likesStatus.None;
-          userId = '93cbe5fc-0df7-4124-8fda-b7bb86ca98fe'
+      const posts = result[0];
+      const postsCount = result[1];
+
+      let myReactions: PostReaction[];
+
+      userId = '031b96ce-ba2c-4bfb-abeb-a0f6c8a6f570';
       if (userId) {
         const reactions = await this.postReactions.find({
           where: {
             user: {
-              id: userId
+              id: userId,
             },
             post: {
               blog: {
-                id: blogId
-              }
-            }
-          }
+                id: blogId,
+              },
+            },
+          },
+          relations: ['post'],
         });
-        console.log('userId', {reactions});
 
-        // myReactions = reactionsResult;
+        myReactions = reactions ? reactions : [];
       }
 
       const latestReactions = await this.postReactions
@@ -188,7 +170,7 @@ export class PostsTORQueryRepo {
         ])
         .innerJoinAndSelect('pr.post', 'posts')
         .leftJoin('posts.blog', 'b')
-        .leftJoin('pr.user', 'user')
+        .leftJoinAndSelect('pr.user', 'user')
         .where('pr.reaction_type = :reactionType', {
           reactionType: likesStatus.Like,
         })
@@ -196,28 +178,17 @@ export class PostsTORQueryRepo {
         .orderBy('pr.created_at', 'DESC')
         .limit(3)
         .getMany();
-        const transformedReactions = latestReactions.map(reaction => ({
-          ...reaction,
-          // post_id: reaction.post.id,
-          post: reaction.post.id,
-        }));
-      console.log( transformedReactions );
 
-      // const postsViewModel = new PaginationViewModel<PostViewModelType>(
-      //   result.map((rawPost: PostsSqlDbType) =>
-      //     getPostSqlViewModel(
-      //       rawPost,
-      //       latestReactions,
-      //       reactionCounter,
-      //       myReactions,
-      //     ),
-      //   ),
-      //   pageNumber,
-      //   pageSize,
-      //   postsCounter.count,
-      // );
+      const postsViewModel = new PaginationViewModel<PostViewModelType>(
+        posts.map((post: Post) =>
+          getPostTORViewModel(post, latestReactions, myReactions),
+        ),
+        pageNumber,
+        pageSize,
+        postsCount,
+      );
 
-      // return postsViewModel;
+      return postsViewModel;
     } catch (e) {
       console.error(`Database fails operation with find posts by blogId ${e}`);
       return null;
@@ -262,8 +233,7 @@ export class PostsTORQueryRepo {
       queryBuilder
         .where('posts.id = :postId', { postId })
         .leftJoinAndSelect('posts.postReactionCounts', 'prc')
-        .leftJoin('posts.blog', 'b')
-        .addSelect('b.id');
+        .leftJoinAndSelect('posts.blog', 'b');
 
       const result = await queryBuilder.getOne();
 
@@ -272,35 +242,33 @@ export class PostsTORQueryRepo {
       const latestReactions = await this.postReactions
         .createQueryBuilder('pr')
         .select([
-          'pr.user_id',
           'pr.reaction_type',
           'pr.user_login',
           'pr.created_at',
           'pr.post_id',
         ])
-        .addSelect('user.id', 'user_id')
+        .leftJoinAndSelect('pr.user', 'user')
+        .leftJoinAndSelect('pr.post', 'post')
         .where('pr.post_id = :postId', { postId })
         .andWhere('pr.reaction_type = :reactionType', {
           reactionType: likesStatus.Like,
         })
-        .leftJoin('pr.user', 'user')
         .orderBy('pr.created_at', 'DESC')
         .limit(3)
         .getMany();
 
       if (userId) {
-        const post = await this.posts.findOne({
+        const reaction = await this.postReactions.findOne({
           where: {
-            id: postId,
-            postReactions: { user: { id: userId } },
+            post: {
+              id: postId,
+            },
           },
-          relations: ['postReactions'],
+          relations: ['post'],
         });
-        console.log(post);
 
-        // if (post) myReaction = post.postReactions
+        myReaction = reaction ? reaction.reaction_type : likesStatus.None;
       }
-      console.log({ latestReactions });
 
       return getPostTORViewModel(result, latestReactions, myReaction);
     } catch (error) {
