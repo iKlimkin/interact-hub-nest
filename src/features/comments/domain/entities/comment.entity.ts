@@ -31,6 +31,6 @@ export class Comment extends BaseEntity {
   @OneToMany('CommentReaction', 'comment')
   commentReactions: CommentReaction[];
 
-  @OneToOne('CommentReactionCounts')
+  @OneToOne('CommentReactionCounts', 'comment')
   commentReactionCounts: CommentReactionCounts;
 }

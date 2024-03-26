@@ -4,7 +4,7 @@ import type { Comment } from './comment.entity';
 
 @Entity()
 export class CommentReactionCounts extends BaseEntity {
-  @OneToOne('Comment', { onDelete: 'CASCADE' })
+  @OneToOne('Comment', 'commentReactionCounts', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'comment_id' })
   comment: Comment;
 

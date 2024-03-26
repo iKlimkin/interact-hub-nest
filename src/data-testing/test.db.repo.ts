@@ -51,6 +51,9 @@ export class TestDatabaseRepo {
       TRUNCATE TABLE temporary_user_account;
       TRUNCATE TABLE user_session CASCADE;
       TRUNCATE TABLE user_account CASCADE;
+      TRUNCATE TABLE post CASCADE;
+      TRUNCATE TABLE blog CASCADE;
+      TRUNCATE TABLE comment CASCADE;
     `);
 
       await Promise.all([

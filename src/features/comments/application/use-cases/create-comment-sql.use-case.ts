@@ -7,6 +7,7 @@ import { UsersSQLRepository } from '../../../admin/infrastructure/users.sql-repo
 import { CommentDtoSqlModel } from '../../api/models/comment-dto-sql.model';
 import { FeedbacksSqlRepo } from '../../infrastructure/feedbacks.sql-repository';
 import { CreateCommentSqlCommand } from './commands/create-comment-sql.command';
+import { FeedbacksTORRepo } from '../../infrastructure/feedbacks.typeorm-repository';
 
 @CommandHandler(CreateCommentSqlCommand)
 export class CreateCommentSqlUseCase
@@ -15,6 +16,7 @@ export class CreateCommentSqlUseCase
   constructor(
     private feedbacksSqlRepo: FeedbacksSqlRepo,
     private usersSqlRepository: UsersSQLRepository,
+    private feedbacksRepo: FeedbacksTORRepo,
   ) {}
 
   async execute(
@@ -43,7 +45,7 @@ export class CreateCommentSqlUseCase
       content,
     });
 
-    const result = await this.feedbacksSqlRepo.save(commentDto);
+    const result = await this.feedbacksRepo.createComment(commentDto);
 
     if (result) {
       notice.addData(result);

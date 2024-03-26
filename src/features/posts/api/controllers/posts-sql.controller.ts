@@ -42,11 +42,13 @@ import { PostsQueryFilter } from '../models/output.post.models/posts-query.filte
 import { PostViewModelType } from '../models/post.view.models/post-view-model.type';
 import { PostsSqlQueryRepo } from '../query-repositories/posts-query.sql-repo';
 import { PostsTORQueryRepo } from '../query-repositories/posts-query.typeorm-repo';
+import { FeedbacksQueryTORRepo } from '../../../comments/api/query-repositories/feedbacks.query.typeorm-repository';
 
 @Controller('posts')
 export class PostsSqlController {
   constructor(
     private feedbacksQuerySqlRepo: FeedbacksQuerySqlRepo,
+    private feedbacksQueryRepo: FeedbacksQueryTORRepo,
     private postsSqlQueryRepo: PostsSqlQueryRepo,
     private postsQueryRepo: PostsTORQueryRepo,
     private usersSqlQueryRepository: UsersSqlQueryRepository,
@@ -148,7 +150,7 @@ export class PostsSqlController {
     const { content } = body;
     const { userId } = userInfo;
 
-    const existPost = await this.postsSqlQueryRepo.getPostById(postId);
+    const existPost = await this.postsQueryRepo.getPostById(postId);
 
     if (!existPost) {
       throw new NotFoundException('Post not found');
@@ -172,7 +174,7 @@ export class PostsSqlController {
       throw errors.error;
     }
 
-    const foundNewComment = await this.feedbacksQuerySqlRepo.getCommentById(
+    const foundNewComment = await this.feedbacksQueryRepo.getCommentById(
       result.data!.id,
       userId,
     );

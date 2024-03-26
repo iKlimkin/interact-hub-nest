@@ -31,11 +31,13 @@ import {
 } from '../models/input.comment.models';
 import { CommentsQueryFilter } from '../models/output.comment.models/comment-query.filter';
 import { FeedbacksQuerySqlRepo } from '../query-repositories/feedbacks.query.sql-repository';
+import { FeedbacksQueryTORRepo } from '../query-repositories/feedbacks.query.typeorm-repository';
 
 @Controller('comments')
 export class FeedbacksSqlController {
   constructor(
     private feedbacksQuerySqlRepo: FeedbacksQuerySqlRepo,
+    private feedbacksQueryRepo: FeedbacksQueryTORRepo,
     private commandBus: CommandBus,
   ) {}
 
@@ -46,7 +48,7 @@ export class FeedbacksSqlController {
     @Param('id', ObjectIdPipe) commentId: string,
     @CurrentUserId() userId: string,
   ): Promise<CommentsViewModel> {
-    const comment = await this.feedbacksQuerySqlRepo.getCommentById(
+    const comment = await this.feedbacksQueryRepo.getCommentById(
       commentId,
       userId,
     );

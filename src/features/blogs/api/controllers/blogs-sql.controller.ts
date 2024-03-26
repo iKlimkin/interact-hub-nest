@@ -34,6 +34,7 @@ import { InputBlogModel } from '../models/input.blog.models/create.blog.model';
 import { BlogViewModelType } from '../models/output.blog.models/blog.view.model-type';
 import { BlogsSqlQueryRepo } from '../query-repositories/blogs.query.sql-repo';
 import { BlogsTORQueryRepo } from '../query-repositories/blogs.query.typeorm-repo';
+import { PostsTORQueryRepo } from '../../../posts/api/query-repositories/posts-query.typeorm-repo';
 
 @Controller('blogs')
 export class BlogsSqlController {
@@ -41,6 +42,7 @@ export class BlogsSqlController {
     private readonly blogsSqlQueryRepo: BlogsSqlQueryRepo,
     private readonly blogQueryRepo: BlogsTORQueryRepo,
     private readonly postsSqlQueryRepo: PostsSqlQueryRepo,
+    private readonly postsQueryRepo: PostsTORQueryRepo,
     private readonly commandBus: CommandBus,
   ) {}
 
@@ -61,7 +63,7 @@ export class BlogsSqlController {
   async getBlogById(
     @Param('id', ObjectIdPipe) blogId: string,
   ): Promise<BlogViewModelType> {
-    const foundBlog = await this.blogsSqlQueryRepo.getBlogById(blogId);
+    const foundBlog = await this.blogQueryRepo.getBlogById(blogId);
 
     if (!foundBlog) {
       throw new NotFoundException('blog not found');
@@ -77,13 +79,13 @@ export class BlogsSqlController {
     @Param('id', ObjectIdPipe) blogId: string,
     @Query() query: PostsQueryFilter,
   ): Promise<PaginationViewModel<PostViewModelType>> {
-    const blog = await this.blogsSqlQueryRepo.getBlogById(blogId);
+    const blog = await this.blogQueryRepo.getBlogById(blogId);
 
     if (!blog) {
       throw new NotFoundException('blog not found');
     }
 
-    const posts = await this.postsSqlQueryRepo.getPostsByBlogId(
+    const posts = await this.postsQueryRepo.getPostsByBlogId(
       blogId,
       query,
       userId,

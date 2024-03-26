@@ -54,11 +54,14 @@ export class BlogsTORQueryRepo {
 
       const result = await queryBuilder.getManyAndCount();
 
+      const blogs = result[0];
+      const blogsCount = result[1];
+
       const blogsViewModel = new PaginationViewModel<BlogViewModelType>(
-        result[0].map(getBlogSqlViewModel),
+        blogs.map(getBlogSqlViewModel),
         pageNumber,
         pageSize,
-        result[1],
+        blogsCount,
       );
 
       return blogsViewModel;

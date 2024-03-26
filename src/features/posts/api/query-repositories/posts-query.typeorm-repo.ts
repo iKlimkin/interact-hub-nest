@@ -1,21 +1,17 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import {
-  PostsSqlDbType,
-  UserReactionsOutType,
-  UserPostReactionsType,
-} from '../models/output.post.models/output.post.models';
-import { PostViewModelType } from '../models/post.view.models/post-view-model.type';
-import { getPostSqlViewModel } from '../models/post.view.models/post-view-sql.model';
-import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
-import { PostsQueryFilter } from '../models/output.post.models/posts-query.filter';
-import { getPagination } from '../../../../infra/utils/pagination';
 import { likesStatus } from '../../../../domain/likes.types';
-import { Post } from '../../domain/entities/post.entity';
-import { getPostTORViewModel } from '../models/post.view.models/post-view-typeorm.model';
+import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
+import { getPagination } from '../../../../infra/utils/pagination';
 import { PostReaction } from '../../domain/entities/post-reactions.entity';
-import { seedAllData } from '../../../../infra/utils/seed/seed-data';
+import { Post } from '../../domain/entities/post.entity';
+import {
+  UserReactionsOutType
+} from '../models/output.post.models/output.post.models';
+import { PostsQueryFilter } from '../models/output.post.models/posts-query.filter';
+import { PostViewModelType } from '../models/post.view.models/post-view-model.type';
+import { getPostTORViewModel } from '../models/post.view.models/post-view-typeorm.model';
 
 @Injectable()
 export class PostsTORQueryRepo {

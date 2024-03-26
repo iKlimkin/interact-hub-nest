@@ -44,6 +44,8 @@ import { BlogsTORRepo } from '../features/blogs/infrastructure/blogs.typeorm-rep
 import { BlogsTORQueryRepo } from '../features/blogs/api/query-repositories/blogs.query.typeorm-repo';
 import { PostsTorRepo } from '../features/posts/infrastructure/posts.typeorm-repository';
 import { PostsTORQueryRepo } from '../features/posts/api/query-repositories/posts-query.typeorm-repo';
+import { FeedbacksTORRepo } from '../features/comments/infrastructure/feedbacks.typeorm-repository';
+import { FeedbacksQueryTORRepo } from '../features/comments/api/query-repositories/feedbacks.query.typeorm-repository';
 
 const blogsProviders: Provider[] = [
   BlogsQueryRepo,
@@ -70,6 +72,8 @@ const feedbacksProviders: Provider[] = [
   FeedbacksQuerySqlRepo,
   FeedbacksRepository,
   FeedbacksSqlRepo,
+  FeedbacksTORRepo,
+  FeedbacksQueryTORRepo,
 ];
 
 const useCases: Provider[] = [
