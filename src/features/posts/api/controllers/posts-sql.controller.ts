@@ -114,18 +114,18 @@ export class PostsSqlController {
 
   @Get(':id/comments')
   @UseGuards(SetUserIdGuard)
-  async getCommentsByPostId(
+  async getComments(
     @Param('id', ObjectIdPipe) postId: string,
     @CurrentUserId() userId: string,
     @Query() query: PostsQueryFilter,
   ): Promise<PaginationViewModel<CommentsViewModel>> {
-    const post = await this.postsSqlQueryRepo.getPostById(postId);
+    const post = await this.postsQueryRepo.getPostById(postId);
 
     if (!post) {
       throw new NotFoundException('Post not found');
     }
 
-    const comments = await this.feedbacksQuerySqlRepo.getCommentsByPostId(
+    const comments = await this.feedbacksQueryRepo.getCommentsByPostId(
       postId,
       query,
       userId,
@@ -215,7 +215,7 @@ export class PostsSqlController {
     @Param('id') postId: string,
     @Body() inputPostModel: InputPostModel,
   ) {
-    const post = await this.postsSqlQueryRepo.getPostById(postId);
+    const post = await this.postsQueryRepo.getPostById(postId);
 
     if (!post) throw new NotFoundException();
 

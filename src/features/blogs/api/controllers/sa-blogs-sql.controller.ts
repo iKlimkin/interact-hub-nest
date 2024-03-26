@@ -80,7 +80,7 @@ export class SABlogsController {
 
   @Get(':blogId/posts')
   @UseGuards(SetUserIdGuard)
-  async getPostsByBlogId(
+  async getPosts(
     //@CurrentUserInfo() userInfo: UserInfoType,
     @CurrentUserId() userId: string,
     @Param('blogId', ObjectIdPipe) blogId: string,

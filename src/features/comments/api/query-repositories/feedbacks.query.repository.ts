@@ -11,7 +11,7 @@ import {
   CommentModelType,
 } from '../../domain/entities/comment.schema';
 import { CommentsViewModel } from '../models/comments.view.models/comments.view.model';
-import { getCommentsViewModel } from '../models/comments.view.models/get.comments.view.model';
+import { getCommentsViewModel } from '../models/comments.view.models/view.model';
 import { CommentsQueryFilter } from '../models/output.comment.models/comment-query.filter';
 
 @Injectable()

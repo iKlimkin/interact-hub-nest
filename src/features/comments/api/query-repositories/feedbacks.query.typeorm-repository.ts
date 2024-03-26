@@ -3,11 +3,11 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { likesStatus } from '../../../../domain/likes.types';
 import { CommentsViewModel } from '../models/comments.view.models/comments.view.model';
-import { getCommentsSqlViewModel } from '../models/comments.view.models/get.comments.sql-view.model';
+import { getCommentsSqlViewModel } from '../models/comments.view.models/sql-view.model';
 import {
   getCommentSqlViewModel,
   getCommentTORViewModel,
-} from '../models/comments.view.models/get-comment.sql-view.model';
+} from '../models/comments.view.models/comment.sql-view.model';
 import {
   CommentReactionsType,
   CommentSqlDbType,
@@ -16,12 +16,16 @@ import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
 import { CommentsQueryFilter } from '../models/output.comment.models/comment-query.filter';
 import { getPagination } from '../../../../infra/utils/pagination';
 import { Comment } from '../../domain/entities/comment.entity';
+import { CommentReaction } from '../../domain/entities/comment-reactions.entity';
+import { getCommentsTORViewModel } from '../models/comments.view.models/typeorm-view.model';
 
 @Injectable()
 export class FeedbacksQueryTORRepo {
   constructor(
     @InjectDataSource() private dataSource: DataSource,
     @InjectRepository(Comment) private readonly comments: Repository<Comment>,
+    @InjectRepository(CommentReaction)
+    private readonly commentReactions: Repository<CommentReaction>,
   ) {}
 
   async getComments(
@@ -108,66 +112,57 @@ export class FeedbacksQueryTORRepo {
       const { pageNumber, pageSize, sortBy, skip, sortDirection } =
         getPagination(queryOptions, !!0, !0);
 
-      const filter = `%${searchContentTerm ? searchContentTerm : ''}%`;
+      const searchTerm = `%${searchContentTerm ? searchContentTerm : ''}%`;
 
-      const sortQuery = `
-      SELECT *
-        FROM comments
-        WHERE content ILIKE $1 AND post_id = $2
-        ORDER BY ${sortBy} ${sortDirection}
-        LIMIT $3 OFFSET $4
-      `;
+      const queryBuilder = this.comments.createQueryBuilder('comments');
 
-      const result = await this.dataSource.query(sortQuery, [
-        filter,
-        postId,
-        pageSize,
-        skip,
-      ]);
+      queryBuilder
+        .where('comments.content ILIKE :searchTerm', { searchTerm })
+        .andWhere('comments.post_id = :postId', { postId })
+        .leftJoin('comments.userAccount', 'user')
+        .addSelect('user.id')
+        .leftJoinAndSelect('comments.commentReactionCounts', 'counts')
+        .orderBy(
+          sortBy !== 'created_at'
+            ? `comments.${sortBy} COLLATE 'C'`
+            : `comments.created_at`,
+          sortDirection,
+        )
+        .skip(skip)
+        .take(pageSize);
 
-      let myReactions: CommentReactionsType[];
+      const result = await queryBuilder.getManyAndCount();
+
+      const comments = result[0];
+      const commentsCount = result[1];
+
+      let myReactions: CommentReaction[];
 
       if (userId) {
-        const reactionsResult = await this.dataSource.query(
-          `
-          SELECT cr.reaction_type, cr.comment_id
-          FROM posts p
-          INNER JOIN comments c ON p.id = c.post_id
-          INNER JOIN comment_reactions cr ON c.id = cr.comment_id
-          WHERE cr.user_id = $1 AND c.post_id = $2
-        `,
-          [userId, postId],
-        );
+        const reactions = await this.commentReactions.find({
+          where: {
+            userAccount: {
+              id: userId,
+            },
+            comment: {
+              post: {
+                id: postId,
+              },
+            },
+          },
+          relations: ['post'],
+        });
 
-        myReactions = reactionsResult;
+        myReactions = reactions ? reactions : [];
       }
 
-      const reactionCounter = await this.dataSource.query(
-        `
-        SELECT likes_count, dislikes_count, comment_id
-        FROM comment_reaction_counts crc
-        INNER JOIN comments ON crc.comment_id = comments.id
-        WHERE post_id = $1
-        `,
-        [postId],
-      );
-
-      const [commentsCounter] = await this.dataSource.query(
-        `
-          SELECT COUNT(*)
-          FROM comments
-          WHERE content ILIKE $1 and post_id = $2
-        `,
-        [filter, postId],
-      );
-
       const commentsViewModel = new PaginationViewModel<CommentsViewModel>(
-        result.map((comment: CommentSqlDbType) =>
-          getCommentsSqlViewModel(comment, reactionCounter, myReactions),
+        comments.map((comment: Comment) =>
+          getCommentsTORViewModel(comment, myReactions),
         ),
         pageNumber,
         pageSize,
-        commentsCounter.count,
+        commentsCount,
       );
 
       return commentsViewModel;
@@ -209,7 +204,7 @@ export class FeedbacksQueryTORRepo {
         where: {
           id: commentId,
         },
-        relations: ['commentReactionCounts', 'userAccount'],
+        // relations: ['commentReactionCounts', 'userAccount'],
       });
 
       if (!comment) return null;

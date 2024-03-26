@@ -74,7 +74,7 @@ export class BlogsSqlController {
 
   @Get(':id/posts')
   @UseGuards(SetUserIdGuard)
-  async getPostsByBlogId(
+  async getPosts(
     @CurrentUserId() userId: string,
     @Param('id', ObjectIdPipe) blogId: string,
     @Query() query: PostsQueryFilter,

@@ -78,7 +78,8 @@ export class PostsTORQueryRepo {
         ])
         .innerJoinAndSelect('pr.post', 'posts')
         .leftJoin('posts.blog', 'b')
-        .leftJoinAndSelect('pr.user', 'user')
+        .leftJoin('pr.user', 'user')
+        .addSelect('user.id')
         .where('pr.reaction_type = :reactionType', {
           reactionType: likesStatus.Like,
         })
@@ -107,7 +108,7 @@ export class PostsTORQueryRepo {
     blogId: string,
     queryOptions: PostsQueryFilter,
     userId?: string,
-  ): Promise<PaginationViewModel<PostViewModelType> | null | void> {
+  ): Promise<PaginationViewModel<PostViewModelType> | null> {
     try {
       const { searchContentTerm } = queryOptions;
       const isSql = true;
@@ -140,7 +141,6 @@ export class PostsTORQueryRepo {
 
       let myReactions: PostReaction[];
 
-      userId = '031b96ce-ba2c-4bfb-abeb-a0f6c8a6f570';
       if (userId) {
         const reactions = await this.postReactions.find({
           where: {

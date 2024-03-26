@@ -2,6 +2,8 @@ import {
   ReactionsCounter,
   likesStatus,
 } from '../../../../../domain/likes.types';
+import { CommentReaction } from '../../../domain/entities/comment-reactions.entity';
+import { Comment } from '../../../domain/entities/comment.entity';
 import {
   CommentReactionCounter,
   CommentReactionsType,
@@ -31,23 +33,22 @@ const calculateLikesDislikesCount = (
   };
 };
 
+
+
 const convertStatus = (
   myReactions: CommentReactionsType[] | likesStatus,
-  comment: CommentSqlDbType,
+  commentId: string,
 ): likesStatus => {
-  let result: likesStatus = likesStatus.None;
-
   if (Array.isArray(myReactions)) {
-    result =
+    if (!myReactions.length) return likesStatus.None;
+    return (
       (myReactions
-        .filter((r) => r.comment_id === comment.id)
+        .filter((r) => r.comment_id === commentId)
         .map((r) => r.reaction_type)
-        .join('') as likesStatus) || likesStatus.None;
-  } else {
-    result = myReactions || likesStatus.None;
+        .join('') as likesStatus) || likesStatus.None
+    );
   }
-
-  return result;
+  return myReactions || likesStatus.None;
 };
 
 export const getCommentsSqlViewModel = (
@@ -71,7 +72,9 @@ export const getCommentsSqlViewModel = (
     likesInfo: {
       likesCount,
       dislikesCount,
-      myStatus: convertStatus(myReactions, comment),
+      myStatus: convertStatus(myReactions, comment.id),
     },
   };
 };
+
+
