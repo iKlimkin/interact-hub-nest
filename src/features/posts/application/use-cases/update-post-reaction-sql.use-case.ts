@@ -6,18 +6,27 @@ import {
 import { getStatusCounting } from '../../../../infra/utils/status-counter';
 import { PostsSqlRepository } from '../../infrastructure/posts.sql-repository';
 import { UpdatePostReactionSqlCommand } from './commands/update-post-reaction-sql.command';
+import { UserAccountsTORRepo } from '../../../admin/infrastructure/users.typeorm-repo';
+import { PostsTorRepo } from '../../infrastructure/posts.typeorm-repository';
 
 @CommandHandler(UpdatePostReactionSqlCommand)
 export class UpdatePostReactionSqlUseCase
   implements ICommandHandler<UpdatePostReactionSqlCommand>
 {
-  constructor(private postsSqlRepository: PostsSqlRepository) {}
+  constructor(
+    private postsSqlRepository: PostsSqlRepository,
+    private postsRepo: PostsTorRepo,
+    private usersRepo: UserAccountsTORRepo,
+  ) {}
 
   async execute(command: UpdatePostReactionSqlCommand) {
-    const { postId, userId, inputStatus, login } =
-      command.updatePostReactionDto;
+    const { postId, userId, inputStatus } = command.updatePostReactionDto;
 
-    const currentStatus = await this.postsSqlRepository.getUserReaction(
+    const user = await this.usersRepo.getUserById(userId);
+
+    if (!user) throw new Error('User not found');
+
+    const currentStatus = await this.postsRepo.getUserReaction(
       userId,
       postId,
     );
@@ -25,7 +34,7 @@ export class UpdatePostReactionSqlUseCase
     await this.handleReaction({
       postId,
       userId,
-      userLogin: login,
+      userLogin: user.login,
       inputStatus,
       currentStatus,
     });
@@ -39,7 +48,7 @@ export class UpdatePostReactionSqlUseCase
       inputStatus,
       currentStatus || 'None',
     );
-
+      
     const reactionData: ReactionPostDtoType = {
       postId,
       userId,
@@ -49,6 +58,6 @@ export class UpdatePostReactionSqlUseCase
       likesCount,
     };
 
-    await this.postsSqlRepository.updateReactionType(reactionData);
+    await this.postsRepo.updateReactionType(reactionData);
   }
 }

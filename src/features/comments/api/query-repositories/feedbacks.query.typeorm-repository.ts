@@ -150,7 +150,7 @@ export class FeedbacksQueryTORRepo {
               },
             },
           },
-          relations: ['post'],
+          relations: ['comment'],
         });
 
         myReactions = reactions ? reactions : [];
@@ -182,27 +182,27 @@ export class FeedbacksQueryTORRepo {
       let myReaction: likesStatus = likesStatus.None;
 
       if (userId) {
-        const comment = await this.comments.findOne({
-          where: { id: commentId },
-          relations: ['commentReactions', 'commentReactions.userAccount'],
+        const myStorageReaction = await this.commentReactions.findOne({
+          where: {
+            comment: {
+              id: commentId,
+            },
+            userAccount: {
+              id: userId,
+            },
+          },
         });
 
-        if (comment) {
-          const reaction = comment.commentReactions.find(
-            (reaction) => reaction.userAccount.id === userId,
-          );
-
-          myReaction = reaction
-            ? reaction.reaction_type
-            : likesStatus.None;
-        }
+        myReaction = myStorageReaction
+          ? myStorageReaction.reaction_type
+          : likesStatus.None;
       }
 
       const comment = await this.comments.findOne({
         where: {
           id: commentId,
         },
-        // relations: ['commentReactionCounts', 'userAccount'],
+        relations: ['userAccount'],
       });
 
       if (!comment) return null;

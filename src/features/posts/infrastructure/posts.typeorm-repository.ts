@@ -10,11 +10,18 @@ import { ReactionType } from '../../comments/api/models/output.comment.models/ou
 import { UpdatePostModel } from '../api/models/input.posts.models/create.post.model';
 import { PostDtoSqlModel } from '../api/models/post-sql.model';
 import { Post } from '../domain/entities/post.entity';
+import { PostReaction } from '../domain/entities/post-reactions.entity';
+import { PostReactionCounts } from '../domain/entities/post-reaction-counts.entity';
 
 @Injectable()
 export class PostsTorRepo {
   constructor(
     @InjectRepository(Post) private readonly posts: Repository<Post>,
+    @InjectRepository(PostReactionCounts)
+    private readonly postReactionCounts: Repository<PostReactionCounts>,
+    @InjectRepository(PostReaction)
+    private readonly postReactions: Repository<PostReaction>,
+    @InjectDataSource() private dataSource: DataSource,
   ) {}
 
   async createPost(
@@ -42,32 +49,29 @@ export class PostsTorRepo {
     }
   }
 
-  // async getUserReaction(
-  //   userId: string,
-  //   postId: string,
-  // ): Promise<likesStatus | null> {
-  //   try {
-  //     const findQuery = `
-  //     SELECT *
-  //       FROM post_reactions
-  //       WHERE user_id = $1 AND post_id = $2
-  //     `;
+  async getUserReaction(
+    userId: string,
+    postId: string,
+  ): Promise<likesStatus | null> {
+    try {
+      userId = 'ab7c91c2-6372-4417-b32c-dfc63c82d5cb';
+      const result = await this.postReactions
+        .createQueryBuilder('pr')
+        .select('reaction_type')
+        .where('pr.user_id = :userId', { userId })
+        .andWhere('pr.post_id = :postId', { postId })
+        .getRawOne();
 
-  //     const result = await this.dataSource.query<ReactionType>(findQuery, [
-  //       userId,
-  //       postId,
-  //     ]);
+      if (!result) return null;
 
-  //     if (!result) return null;
-
-  //     return result[0].reaction_type;
-  //   } catch (error) {
-  //     console.error(
-  //       `Database fails operate with find user's reactions on post`,
-  //     );
-  //     return null;
-  //   }
-  // }
+      return result.reaction_type;
+    } catch (error) {
+      console.error(
+        `Database fails operate with find user's reactions on post`,
+      );
+      return null;
+    }
+  }
 
   async updatePost(updateData: UpdatePostModel): Promise<boolean> {
     try {
@@ -87,39 +91,65 @@ export class PostsTorRepo {
     }
   }
 
-  // async updateReactionType(reactionDto: ReactionPostDtoType) {
-  //   try {
-  //     const updateReactionQuery = `
-  //     INSERT INTO post_reactions (user_id, user_login, post_id, reaction_type)
-  //     VALUES ($1, $2, $3, $4)
-  //     ON CONFLICT (user_id, post_id) DO UPDATE SET reaction_type = EXCLUDED.reaction_type
-  //   `;
+  async updateReactionType(reactionDto: ReactionPostDtoType) {
+    try {
+      const {
+        dislikesCount,
+        inputStatus,
+        likesCount,
+        postId,
+        userId,
+        userLogin,
+      } = reactionDto;
 
-  //     const updatedReaction = await this.dataSource.query(updateReactionQuery, [
-  //       reactionDto.userId,
-  //       reactionDto.userLogin,
-  //       reactionDto.postId,
-  //       reactionDto.inputStatus,
-  //     ]);
+      await this.postReactions
+        .createQueryBuilder('postReactions')
+        .insert()
+        .values({
+          user_login: userLogin,
+          user: { id: userId },
+          post: { id: postId },
+          reaction_type: inputStatus as likesStatus,
+        })
+        .orUpdate(['reaction_type'], ['user_id', 'post_id'])
+        .execute();
 
-  //     const updateCounterQuery = `
-  //     INSERT INTO post_reaction_counts (post_id, likes_count, dislikes_count)
-  //     VALUES ($1, $2, $3)
-  //     ON CONFLICT (post_id) DO UPDATE SET
-  //       likes_count = post_reaction_counts.likes_count + EXCLUDED.likes_count,
-  //       dislikes_count = post_reaction_counts.dislikes_count + EXCLUDED.dislikes_count
-  //   `;
+      // await this.postReactionCounts
+      //   .createQueryBuilder('postReactionCounts')
+      //   .insert()
+      //   .values({
+      //     post: {
+      //       id: postId,
+      //     },
+      //     likes_count: likesCount,
+      //     dislikes_count: dislikesCount,
+      //   })
+      //   .orUpdate(['likes_count', 'dislikes_count'], ['post_id'])
+      //   .setParameters({
+      //     excludedDislikesCount:` post_reaction_counts.likes_count + ${dislikesCount}`,
+      //     excludedLikesCount: `post_reaction_counts.likes_count + ${likesCount}`,
+      //   })
+      //   .execute();
 
-  //     const updatedReactionCounter = await this.dataSource.query(
-  //       updateCounterQuery,
-  //       [reactionDto.postId, reactionDto.likesCount, reactionDto.dislikesCount],
-  //     );
-  //   } catch (error) {
-  //     console.error(
-  //       `Database fails during create post reaction operate ${error}`,
-  //     );
-  //   }
-  // }
+      const updateCounterQuery = `
+      INSERT INTO post_reaction_counts (post_id, likes_count, dislikes_count)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (post_id) DO UPDATE SET
+        likes_count = post_reaction_counts.likes_count + EXCLUDED.likes_count,
+        dislikes_count = post_reaction_counts.dislikes_count + EXCLUDED.dislikes_count
+    `;
+
+      await this.dataSource.query(updateCounterQuery, [
+        postId,
+        likesCount,
+        dislikesCount,
+      ]);
+    } catch (error) {
+      console.error(
+        `Database fails during create post reaction operate ${error}`,
+      );
+    }
+  }
 
   async deletePost(postId: string): Promise<boolean> {
     try {

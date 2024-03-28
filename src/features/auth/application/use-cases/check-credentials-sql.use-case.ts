@@ -25,7 +25,7 @@ export class CheckCredentialsSQLUseCase
     const userAccount = await this.authRepo.findByLoginOrEmail({
       loginOrEmail: command.inputData.loginOrEmail,
     });
-    
+
     if (!userAccount) return null;
 
     const validPassword = await this.bcryptAdapter.compareAsync(

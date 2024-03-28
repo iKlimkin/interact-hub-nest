@@ -31,6 +31,7 @@ import {
   usersProviders,
 } from './infrastructure/settings/auth-providers';
 import { mongooseModels } from './infrastructure/settings/mongoose-models';
+import { UsersQueryRepo } from '../admin/infrastructure/users.query.typeorm-repo';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import { mongooseModels } from './infrastructure/settings/mongoose-models';
     UsersRepository,
     UsersSQLRepository,
     UserAccountsTORRepo,
+    UsersQueryRepo,
     UsersSqlQueryRepository,
     CqrsModule,
   ],

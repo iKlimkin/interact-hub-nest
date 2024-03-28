@@ -43,6 +43,7 @@ import { PostViewModelType } from '../models/post.view.models/post-view-model.ty
 import { PostsSqlQueryRepo } from '../query-repositories/posts-query.sql-repo';
 import { PostsTORQueryRepo } from '../query-repositories/posts-query.typeorm-repo';
 import { FeedbacksQueryTORRepo } from '../../../comments/api/query-repositories/feedbacks.query.typeorm-repository';
+import { UsersQueryRepo } from '../../../admin/infrastructure/users.query.typeorm-repo';
 
 @Controller('posts')
 export class PostsSqlController {
@@ -52,6 +53,7 @@ export class PostsSqlController {
     private postsSqlQueryRepo: PostsSqlQueryRepo,
     private postsQueryRepo: PostsTORQueryRepo,
     private usersSqlQueryRepository: UsersSqlQueryRepository,
+    private usersQueryRepo: UsersQueryRepo,
     private commandBus: CommandBus,
   ) {}
 
@@ -63,6 +65,16 @@ export class PostsSqlController {
     @CurrentUserId() userId: string,
   ): Promise<PaginationViewModel<PostViewModelType>> {
     return this.postsQueryRepo.getAllPosts(query, userId);
+  }
+
+  @Get('test')
+  @UseGuards(SetUserIdGuard)
+  @HttpCode(HttpStatus.OK)
+  async getPostsTest(
+    @Query() query: PostsQueryFilter,
+    @CurrentUserId() userId: string,
+  ): Promise<PaginationViewModel<PostViewModelType>> {
+    return this.postsQueryRepo.getPostsForTest(query, userId);
   }
 
   @Get(':id')
@@ -91,20 +103,15 @@ export class PostsSqlController {
     const { userId } = userInfo;
     const { likeStatus } = body;
 
-    const post = await this.postsSqlQueryRepo.getPostById(postId, userId);
+    const post = await this.postsQueryRepo.getPostById(postId, userId);
 
-    if (!post) {
-      throw new NotFoundException('Post not found');
-    }
+    if (!post) throw new NotFoundException('Post not found');
 
     if (post.extendedLikesInfo.myStatus === likeStatus) return;
-
-    const user = await this.usersSqlQueryRepository.getUserById(userId);
 
     const reactionDto: UpdateReactionModelType = {
       postId,
       userId,
-      login: user!.login,
       inputStatus: likeStatus,
     };
 

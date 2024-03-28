@@ -11,7 +11,6 @@ export type LikeUserType = {
 export type UpdateReactionModelType = {
   postId: string;
   userId: string;
-  login: string;
   inputStatus: likesStatus;
 };
 

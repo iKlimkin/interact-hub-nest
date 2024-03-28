@@ -40,6 +40,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException();
     }
 
+
     return userId ? userId : sqlUserAccount;
   }
 

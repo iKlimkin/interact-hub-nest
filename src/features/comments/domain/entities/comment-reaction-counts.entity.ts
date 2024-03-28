@@ -1,8 +1,9 @@
-import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne, Unique } from 'typeorm';
 import { BaseEntity } from '../../../../domain/base-entity';
 import type { Comment } from './comment.entity';
 
 @Entity()
+@Unique(['comment'])
 export class CommentReactionCounts extends BaseEntity {
   @OneToOne('Comment', 'commentReactionCounts', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'comment_id' })

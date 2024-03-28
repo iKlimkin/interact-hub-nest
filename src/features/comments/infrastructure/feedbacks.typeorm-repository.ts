@@ -12,12 +12,19 @@ import {
   ReactionType,
 } from '../api/models/output.comment.models/output.comment.models';
 import { Comment } from '../domain/entities/comment.entity';
+import { removeUnwantedFields } from '../../../../test/base/utils/remove-fields';
+import { CommentReaction } from '../domain/entities/comment-reactions.entity';
+import { CommentReactionCounts } from '../domain/entities/comment-reaction-counts.entity';
 
 @Injectable()
 export class FeedbacksTORRepo {
   constructor(
     @InjectDataSource() private dataSource: DataSource,
     @InjectRepository(Comment) private readonly comments: Repository<Comment>,
+    @InjectRepository(CommentReaction)
+    private readonly commentReactions: Repository<CommentReaction>,
+    @InjectRepository(CommentReactionCounts)
+    private readonly commentReactionCounts: Repository<CommentReactionCounts>,
   ) {}
 
   async createComment(
@@ -51,53 +58,42 @@ export class FeedbacksTORRepo {
 
   async updateComment(commentId: string, content: string): Promise<boolean> {
     try {
-      const updateQuery = `
-        UPDATE comments
-        SET content = $1
-        WHERE id = $2
-      `;
+      const result = await this.comments.update({ id: commentId }, { content });
 
-      const result = await this.dataSource.query(updateQuery, [
-        content,
-        commentId,
-      ]);
-
-      return result[1] > 0;
+      return result.affected !== 0;
     } catch (error) {
       console.error(`Database fails during update comment operation ${error}`);
       return false;
     }
   }
 
-  async deleteComment(commentId: string): Promise<boolean> {
-    try {
-      const deleteQuery = `
-        DELETE FROM comments
-        WHERE id = $1
-      `;
-
-      const result = await this.dataSource.query(deleteQuery, [commentId]);
-
-      return result[1] > 0;
-    } catch (error) {
-      console.error(`Database fails during delete comment operation ${error}`);
-      return false;
-    }
-  }
-
   async updateReactionType(reactionDto: ReactionCommentDto): Promise<void> {
     try {
-      const updateReactionQuery = `
-      INSERT INTO comment_reactions (user_id, comment_id, reaction_type)
-      VALUES ($1, $2, $3)
-      ON CONFLICT (user_id, comment_id) DO UPDATE SET reaction_type = EXCLUDED.reaction_type
-    `;
+      const { commentId, dislikesCount, inputStatus, likesCount, userId } =
+        reactionDto;
+      console.log({ reactionDto });
 
-      const updatedReaction = await this.dataSource.query(updateReactionQuery, [
-        reactionDto.userId,
-        reactionDto.commentId,
-        reactionDto.inputStatus,
-      ]);
+      await this.commentReactions
+        .createQueryBuilder()
+        .insert()
+        .values({
+          reaction_type: inputStatus as likesStatus,
+          userAccount: { id: userId },
+          comment: { id: commentId },
+        })
+        .orUpdate(['reaction_type'], ['user_id', 'comment_id'])
+        .execute();
+
+      // await this.commentReactionCounts
+      //   .createQueryBuilder()
+      //   .insert()
+      //   .values({
+      //     comment: { id: commentId },
+      //     likes_count: () => `"likes_count"::integer + ${likesCount}`,
+      //   dislikes_count: () => `"dislikes_count"::integer + ${dislikesCount}`,
+      //   })
+      //   .orUpdate([], ['comment_id'])
+      //   .execute();
 
       const updateCounterQuery = `
       INSERT INTO comment_reaction_counts (comment_id, likes_count, dislikes_count)
@@ -107,14 +103,11 @@ export class FeedbacksTORRepo {
         dislikes_count = comment_reaction_counts.dislikes_count + EXCLUDED.dislikes_count
     `;
 
-      const updatedReactionCounter = await this.dataSource.query(
-        updateCounterQuery,
-        [
-          reactionDto.commentId,
-          reactionDto.likesCount,
-          reactionDto.dislikesCount,
-        ],
-      );
+      await this.dataSource.query(updateCounterQuery, [
+        commentId,
+        likesCount,
+        dislikesCount,
+      ]);
     } catch (error) {
       console.error(
         `Database fails during update likeStatus in comment operation ${error}`,
@@ -127,18 +120,12 @@ export class FeedbacksTORRepo {
     commentId: string,
   ): Promise<likesStatus | null> {
     try {
-      const findQuery = `
-      SELECT *
-        FROM comment_reactions
-        WHERE user_id = $1 AND comment_id = $2
-      `;
-
-      const result = (
-        await this.dataSource.query<ReactionType>(findQuery, [
-          userId,
-          commentId,
-        ])
-      )[0];
+      const result = await this.commentReactions
+        .createQueryBuilder('cr')
+        .select('reaction_type')
+        .where('cr.user_id = :userId', { userId })
+        .andWhere('cr.comment_id = :commentId', { commentId })
+        .getRawOne();
 
       if (!result) return null;
 
@@ -147,6 +134,17 @@ export class FeedbacksTORRepo {
       console.error(`Database fails during get user's reaction in feedback",
       ${error}`);
       return null;
+    }
+  }
+
+  async deleteComment(commentId: string): Promise<boolean> {
+    try {
+      const result = await this.comments.delete({ id: commentId });
+
+      return result.affected !== 0;
+    } catch (error) {
+      console.error(`Database fails during delete comment operation ${error}`);
+      return false;
     }
   }
 }

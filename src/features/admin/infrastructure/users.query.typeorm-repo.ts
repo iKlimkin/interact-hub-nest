@@ -46,14 +46,16 @@ export class UsersQueryRepo {
       .skip(skip)
       .take(pageSize);
 
-    const result = await queryBuilder.getMany();
-    const count = await queryBuilder.getCount();
+    const result = await queryBuilder.getManyAndCount();
+
+    const users = result[0];
+    const usersCount = result[1];
 
     const userSAViewModel = new PaginationViewModel<SAViewModel>(
-      result.map(getSAViewSQLModel),
+      users.map(getSAViewSQLModel),
       pageNumber,
       pageSize,
-      count,
+      usersCount,
     );
 
     return userSAViewModel;

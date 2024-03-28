@@ -99,7 +99,7 @@ export class FeedbacksSqlController {
   ) {
     const { content } = body;
 
-    const foundedComment = await this.feedbacksQuerySqlRepo.getCommentById(
+    const foundedComment = await this.feedbacksQueryRepo.getCommentById(
       commentId,
     );
 
@@ -127,7 +127,7 @@ export class FeedbacksSqlController {
     const { likeStatus } = inputStatusModel;
     const { userId } = userInfo;
 
-    const comment = await this.feedbacksQuerySqlRepo.getCommentById(
+    const comment = await this.feedbacksQueryRepo.getCommentById(
       commentId,
       userId,
     );
@@ -156,7 +156,7 @@ export class FeedbacksSqlController {
     @Param('id', ObjectIdPipe) commentId: string,
     @CurrentUserInfo() userInfo: UserInfoType,
   ) {
-    const comment = await this.feedbacksQuerySqlRepo.getCommentById(commentId);
+    const comment = await this.feedbacksQueryRepo.getCommentById(commentId);
 
     if (!comment) {
       throw new NotFoundException('Comment not found');
