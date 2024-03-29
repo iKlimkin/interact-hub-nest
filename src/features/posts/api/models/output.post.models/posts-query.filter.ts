@@ -6,7 +6,7 @@ import { ValidateSortBy, ValidSortDirection } from "../../../../../infra/decorat
 export class PostsQueryFilter extends BaseFilter {
     pageNumber: string;
     pageSize: string;
-    @ValidateSortBy()
+    @ValidateSortBy('posts')
     sortBy: string;
 
     @ValidSortDirection()

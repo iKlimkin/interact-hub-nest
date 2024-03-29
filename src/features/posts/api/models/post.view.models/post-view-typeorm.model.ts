@@ -33,7 +33,8 @@ const filterNewestLikes = (reactions: PostReaction[], postId: string) => {
       addedAt: like.created_at.toISOString(),
       userId: like.user.id,
       login: like.user_login,
-    }));
+    }))
+    .slice(0, 3);
 };
 
 export const getPostTORViewModel = (

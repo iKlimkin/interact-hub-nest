@@ -1,7 +1,4 @@
-import {
-  IsOptional,
-  IsString
-} from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { SortDirection } from 'mongodb';
 
 export enum convertSortBy {
@@ -21,9 +18,17 @@ export enum convertSortBy {
   login = 'login',
 }
 
-type SortByType = typeof convertSortBy
+export const sortingKeys = Object.keys(convertSortBy);
 
-export const sortingKeys = Object.keys(convertSortBy)
+export const sortingConstraints = {
+  sa: ['id', 'login', 'email', 'createdAt'],
+  blogs: ['id', 'name', 'description', 'websiteUrl', 'isMembership', 'createdAt'],
+  posts: ['id', 'title', 'shortDescription', 'content', 'blogId', 'blogName', 'createdAt'],
+  comments: ['id', 'content', 'userId', 'userLogin', 'createdAt'],
+  default: sortingKeys,
+};
+
+type SortByType = typeof convertSortBy;
 
 export enum SortDirections {
   Asc = 'asc',

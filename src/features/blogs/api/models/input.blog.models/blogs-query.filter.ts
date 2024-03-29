@@ -11,7 +11,7 @@ export class BlogsQueryFilter extends BaseFilter {
   pageNumber: string;
   pageSize: string;
 
-  @ValidateSortBy()
+  @ValidateSortBy('blogs')
   sortBy: string;
 
   @ValidSortDirection()

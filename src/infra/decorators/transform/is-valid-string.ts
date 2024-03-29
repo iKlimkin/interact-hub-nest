@@ -4,6 +4,7 @@ import { IsNotEmpty, IsString, Length, Matches } from 'class-validator';
 import {
   SortDirections,
   convertSortBy,
+  sortingConstraints,
   sortingKeys,
 } from '../../../domain/sorting-base-filter';
 
@@ -27,16 +28,12 @@ export const iSValidField = ({ min, max }, regexOption?: RegExp) => {
 export const Trim = () =>
   Transform(({ value }: TransformFnParams) => value?.trim());
 
-export const ValidateSortBy = () =>
+export const ValidateSortBy = (entity: string = 'default') =>
   Transform(({ value }: TransformFnParams) => {
-    const isValue = sortingKeys.includes(value);
-    return (
-      !isValue
-        ? convertSortBy.createdAt
-        : convertSortBy[value]
-    )
-});
-
+    const isValidValue = sortingConstraints[entity].includes(value);
+    
+    return !isValidValue ? convertSortBy.createdAt : convertSortBy[value];
+  });
 
 export const ValidSortDirection = () =>
   Transform(({ value }: TransformFnParams): SortDirections => {

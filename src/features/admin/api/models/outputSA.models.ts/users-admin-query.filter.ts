@@ -13,7 +13,7 @@ export class SAQueryFilter extends BaseFilter {
   pageSize: string;
 
   @IsOptional()
-  @ValidateSortBy()
+  @ValidateSortBy('sa')
   sortBy: string;
 
   @ValidSortDirection()

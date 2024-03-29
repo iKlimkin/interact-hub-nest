@@ -38,10 +38,18 @@ export class PostsTORQueryRepo {
       queryBuilder
         .where('posts.content ILIKE :content', { content: searchTerm })
         .leftJoin('posts.blog', 'blog')
-        .leftJoinAndSelect('posts.postReactionCounts', 'counts')
-        .addSelect('blog.id')
+        .leftJoin('posts.postReactionCounts', 'reactionCounter')
+        .addSelect([
+          'blog.id',
+          'reactionCounter.likes_count',
+          'reactionCounter.dislikes_count',
+        ])
         .orderBy(
-          sortBy !== 'created_at' ? `posts.${sortBy}` : `posts.created_at`,
+          sortBy === 'blog_id'
+            ? 'blog.id'
+            : 'created_at'
+            ? `posts.created_at`
+            : `posts.${sortBy}`,
           sortDirection,
         )
         .skip(skip)
@@ -69,7 +77,7 @@ export class PostsTORQueryRepo {
 
       const latestReactions = await this.postReactions
         .createQueryBuilder('pr')
-        .select(['pr.reaction_type', 'pr.user_login', 'pr.created_at'])
+        .select(['pr.user_login', 'pr.created_at'])
         .leftJoin('pr.post', 'post')
         .addSelect('post.id')
         .leftJoin('pr.user', 'user')
@@ -78,7 +86,6 @@ export class PostsTORQueryRepo {
           reactionType: likesStatus.Like,
         })
         .orderBy('pr.created_at', 'DESC')
-        .limit(3)
         .getMany();
 
       const postsViewModel = new PaginationViewModel<PostViewModelType>(
@@ -118,18 +125,24 @@ export class PostsTORQueryRepo {
         .where('posts.content ILIKE :searchTerm', { searchTerm })
         .andWhere('posts.blog_id = :blogId', { blogId })
         .leftJoin('posts.blog', 'blog')
-        .leftJoinAndSelect('posts.postReactionCounts', 'counts')
-        .addSelect('blog.id')
+        .leftJoin('posts.postReactionCounts', 'reactionCounter')
+        .addSelect([
+          'blog.id',
+          'reactionCounter.likes_count',
+          'reactionCounter.dislikes_count',
+        ])
         .orderBy(
-          sortBy !== 'created_at' ? `posts.${sortBy}` : `posts.created_at`,
+          sortBy === 'blog_id'
+            ? 'blog.id'
+            : 'created_at'
+            ? `posts.created_at`
+            : `posts.${sortBy}`,
           sortDirection,
         )
         .skip(skip)
         .take(pageSize);
 
       const result = await queryBuilder.getManyAndCount();
-
-      console.log({ result });
 
       const posts = result[0];
       const postsCount = result[1];
@@ -156,10 +169,9 @@ export class PostsTORQueryRepo {
 
       const latestReactions = await this.postReactions
         .createQueryBuilder('pr')
-        .select(['pr.reaction_type', 'pr.user_login', 'pr.created_at'])
+        .select(['pr.user_login', 'pr.created_at'])
         .leftJoin('pr.post', 'posts')
         .addSelect('posts.id')
-        .leftJoin('posts.blog', 'b')
         .leftJoin('pr.user', 'user')
         .addSelect('user.id')
         .where('pr.reaction_type = :reactionType', {
@@ -167,7 +179,6 @@ export class PostsTORQueryRepo {
         })
         .andWhere('posts.blog_id = :blogId', { blogId })
         .orderBy('pr.created_at', 'DESC')
-        .limit(3)
         .getMany();
 
       const postsViewModel = new PaginationViewModel<PostViewModelType>(
@@ -298,7 +309,7 @@ export class PostsTORQueryRepo {
 
       const latestReactions = await this.postReactions
         .createQueryBuilder('pr')
-        .select(['pr.reaction_type', 'pr.user_login', 'pr.created_at'])
+        .select(['pr.user_login', 'pr.created_at'])
         .leftJoin('pr.post', 'post')
         .addSelect('post.id')
         .leftJoin('pr.user', 'user')
@@ -307,7 +318,6 @@ export class PostsTORQueryRepo {
           reactionType: likesStatus.Like,
         })
         .orderBy('pr.created_at', 'DESC')
-        .limit(3)
         .getMany();
 
       const postsViewModel = new PaginationViewModel<PostViewModelType>(
