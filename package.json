@@ -23,7 +23,10 @@
     "test:e2e:sql": "set MAIN_DB=SQL && jest  --config ./test/jest-e2e.json",
     "test:e2e:mongo": "set MAIN_DB=MONGO && jest  --config ./test/jest-e2e.json",
     "test:u": "jest --detectOpenHandles --config ./test/tests.use-cases/jest.config.json",
-    "migration:generate": "typeorm-ts-node-commonjs migration:generate -d typeorm.config.ts"
+    "apply-migrations": "typeorm-ts-node-commonjs migration:run -d ./typeorm.config.ts",
+    "add-migration": "node ./migrations/tools/add-migration.js",
+    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d ./typeorm.config.ts"
+
   },
   "dependencies": {
     "@nestjs/common": "10.0.0",

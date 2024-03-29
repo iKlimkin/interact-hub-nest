@@ -124,7 +124,7 @@ export class FeedbacksQueryTORRepo {
         .leftJoinAndSelect('comments.commentReactionCounts', 'counts')
         .orderBy(
           sortBy !== 'created_at'
-            ? `comments.${sortBy} COLLATE 'C'`
+            ? `comments.${sortBy}`
             : `comments.created_at`,
           sortDirection,
         )

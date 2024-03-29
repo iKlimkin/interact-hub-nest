@@ -54,7 +54,6 @@ export class PostsTorRepo {
     postId: string,
   ): Promise<likesStatus | null> {
     try {
-      userId = 'ab7c91c2-6372-4417-b32c-dfc63c82d5cb';
       const result = await this.postReactions
         .createQueryBuilder('pr')
         .select('reaction_type')

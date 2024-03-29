@@ -36,14 +36,12 @@ export class PostsTORQueryRepo {
       const queryBuilder = this.posts.createQueryBuilder('posts');
 
       queryBuilder
-        .where('posts.content ILIKE :searchTerm', { searchTerm })
+        .where('posts.content ILIKE :content', { content: searchTerm })
         .leftJoin('posts.blog', 'blog')
         .leftJoinAndSelect('posts.postReactionCounts', 'counts')
         .addSelect('blog.id')
         .orderBy(
-          sortBy !== 'created_at'
-            ? `posts.${sortBy} COLLATE 'C'`
-            : `posts.created_at`,
+          sortBy !== 'created_at' ? `posts.${sortBy}` : `posts.created_at`,
           sortDirection,
         )
         .skip(skip)
@@ -111,8 +109,6 @@ export class PostsTORQueryRepo {
       const isMongo = true;
       const { pageNumber, pageSize, skip, sortBy, sortDirection } =
         getPagination(queryOptions, !isMongo, isSql);
-      const pagination = getPagination(queryOptions, !isMongo, isSql);
-      console.log({ pagination });
 
       const searchTerm = `%${searchContentTerm ? searchContentTerm : ''}%`;
 
@@ -125,9 +121,7 @@ export class PostsTORQueryRepo {
         .leftJoinAndSelect('posts.postReactionCounts', 'counts')
         .addSelect('blog.id')
         .orderBy(
-          sortBy !== 'created_at'
-            ? `posts.${sortBy} COLLATE 'C'`
-            : `posts.created_at`,
+          sortBy !== 'created_at' ? `posts.${sortBy}` : `posts.created_at`,
           sortDirection,
         )
         .skip(skip)

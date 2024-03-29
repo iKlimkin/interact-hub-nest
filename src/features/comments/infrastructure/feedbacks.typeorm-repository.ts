@@ -71,7 +71,6 @@ export class FeedbacksTORRepo {
     try {
       const { commentId, dislikesCount, inputStatus, likesCount, userId } =
         reactionDto;
-      console.log({ reactionDto });
 
       await this.commentReactions
         .createQueryBuilder()

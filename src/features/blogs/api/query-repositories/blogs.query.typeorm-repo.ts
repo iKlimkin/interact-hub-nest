@@ -44,9 +44,11 @@ export class BlogsTORQueryRepo {
       queryBuilder
         .where('blogs.title ILIKE :title', { title: searchTerm })
         .orderBy(
-          sortBy !== 'created_at'
-            ? `blogs.${sortBy} COLLATE "C"`
-            : 'blogs.created_at',
+          sortBy === 'title'
+            ? 'blogs.title COLLATE "C"'
+            : sortBy === 'created_at'
+            ? 'blogs.created_at'
+            : `blogs.${sortBy}`,
           sortDirection,
         )
         .skip(skip)

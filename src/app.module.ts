@@ -12,7 +12,7 @@ import { controllers } from './settings/app-controllers';
 import { providers } from './settings/app-providers';
 import { createAsyncMongoConnection } from './settings/app.settings';
 import { mongooseSchemas } from './settings/mongoose-schemas';
-import { TypeOrmOptions } from './settings/postgres-options';
+import { TypeOrmOptions } from './settings/typeorm-options';
 import { UserSession } from './features/security/domain/entities/security.entity';
 import { PostReaction } from './features/posts/domain/entities/post-reactions.entity';
 import { CommentReaction } from './features/comments/domain/entities/comment-reactions.entity';
