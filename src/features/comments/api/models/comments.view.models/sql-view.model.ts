@@ -9,7 +9,7 @@ import {
   CommentReactionsType,
   CommentSqlDbType,
 } from '../output.comment.models/output.comment.models';
-import { CommentsViewModel } from './comments.view.model';
+import { CommentsViewModel } from './comments.view-model.type';
 
 const calculateLikesDislikesCount = (
   reactionCounters: CommentReactionCounter[],
@@ -32,8 +32,6 @@ const calculateLikesDislikesCount = (
     dislikesCount: dislikesCount || 0,
   };
 };
-
-
 
 const convertStatus = (
   myReactions: CommentReactionsType[] | likesStatus,
@@ -76,5 +74,3 @@ export const getCommentsSqlViewModel = (
     },
   };
 };
-
-

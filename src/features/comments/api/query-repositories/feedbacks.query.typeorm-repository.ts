@@ -2,12 +2,8 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { likesStatus } from '../../../../domain/likes.types';
-import { CommentsViewModel } from '../models/comments.view.models/comments.view.model';
+import { CommentsViewModel } from '../models/comments.view.models/comments.view-model.type';
 import { getCommentsSqlViewModel } from '../models/comments.view.models/sql-view.model';
-import {
-  getCommentSqlViewModel,
-  getCommentTORViewModel,
-} from '../models/comments.view.models/comment.sql-view.model';
 import {
   CommentReactionsType,
   CommentSqlDbType,
@@ -17,7 +13,7 @@ import { CommentsQueryFilter } from '../models/output.comment.models/comment-que
 import { getPagination } from '../../../../infra/utils/pagination';
 import { Comment } from '../../domain/entities/comment.entity';
 import { CommentReaction } from '../../domain/entities/comment-reactions.entity';
-import { getCommentsTORViewModel } from '../models/comments.view.models/typeorm-view.model';
+import { getCommentsTORViewModel } from '../models/comments.view.models/comment.typeorm-view.model';
 
 @Injectable()
 export class FeedbacksQueryTORRepo {
@@ -40,65 +36,55 @@ export class FeedbacksQueryTORRepo {
 
       const filter = `%${searchContentTerm ? searchContentTerm : ''}%`;
 
-      const sortQuery = `
-      SELECT *
-        FROM comments
-        WHERE content ILIKE $1
-        ORDER BY ${sortBy} ${sortDirection}
-        LIMIT $2 OFFSET $3
-      `;
+      const queryBuilder = this.comments.createQueryBuilder('comments');
 
-      const result = await this.dataSource.query(sortQuery, [
-        filter,
-        pageSize,
-        skip,
-      ]);
+      queryBuilder
+        .where('comments.content ILIKE :filter', { filter })
+        .leftJoin('comments.userAccount', 'user')
+        .leftJoin('comments.commentReactionCounts', 'reactionCounter')
+        .addSelect([
+          'user.id',
+          'reactionCounter.likes_count',
+          'reactionCounter.dislikes_count',
+        ])
+        .orderBy(
+          sortBy === 'created_at'
+            ? 'comments.created_at'
+            : `comments.${sortBy}`,
+          sortDirection,
+        )
+        .skip(skip)
+        .take(pageSize);
 
-      let myReactions: CommentReactionsType[];
+      const [comments, count] = await queryBuilder.getManyAndCount();
+
+      let myReactions: CommentReaction[];
 
       if (userId) {
-        const reactionsResult = await this.dataSource.query(
-          `
-          SELECT reaction_type, comment_id
-          FROM comment_reactions
-          WHERE user_id = $1
-        `,
-          [userId],
-        );
+        const reactions = await this.commentReactions.find({
+          where: {
+            userAccount: {
+              id: userId,
+            },
+          },
+          relations: ['comment'],
+        });
 
-        myReactions = reactionsResult;
+        myReactions = reactions ? reactions : [];
       }
 
-      const reactionCounter = await this.dataSource.query(
-        `
-        SELECT likes_count, dislikes_count, comment_id
-        FROM comment_reaction_counts
-        `,
-      );
-
-      const [commentsCounter] = await this.dataSource.query(
-        `
-          SELECT COUNT(*)
-          FROM comments
-          WHERE content ILIKE $1
-        `,
-        [filter],
-      );
-
       const commentsViewModel = new PaginationViewModel<CommentsViewModel>(
-        result.map((comment: CommentSqlDbType) =>
-          getCommentsSqlViewModel(comment, reactionCounter, myReactions),
+        comments.map((comment: Comment) =>
+          getCommentsTORViewModel(comment, myReactions),
         ),
         pageNumber,
         pageSize,
-        commentsCounter.count,
+        count,
       );
 
       return commentsViewModel;
     } catch (error) {
-      throw new Error(
-        `Database fails during find comments by postId operation ${error}`,
-      );
+      throw new Error(`Database fails operation during find comments ${error}`);
     }
   }
   async getCommentsByPostId(
@@ -202,12 +188,12 @@ export class FeedbacksQueryTORRepo {
         where: {
           id: commentId,
         },
-        relations: ['userAccount'],
+        relations: ['userAccount', 'commentReactionCounts'],
       });
 
       if (!comment) return null;
 
-      return getCommentTORViewModel(comment, myReaction);
+      return getCommentsTORViewModel(comment, myReaction);
     } catch (error) {
       console.error(
         'Database fails during find comment by id operation',
@@ -216,34 +202,6 @@ export class FeedbacksQueryTORRepo {
       return null;
     }
   }
-
-  // async getUserLikes(
-  //   userId: string,
-  //   commentId: string,
-  // ): Promise<likesStatus | null> {
-  //   try {
-  //     const foundedUserReaction = await this.CommentModel.findOne({
-  //       _id: commentId,
-  //       likesUserInfo: {
-  //         $elemMatch: {
-  //           userId,
-  //           status: { $exists: true },
-  //         },
-  //       },
-  //     });
-
-  //     if (!foundedUserReaction) return null;
-
-  //     const [status] = getLikeStatus(foundedUserReaction.likesUserInfo, userId);
-
-  //     return status;
-  //   } catch (error) {
-  //     throw new InternalServerErrorException(
-  //       "Database fails during get user's likes operation in feedback",
-  //       error,
-  //     );
-  //   }
-  // }
 
   async getCommentsByUserId(
     userId: string,

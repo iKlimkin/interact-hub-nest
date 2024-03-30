@@ -31,7 +31,7 @@ export const Trim = () =>
 export const ValidateSortBy = (entity: string = 'default') =>
   Transform(({ value }: TransformFnParams) => {
     const isValidValue = sortingConstraints[entity].includes(value);
-    
+
     return !isValidValue ? convertSortBy.createdAt : convertSortBy[value];
   });
 

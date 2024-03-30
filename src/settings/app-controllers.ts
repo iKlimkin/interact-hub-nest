@@ -11,11 +11,11 @@ import { PostsController } from '../features/posts/api/controllers/posts.control
 export const controllers = [
   AppController,
 
-  process.env.MAIN_DB === 'SQL' ? BlogsSqlController : BlogsController,
+  process.env.MAIN_DB === 'Postgres' ? BlogsSqlController : BlogsController,
 
-  process.env.MAIN_DB === 'SQL' ? PostsSqlController : PostsController,
+  process.env.MAIN_DB === 'Postgres' ? PostsSqlController : PostsController,
 
-  process.env.MAIN_DB === 'SQL' ? FeedbacksSqlController: FeedbacksController ,
+  process.env.MAIN_DB === 'Postgres' ? FeedbacksSqlController: FeedbacksController ,
 
   SABlogsController,
 

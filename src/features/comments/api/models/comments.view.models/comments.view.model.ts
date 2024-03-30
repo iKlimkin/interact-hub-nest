@@ -1,41 +1,28 @@
 import { likesStatus } from '../../../../../domain/likes.types';
+import { getLikeStatus } from '../../../../../infra/utils/get-like-status';
+import { CommentType } from '../output.comment.models/output.comment.models';
+import { CommentsViewModel } from './comments.view-model.type';
+import { WithId } from 'mongodb';
 
-export type CommentsViewModel = {
-  /**
-   * id of the existing blog
-   */
-  id: string;
+export type CommentDBType = WithId<CommentType>;
 
-  /**
-   *  current content
-   */
-  content: string;
-
-  /**
-   * info about commentator
-   */
-  commentatorInfo: {
-    /**
-     * user's id
-     */
-    userId: string;
-
-    /**
-     * user's login
-     */
-    userLogin: string;
-  };
-
-  /**
-   * comment's create date
-   */
-  createdAt: string;
-
-  likesInfo: {
-    likesCount: number;
-
-    dislikesCount: number;
-
-    myStatus: likesStatus;
+export const getCommentsViewModel = (
+  comment: CommentDBType,
+  userId?: string,
+): CommentsViewModel => {
+  const [status] = getLikeStatus(comment.likesUserInfo, userId);
+  return {
+    id: comment._id.toString(),
+    content: comment.content,
+    commentatorInfo: {
+      userId: comment.commentatorInfo.userId,
+      userLogin: comment.commentatorInfo.userLogin,
+    },
+    createdAt: comment.createdAt,
+    likesInfo: {
+      likesCount: comment.likesCountInfo.likesCount,
+      dislikesCount: comment.likesCountInfo.dislikesCount,
+      myStatus: status || likesStatus.None,
+    },
   };
 };

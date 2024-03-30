@@ -24,7 +24,7 @@ import { InputLikeStatusModel } from '../../../posts/api/models/input.posts.mode
 import { DeleteCommentSqlCommand } from '../../application/use-cases/commands/delete-comment-sql.command';
 import { UpdateCommentSqlCommand } from '../../application/use-cases/commands/update-comment-sql.command';
 import { UpdateCommentReactionSqlCommand } from '../../application/use-cases/commands/update-user-reaction-sql.command';
-import { CommentsViewModel } from '../models/comments.view.models/comments.view.model';
+import { CommentsViewModel } from '../models/comments.view.models/comments.view-model.type';
 import {
   InputContentModel,
   ReactionDataModel,
@@ -67,7 +67,7 @@ export class FeedbacksSqlController {
     @Query() query: CommentsQueryFilter,
     @CurrentUserId() userId: string,
   ): Promise<PaginationViewModel<CommentsViewModel>> {
-    return this.feedbacksQuerySqlRepo.getComments(query, userId);
+    return this.feedbacksQueryRepo.getComments(query, userId);
   }
 
   @Get('user/test')

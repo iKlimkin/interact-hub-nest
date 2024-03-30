@@ -3,7 +3,10 @@ import { SortDirection } from 'mongodb';
 
 export enum convertSortBy {
   id = 'id',
+  userId = 'user_id',
   blogId = 'blog_id',
+  postId = 'post_id',
+  commentId = 'comment_id',
   blogName = 'blog_title',
   content = 'content',
   title = 'title',
@@ -16,14 +19,30 @@ export enum convertSortBy {
   isMembership = 'is_membership',
   email = 'email',
   login = 'login',
+  userLogin = 'user_login',
 }
 
 export const sortingKeys = Object.keys(convertSortBy);
 
 export const sortingConstraints = {
   sa: ['id', 'login', 'email', 'createdAt'],
-  blogs: ['id', 'name', 'description', 'websiteUrl', 'isMembership', 'createdAt'],
-  posts: ['id', 'title', 'shortDescription', 'content', 'blogId', 'blogName', 'createdAt'],
+  blogs: [
+    'id',
+    'name',
+    'description',
+    'websiteUrl',
+    'isMembership',
+    'createdAt',
+  ],
+  posts: [
+    'id',
+    'title',
+    'shortDescription',
+    'content',
+    'blogId',
+    'blogName',
+    'createdAt',
+  ],
   comments: ['id', 'content', 'userId', 'userLogin', 'createdAt'],
   default: sortingKeys,
 };

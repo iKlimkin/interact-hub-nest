@@ -1,5 +1,5 @@
 import { HttpStatus, INestApplication } from '@nestjs/common';
-import { CommentsViewModel } from '../../../src/features/comments/api/models/comments.view.models/comments.view.model';
+import { CommentsViewModel } from '../../../src/features/comments/api/models/comments.view.models/comments.view-model.type';
 import { PostViewModelType } from '../../../src/features/posts/api/models/post.view.models/post-view-model.type';
 import { likesStatus } from '../../../src/domain/likes.types';
 import { RouterPaths } from '../utils/routing';

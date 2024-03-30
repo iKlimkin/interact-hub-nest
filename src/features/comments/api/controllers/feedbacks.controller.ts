@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { CurrentUserId } from '../../../../infra/decorators/current-user-id.decorator';
 import { SetUserIdGuard } from '../../../../infra/guards/set-user-id.guard';
-import { CommentsViewModel } from '../models/comments.view.models/comments.view.model';
+import { CommentsViewModel } from '../models/comments.view.models/comments.view-model.type';
 import { CommandBus } from '@nestjs/cqrs';
 import { UserInfoType } from '../../../auth/api/models/user-models';
 import { CurrentUserInfo } from '../../../auth/infrastructure/decorators/current-user-info.decorator';
@@ -23,7 +23,10 @@ import { InputLikeStatusModel } from '../../../posts/api/models/input.posts.mode
 import { DeleteCommentCommand } from '../../application/use-cases/commands/delete-comment.command';
 import { UpdateCommentCommand } from '../../application/use-cases/commands/update-comment.command';
 import { UpdateCommentReactionCommand } from '../../application/use-cases/commands/update-user-reaction.command';
-import { InputContentModel, ReactionDataModel } from '../models/input.comment.models';
+import {
+  InputContentModel,
+  ReactionDataModel,
+} from '../models/input.comment.models';
 import { FeedbacksQueryRepository } from '../query-repositories/feedbacks.query.repository';
 import { ObjectIdPipe } from '../../../../infra/pipes/valid-objectId.pipe';
 import { PaginationViewModel } from '../../../../domain/sorting-base-filter';
@@ -83,8 +86,9 @@ export class FeedbacksController {
   ) {
     const { content } = body;
 
-    const foundedCommentById =
-      await this.feedbacksQueryRepo.getCommentById(commentId);
+    const foundedCommentById = await this.feedbacksQueryRepo.getCommentById(
+      commentId,
+    );
 
     if (!foundedCommentById) {
       throw new NotFoundException('Comment not found');

@@ -28,7 +28,7 @@ import { UserInfoType } from '../../../auth/api/models/user-models';
 import { CurrentUserInfo } from '../../../auth/infrastructure/decorators/current-user-info.decorator';
 import { AccessTokenGuard } from '../../../auth/infrastructure/guards/accessToken.guard';
 import { BasicSAAuthGuard } from '../../../auth/infrastructure/guards/basic-auth.guard';
-import { CommentsViewModel } from '../../../comments/api/models/comments.view.models/comments.view.model';
+import { CommentsViewModel } from '../../../comments/api/models/comments.view.models/comments.view-model.type';
 import { InputContentModel } from '../../../comments/api/models/input.comment.models';
 import { FeedbacksQuerySqlRepo } from '../../../comments/api/query-repositories/feedbacks.query.sql-repository';
 import { CreateCommentSqlCommand } from '../../../comments/application/use-cases/commands/create-comment-sql.command';

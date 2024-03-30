@@ -30,9 +30,6 @@ export class UserAccount extends BaseEntity {
   is_confirmed: boolean;
 
   @Column({ nullable: true })
-  address: string
-
-  @Column({ nullable: true })
   password_recovery_code: string;
 
   @Column({ nullable: true })

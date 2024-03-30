@@ -55,10 +55,7 @@ export class PostsTORQueryRepo {
         .skip(skip)
         .take(pageSize);
 
-      const result = await queryBuilder.getManyAndCount();
-
-      const posts = result[0];
-      const count = result[1];
+      const [posts, count] = await queryBuilder.getManyAndCount();
 
       let myReactions: PostReaction[];
 

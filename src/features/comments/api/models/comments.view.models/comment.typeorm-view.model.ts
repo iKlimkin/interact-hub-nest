@@ -1,7 +1,7 @@
-import { likesStatus } from "../../../../../domain/likes.types";
-import { CommentReaction } from "../../../domain/entities/comment-reactions.entity";
-import { Comment } from "../../../domain/entities/comment.entity";
-import { CommentsViewModel } from "./comments.view.model";
+import { likesStatus } from '../../../../../domain/likes.types';
+import { CommentReaction } from '../../../domain/entities/comment-reactions.entity';
+import { Comment } from '../../../domain/entities/comment.entity';
+import { CommentsViewModel } from './comments.view-model.type';
 
 const convertStatus = (
   myReactions: CommentReaction[] | likesStatus,
@@ -21,7 +21,7 @@ const convertStatus = (
 
 export const getCommentsTORViewModel = (
   comment: Comment,
-  myReactions: CommentReaction[],
+  myReactions: CommentReaction[] | likesStatus,
 ): CommentsViewModel => {
   return {
     id: comment.id,
