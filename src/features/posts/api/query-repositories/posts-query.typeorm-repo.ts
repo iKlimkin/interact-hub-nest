@@ -46,8 +46,8 @@ export class PostsTORQueryRepo {
         ])
         .orderBy(
           sortBy === 'blog_id'
-            ? 'blog.id'
-            : 'created_at'
+            ? 'posts.blog.id'
+            : sortBy === 'created_at'
             ? `posts.created_at`
             : `posts.${sortBy}`,
           sortDirection,
@@ -56,6 +56,7 @@ export class PostsTORQueryRepo {
         .take(pageSize);
 
       const [posts, count] = await queryBuilder.getManyAndCount();
+
 
       let myReactions: PostReaction[];
 

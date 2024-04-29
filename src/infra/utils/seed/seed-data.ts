@@ -85,36 +85,87 @@ const seedUsers = async (dataSource: DataSource) => {
 
 const seedBlogs = async (dataSource: DataSource) => {
   const blogRepo = dataSource.getRepository('Blog');
-  const blog = new Blog();
-  blog.title = 'Blog 1';
-  blog.description = 'Description for Blog';
-  blog.website_url = 'https://example.com/blog';
-  blog.is_membership = false;
+  const numberOfBlogs = 10000;
+  const batchSize = 1000;
 
-  await blogRepo.save(blog);
+  for (let i = 1; i <= numberOfBlogs; i += batchSize) {
+    const batchBlogs = [];
+    const doPush = Array.prototype.push.bind(batchBlogs);
+
+    for (let j = i; j < i + batchSize && j <= numberOfBlogs; j++) {
+      const blog = new Blog();
+      blog.title = `Blog ${j}`;
+      blog.description = `Description for Blog${j}`;
+      blog.website_url = `https://example${j}.com/blog${j}`;
+      blog.is_membership = false;
+
+      doPush(blog);
+    }
+
+    await blogRepo.save(batchBlogs);
+  }
 };
 
 const seedPosts = async (dataSource: DataSource) => {
   const postRepo = dataSource.getRepository('Post');
   const blogRepo = dataSource.getRepository('Blog');
 
-  const blog = (await blogRepo.find())[0];
+  const blog1 = (await blogRepo.find())[0];
+  const blog2 = (await blogRepo.find())[1];
+  const blog3 = (await blogRepo.find())[2];
+  const blog4 = (await blogRepo.find())[3];
+  const blog5 = (await blogRepo.find())[4];
 
   const post1 = new Post();
-  post1.blog_title = blog.title;
+  post1.blog_title = blog1.title;
   post1.content = 'content 1';
   post1.title = 'title by post 1';
   post1.short_description = 'short description by post 1';
-  post1.blog = blog.id;
+  post1.blog = blog1.id;
 
   const post2 = new Post();
-  post2.blog_title = blog.title;
+  post2.blog_title = blog1.title;
   post2.content = 'content 2';
   post2.title = 'title by post 2';
   post2.short_description = 'short description by post 2';
-  post2.blog = blog.id;
+  post2.blog = blog1.id;
 
-  await postRepo.save([post1, post2]);
+  const post4 = new Post();
+  post4.blog_title = blog2.title;
+  post4.content = 'content 2';
+  post4.title = 'title by post 2';
+  post4.short_description = 'short description by post 2';
+  post4.blog = blog2.id;
+
+  const post5 = new Post();
+  post5.blog_title = blog3.title;
+  post5.content = 'content 2';
+  post5.title = 'title by post 2';
+  post5.short_description = 'short description by post 2';
+  post5.blog = blog3.id;
+
+  const post6 = new Post();
+  post6.blog_title = blog1.title;
+  post6.content = 'content 2';
+  post6.title = 'title by post 2';
+  post6.short_description = 'short description by post 2';
+  post6.blog = blog3.id;
+
+  const post7 = new Post();
+  post7.blog_title = blog4.title;
+  post7.content = 'content 2';
+  post7.title = 'title by post 2';
+  post7.short_description = 'short description by post 2';
+  post7.blog = blog4.id;
+
+  const post8 = new Post();
+  post8.blog_title = blog5.title;
+  post8.content = 'content 2';
+  post8.title = 'title by post 2';
+  post8.short_description = 'short description by post 2';
+  post8.blog = blog5.id;
+
+  await postRepo.save([post1, post2, post4, post5, post6, post7, post8]);
 };
 const seedPostReactions = async (dataSource: DataSource) => {
   const postRepo = dataSource.getRepository('Post');

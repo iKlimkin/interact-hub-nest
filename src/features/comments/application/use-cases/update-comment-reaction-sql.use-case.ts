@@ -5,7 +5,7 @@ import {
 } from '../../../../domain/likes.types';
 import { getStatusCounting } from '../../../../infra/utils/status-counter';
 import { FeedbacksSqlRepo } from '../../infrastructure/feedbacks.sql-repository';
-import { UpdateCommentReactionSqlCommand } from './commands/update-user-reaction-sql.command';
+import { UpdateCommentReactionSqlCommand } from './commands/update-comment-reaction-sql.command';
 import { FeedbacksTORRepo } from '../../infrastructure/feedbacks.typeorm-repository';
 import { log } from 'console';
 

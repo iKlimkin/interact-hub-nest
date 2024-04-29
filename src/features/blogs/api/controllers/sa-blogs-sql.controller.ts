@@ -96,7 +96,7 @@ export class SABlogsController {
     const posts = await this.postsQueryRepo.getPostsByBlogId(
       blogId,
       query,
-      userId
+      userId,
       // userInfo.userId,
     );
 
@@ -196,7 +196,6 @@ export class SABlogsController {
     @Body() inputBlogModel: InputBlogModel,
   ) {
     const blog = await this.blogsQueryRepo.getBlogById(blogId);
-    console.log(blog);
 
     if (!blog) {
       throw new NotFoundException();
@@ -215,6 +214,7 @@ export class SABlogsController {
 
     if (result.hasError()) {
       const errors = handleErrors(result.code, result.extensions);
+
       throw errors.error;
     }
   }

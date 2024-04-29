@@ -13,7 +13,7 @@ import {
 import { CommandBus } from '@nestjs/cqrs';
 import { Response } from 'express';
 import { OutputId } from '../../../../domain/likes.types';
-import { CustomThrottlerGuard } from '../../../../infra/logging/rate-limit.throttler';
+import { CustomThrottlerGuard } from '../../../../infra/guards/custom-throttler.guard';
 import { getDeviceInfo } from '../../../../infra/utils/device-handler';
 import {
   ErrorType,

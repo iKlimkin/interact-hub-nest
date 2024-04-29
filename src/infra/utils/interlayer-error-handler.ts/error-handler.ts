@@ -1,11 +1,9 @@
 import {
-    BadRequestException,
-    InternalServerErrorException,
-    NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
-import {
-    LayerInterceptorExtension
-} from './error-layer-interceptor';
+import { LayerInterceptorExtension } from './error-layer-interceptor';
 import { GetErrors } from './user-errors';
 
 export const handleErrors = (
@@ -15,8 +13,10 @@ export const handleErrors = (
   switch (code) {
     case GetErrors.DatabaseFail:
       return {
-        message: 'Internal Server Error',
-        error: new InternalServerErrorException(extension[0]),
+        message: extension[0].message,
+        error: new InternalServerErrorException(
+          `Error occurred in ${extension[0].key}`,
+        ),
       };
     case GetErrors.NotFound:
       return {

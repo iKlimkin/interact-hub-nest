@@ -23,7 +23,7 @@ import { AccessTokenGuard } from '../../../auth/infrastructure/guards/accessToke
 import { InputLikeStatusModel } from '../../../posts/api/models/input.posts.models/input-post..model';
 import { DeleteCommentSqlCommand } from '../../application/use-cases/commands/delete-comment-sql.command';
 import { UpdateCommentSqlCommand } from '../../application/use-cases/commands/update-comment-sql.command';
-import { UpdateCommentReactionSqlCommand } from '../../application/use-cases/commands/update-user-reaction-sql.command';
+import { UpdateCommentReactionSqlCommand } from '../../application/use-cases/commands/update-comment-reaction-sql.command';
 import { CommentsViewModel } from '../models/comments.view.models/comments.view-model.type';
 import {
   InputContentModel,

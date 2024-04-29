@@ -53,10 +53,8 @@ aDescribe(skipSettings.for('sa_blogs'))('SABlogsController (e2e)', () => {
   beforeAll(async () => {
     const result = await initSettings();
 
-    testingAppModule = result.testingAppModule;
     usersTestManager = result.usersTestManager;
-
-    dataBase = testingAppModule.get<DataSource>(DataSource);
+    dataBase = result.testingAppModule.get<DataSource>(DataSource);
     app = result.app;
 
     postTestManager = new PostsTestManager(app);

@@ -41,16 +41,12 @@ export const getPagination = (
   }
 
   const parsedPageNumber = parseInt(inputData.pageNumber, 10);
-  const pageNumber =
-    !isNaN(parsedPageNumber)
-      ? Math.min(parsedPageNumber, 50)
-      : 1;
+  const pageNumber = !isNaN(parsedPageNumber)
+    ? Math.min(parsedPageNumber, 50)
+    : 1;
 
   const parsedPageSize = parseInt(inputData.pageSize, 10);
-  const pageSize =
-    !isNaN(parsedPageSize)
-      ? Math.min(parsedPageSize, 50)
-      : 10;
+  const pageSize = !isNaN(parsedPageSize) ? Math.min(parsedPageSize, 50) : 10;
 
   const skip: number = (pageNumber - 1) * pageSize;
 

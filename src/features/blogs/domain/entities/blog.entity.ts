@@ -1,10 +1,18 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  Index,
+} from 'typeorm';
 import type { UserAccount } from '../../../admin/domain/entities/user-account.entity';
 import type { Post } from '../../../posts/domain/entities/post.entity';
 import { BaseEntity } from '../../../../domain/base-entity';
 
 @Entity()
 export class Blog extends BaseEntity {
+  @Index('title', { unique: true })
   @Column()
   title: string;
 

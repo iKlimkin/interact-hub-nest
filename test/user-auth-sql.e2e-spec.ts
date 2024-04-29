@@ -18,7 +18,7 @@ aDescribe(skipSettings.for('userAuthSql'))('AuthController (e2e)', () => {
   let usersTestManager: UsersTestManager;
 
   beforeAll(async () => {
-    const result = await initSettings((moduleBuilder) =>
+  const result = await initSettings((moduleBuilder) =>
       moduleBuilder.overrideProvider(EmailManager).useClass(EmailManagerMock).overrideProvider(AuthController).useClass(AuthSQLController),
     );
 
@@ -215,7 +215,7 @@ aDescribe(skipSettings.for('userAuthSql'))('AuthController (e2e)', () => {
 
       const { accessToken, refreshToken } =
         await usersTestManager.refreshToken(oldRefreshToken);
-      
+
       expect.setState({
         newAccessToken: accessToken,
         newRefreshToken: refreshToken,

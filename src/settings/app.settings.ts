@@ -1,7 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import { ConfigurationType } from '../config/configuration';
 
-export const createAsyncMongoConnection = async (
+export const createMongoConnection = async (
   configService: ConfigService,
 ) => {
   const config = configService.get<ConfigurationType>('mongoConnection', {

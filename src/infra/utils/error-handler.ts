@@ -5,6 +5,7 @@ export type ErrorsMessages = {
   field: string;
 };
 type ErrorFormatter<T> = (error: ValidationError) => T;
+
 export type ErrorType = { errorsMessages: ErrorsMessages[] };
 
 export const errorHandler: ErrorFormatter<ErrorsMessages> = (error) => {

@@ -23,7 +23,7 @@ export class UpdateSABlogSqlUseCase
     if (!result) {
       notice.addError(
         `Couldn't update SA blog sa`,
-        'db',
+        'UpdateSABlogSqlUseCase',
         GetErrors.DatabaseFail,
       );
     } else {

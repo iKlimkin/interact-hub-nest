@@ -2,8 +2,6 @@ import {
   ReactionsCounter,
   likesStatus,
 } from '../../../../../domain/likes.types';
-import { CommentReaction } from '../../../domain/entities/comment-reactions.entity';
-import { Comment } from '../../../domain/entities/comment.entity';
 import {
   CommentReactionCounter,
   CommentReactionsType,

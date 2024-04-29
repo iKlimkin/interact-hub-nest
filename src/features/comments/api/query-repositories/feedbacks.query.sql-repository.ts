@@ -3,7 +3,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { likesStatus } from '../../../../domain/likes.types';
 import { CommentsViewModel } from '../models/comments.view.models/comments.view-model.type';
-import { getCommentsSqlViewModel } from '../models/comments.view.models/sql-view.model';
+import { getCommentsSqlViewModel } from '../models/comments.view.models/comments.sql-view.model';
 import { getCommentSqlViewModel } from '../models/comments.view.models/comment.sql-view.model';
 import {
   CommentReactionsType,

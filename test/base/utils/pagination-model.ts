@@ -1,11 +1,10 @@
-import { BaseFilter } from '../../../src/domain/sorting-base-filter';
 import { SortOptions } from '../../../src/infra/utils/pagination';
 
 export class PaginationModel<T> {
   getData(
     data: PaginationModelData<T>,
     query?: any,
-    hideFieldOptions?: any
+    hideFieldOptions?: any,
   ): PaginationModelData<T> {
     const { pagesCount, page, pageSize, totalCount, items } = data;
 
@@ -14,25 +13,25 @@ export class PaginationModel<T> {
     if (query?.searchEmailTerm || query?.searchLoginTerm) {
       cItems = this.filterQueryTerms(cItems, query);
     }
-    
+
     if (query?.sortBy || query?.sortDirection) {
       cItems = this.sortingEntities(cItems, {
         sortBy: query.sortBy,
         sortDirection: query.sortDirection,
       });
     }
-    
+
     if (query.hide === 'createdAt') {
       cItems = cItems.map((item) => ({
         ...item,
         createdAt: expect.any(String),
       }));
     }
-    
+
     if (hideFieldOptions) {
       cItems = this.removeUnwantedFields(cItems, hideFieldOptions);
     }
-    
+
     return {
       pagesCount: pagesCount ? pagesCount : 0,
       page: page ? page : 1,
@@ -74,7 +73,10 @@ export class PaginationModel<T> {
         return fieldA.localeCompare(fieldB);
       }
 
-      if (sortOptions.sortDirection === 'desc' || sortOptions.sortDirection !== 'asc') {
+      if (
+        sortOptions.sortDirection === 'desc' ||
+        sortOptions.sortDirection !== 'asc'
+      ) {
         return fieldB.localeCompare(fieldA);
       }
 
